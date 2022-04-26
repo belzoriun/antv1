@@ -1,8 +1,8 @@
 module fr.florian.ants.antv1 {
     requires javafx.controls;
-    requires javafx.fxml;
 
 
-    opens fr.florian.ants.antv1 to javafx.fxml;
-    exports fr.florian.ants.antv1;
+    exports fr.florian.ants.antv1.ui;
+    exports fr.florian.ants.antv1.living;
+    exports fr.florian.ants.antv1.map;
 }

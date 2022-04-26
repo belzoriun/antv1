@@ -20,11 +20,6 @@
             <artifactId>javafx-controls</artifactId>
             <version>18-ea+6</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>18-ea+6</version>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -60,7 +55,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>fr.florian.ants.antv1/fr.florian.ants.antv1.HelloApplication</mainClass>
+                            <mainClass>fr.florian.ants.antv1/fr.florian.ants.antv1.ui.Application</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
