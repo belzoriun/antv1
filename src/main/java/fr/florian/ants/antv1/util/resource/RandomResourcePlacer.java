@@ -18,11 +18,12 @@ public class RandomResourcePlacer implements IResourcePlacer{
 
     @Override
     public ResourceTile placeTile(Vector v) {
-        int amount = rand.nextInt(0, 20);
         List<Resource> res = new ArrayList<>();
-        for(int i = 0; i<amount; i++)
-        {
-            res.add(new BasicResource());
+        if(rand.nextInt(0, 100) < 30) {
+            int amount = rand.nextInt(0, 20);
+            for (int i = 0; i < amount; i++) {
+                res.add(new BasicResource());
+            }
         }
         return new ResourceTile(res);
     }

@@ -12,7 +12,7 @@ public class MarkerManager {
 
     public void translateOrigin(Vector v)
     {
-        origin.add(v);
+        origin = origin.add(v);
     }
 
     public double getOriginX()

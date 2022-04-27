@@ -31,7 +31,8 @@ public class MainPane extends Pane {
             clickPoint = new Vector(e.getSceneX(), e.getSceneY());
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
-            manager.translateOrigin(new Vector(e.getSceneX()-clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE/TILE_SIZE)*DRAG_SPEED));
+            Vector newPos = new Vector(e.getSceneX()-clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE/TILE_SIZE)*DRAG_SPEED);
+            manager.translateOrigin(newPos);
             clickPoint = new Vector(e.getSceneX(), e.getSceneY());
         });
         canvas.setOnScroll((ScrollEvent e)->{
@@ -49,6 +50,24 @@ public class MainPane extends Pane {
 
     public void displayAll()
     {
+        if(manager.getOriginX() > 0)
+        {
+            manager.translateOrigin(new Vector(-manager.getOriginX(), 0));
+        }
+        if(manager.getOriginY() > 0)
+        {
+            manager.translateOrigin(new Vector(0, -manager.getOriginY()));
+        }
+        double diffX = canvas.getWidth() - (manager.getOriginX()*TILE_SIZE+Map.WIDTH*TILE_SIZE);
+        double diffY = canvas.getHeight() - (manager.getOriginY()*TILE_SIZE+Map.HEIGHT*TILE_SIZE);
+        if(diffX > 0)
+        {
+            manager.translateOrigin(new Vector(diffX/TILE_SIZE,0));
+        }
+        if(diffY > 0)
+        {
+            manager.translateOrigin(new Vector(0,diffY/TILE_SIZE));
+        }
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
         for(int x = 0; x< Map.WIDTH; x++)
@@ -58,9 +77,9 @@ public class MainPane extends Pane {
                 Vector pos = new Vector(x, y);
                 Vector displayPoint = manager.toWorldPoint(pos);
                 if(displayPoint.getX()*TILE_SIZE+TILE_SIZE >= 0
-                        && displayPoint.getX()*TILE_SIZE <= canvas.getWidth()
+                        && displayPoint.getX()*TILE_SIZE-TILE_SIZE <= canvas.getWidth()
                         && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
-                        && displayPoint.getY()*TILE_SIZE <= canvas.getHeight())
+                        && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
                     drawTile(pos, displayPoint, context);
             }
         }

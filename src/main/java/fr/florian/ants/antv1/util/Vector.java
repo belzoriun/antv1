@@ -32,10 +32,9 @@ public class Vector {
         this.y = y;
     }
 
-    public void add(Vector v)
+    public Vector add(Vector v)
     {
-        this.x += v.getX();
-        this.y += v.getY();
+        return new Vector(this.x+v.getX(), this.y+v.getY());
     }
 
     public Vector inverse()
@@ -58,11 +57,9 @@ public class Vector {
         return this;
     }
 
-    public Vector mult(float v)
+    public Vector mult(double v)
     {
-        this.x*=(v);
-        this.y*=(v);
-        return this;
+        return new Vector(x*v, y*v);
     }
 
     public float magnitude()

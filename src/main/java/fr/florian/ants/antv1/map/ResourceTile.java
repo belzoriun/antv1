@@ -11,15 +11,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class ResourceTile implements Tile {
 
     private List<Resource> resources;
 
+    private java.util.Map<Resource, Vector> displayPositions;
+
     public ResourceTile(List<Resource> resources)
     {
         this.resources = resources;
+        this.displayPositions = new HashMap<>();
     }
 
     public List<Resource> getResources()
@@ -57,29 +62,23 @@ public class ResourceTile implements Tile {
     @Override
     public void draw(GraphicsContext context, Vector position) {
         context.setFill(Color.SANDYBROWN);
-        context.fillRect(position.getX()*MainPane.TILE_SIZE, position.getY()*MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
-        Vector center = new Vector(position.getX()*MainPane.TILE_SIZE+MainPane.TILE_SIZE/2, position.getY()*MainPane.TILE_SIZE+MainPane.TILE_SIZE/2);
-        context.setFill(Color.GREENYELLOW);
-        int dotCloseness = 6;
-        if(resources.size() >= 5)
+        context.fillRect(position.getX()*MainPane.TILE_SIZE-1, position.getY()*MainPane.TILE_SIZE-1, MainPane.TILE_SIZE+2, MainPane.TILE_SIZE+2);
+        double xMin = 0.3;
+        double xMax = 0.7;
+        double yMin = 0.3;
+        double yMax = 0.7;
+        for(int i = resources.size()-1; i>=resources.size()-6; i--)
         {
-            context.fillOval(center.getX()+MainPane.TILE_SIZE/dotCloseness, center.getY()+MainPane.TILE_SIZE/dotCloseness, MainPane.TILE_SIZE/4, MainPane.TILE_SIZE/4);
-        }
-        if(resources.size() >= 4)
-        {
-            context.fillOval(center.getX()+MainPane.TILE_SIZE/dotCloseness, center.getY()-MainPane.TILE_SIZE/dotCloseness, MainPane.TILE_SIZE/4, MainPane.TILE_SIZE/4);
-        }
-        if(resources.size() >= 3)
-        {
-            context.fillOval(center.getX()-MainPane.TILE_SIZE/dotCloseness, center.getY()+MainPane.TILE_SIZE/dotCloseness, MainPane.TILE_SIZE/4, MainPane.TILE_SIZE/4);
-        }
-        if(resources.size() >= 2)
-        {
-            context.fillOval(center.getX()-MainPane.TILE_SIZE/dotCloseness, center.getY()-MainPane.TILE_SIZE/dotCloseness, MainPane.TILE_SIZE/4, MainPane.TILE_SIZE/4);
-        }
-        if(resources.size() >= 1)
-        {
-            context.fillOval(center.getX(), center.getY(), MainPane.TILE_SIZE/4, MainPane.TILE_SIZE/4);
+            if(i<0)
+                break;
+            Resource resource = resources.get(i);
+            if(!displayPositions.containsKey(resource))
+            {
+                Vector pos = new Vector(new Random().nextDouble(xMin, xMax), new Random().nextDouble(yMin, yMax));
+                displayPositions.put(resource, pos);
+            }
+            Vector pos = displayPositions.get(resource);
+            resource.draw(context, position.mult(MainPane.TILE_SIZE).add(pos.mult(MainPane.TILE_SIZE)));
         }
     }
 }
