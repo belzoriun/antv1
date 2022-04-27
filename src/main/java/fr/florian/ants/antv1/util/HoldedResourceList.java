@@ -30,4 +30,8 @@ public class HoldedResourceList {
     {
         return resources.size()==capacity;
     }
+
+    public boolean isEmpty() {
+        return resources.isEmpty();
+    }
 }

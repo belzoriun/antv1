@@ -4,8 +4,9 @@ import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.Drawable;
+import fr.florian.ants.antv1.util.PheromoneManager;
 
-public abstract class Tile extends Thread implements Drawable {
+public abstract class Tile implements Drawable {
 
     private int pheromoneLevel;
 
@@ -14,33 +15,20 @@ public abstract class Tile extends Thread implements Drawable {
         pheromoneLevel = 0;
     }
 
-    public void run()
-    {
-        while(Application.isExecuting())
-        {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                break;
-            }
-            if(pheromoneLevel>0)pheromoneLevel--;
-        }
-    }
-
     public void placePheromone()
     {
         pheromoneLevel++;
+        PheromoneManager.getInstance().manageTile(this);
+    }
+
+    public void removePheromone()
+    {
+        pheromoneLevel--;
     }
 
     public int getPheromoneLevel()
     {
         return pheromoneLevel;
-    }
-
-    public Tile startSelf()
-    {
-        this.start();
-        return this;
     }
 
     public abstract void onWalkOn(Living l);

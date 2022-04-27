@@ -2,6 +2,7 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.util.PheromoneManager;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
@@ -20,18 +21,22 @@ public class Map {
 
     private java.util.Map<Vector, Tile> tiles;
     private List<Living> livings;
+    private List<Thread> lives;
 
     private static Map instance = null;
 
     private Map()
     {
+        lives = new ArrayList<>();
         tiles = new HashMap<>();
         livings = new ArrayList<>();
     }
 
     public <T extends Living> T spawn(T living)
     {
-        new Thread(living).start();
+        Thread t = new Thread(living);
+        t.start();
+        lives.add(t);
         livings.add(living);
         return living;
     }
@@ -57,6 +62,7 @@ public class Map {
 
     public void init(IResourcePlacer placer)
     {
+        PheromoneManager.getInstance().start();
         System.out.println("placing ant hills");
         for(int i = 0; i<ANTHILL_COUNT; i++)
         {
@@ -65,12 +71,11 @@ public class Map {
                 pos = new Vector(new Random().nextInt(0, WIDTH), new Random().nextInt(0, HEIGHT));
             }
             AntHillTile hill = new AntHillTile();
-            this.tiles.put(pos, hill);
-            hill.start();
-            this.tiles.put(pos.up(), placer.placeTile(pos.up()).startSelf());
-            this.tiles.put(pos.down(), placer.placeTile(pos.down()).startSelf());
-            this.tiles.put(pos.left(), placer.placeTile(pos.left()).startSelf());
-            this.tiles.put(pos.right(), placer.placeTile(pos.right()).startSelf());
+            addTile(pos, hill);
+            addTile(pos.up(), placer.placeTile(pos.up()));
+            addTile(pos.down(), placer.placeTile(pos.down()));
+            addTile(pos.left(), placer.placeTile(pos.left()));
+            addTile(pos.right(), placer.placeTile(pos.right()));
             hill.makeInitialSpawns(pos);
         }
 
@@ -82,12 +87,17 @@ public class Map {
                 Vector v = new Vector(x, y);
                 if(!tiles.containsKey(v))
                 {
-                    tiles.put(v, placer.placeTile(v).startSelf());
+                    addTile(v, placer.placeTile(v));
                 }
             }
         }
 
         System.out.println("map generation done");
+    }
+
+    private void addTile(Vector v, Tile t)
+    {
+        tiles.put(v, t);
     }
 
     public Tile getTile(Vector pos)
@@ -99,6 +109,21 @@ public class Map {
         if(tiles.get(vector) != null)
         {
             tiles.get(vector).draw(graphicsContext2D, displayPos);
+        }
+    }
+
+    public void killAll()
+    {
+        for(Living l : livings)
+        {
+            l.kill();
+        }
+        for(Thread t : lives)
+        {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+            }
         }
     }
 }

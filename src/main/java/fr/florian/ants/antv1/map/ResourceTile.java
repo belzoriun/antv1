@@ -61,7 +61,11 @@ public class ResourceTile extends Tile {
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
-        context.setFill(Color.SANDYBROWN);
+        Color base = Color.SANDYBROWN;
+        int maxInterpolateValue = this.getPheromoneLevel();
+        if(maxInterpolateValue > 10) maxInterpolateValue = 10;
+        base = base.interpolate(Color.RED, maxInterpolateValue/10.0);
+        context.setFill(base);
         context.fillRect(position.getX()*MainPane.TILE_SIZE-1, position.getY()*MainPane.TILE_SIZE-1, MainPane.TILE_SIZE+2, MainPane.TILE_SIZE+2);
         double xMin = 0.3;
         double xMax = 0.7;

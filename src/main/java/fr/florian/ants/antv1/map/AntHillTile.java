@@ -17,16 +17,19 @@ public class AntHillTile extends Tile{
     private long uniqueId;
     private Color color;
 
+    private int score;
+
     public AntHillTile()
     {
         this.uniqueId = currentId;
         currentId+= 1L;
+        score = 0;
         color = Color.rgb(new Random().nextInt(0, 160), new Random().nextInt(0, 160), new Random().nextInt(0, 160));
     }
 
     public void makeInitialSpawns(Vector pos)
     {
-        for(int i = 0; i<50; i++)
+        for(int i = 0; i<5; i++)
             Map.getInstance().spawn(new WorkerAnt(uniqueId, color, pos));
     }
 
@@ -42,7 +45,10 @@ public class AntHillTile extends Tile{
 
     @Override
     public void onInteract(Ant a) {
-
+        if(a instanceof WorkerAnt want)
+        {
+            this.score += want.getResources().remove().getResourceScore();
+        }
     }
 
     @Override

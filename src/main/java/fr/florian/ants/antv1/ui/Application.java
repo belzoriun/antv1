@@ -2,6 +2,7 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.map.Map;
+import fr.florian.ants.antv1.util.PheromoneManager;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.BasicResource;
 import fr.florian.ants.antv1.util.resource.ExtremelyRareResource;
@@ -16,6 +17,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,6 +57,12 @@ public class Application extends javafx.application.Application {
             @Override
             public void handle(KeyEvent evt) {
                 if (evt.getCode().equals(KeyCode.ESCAPE)) {
+                    executing = false;
+                    Map.getInstance().killAll();
+                    try {
+                        PheromoneManager.getInstance().join();
+                    } catch (InterruptedException e) {
+                    }
                     stage.close();
                 }
             }

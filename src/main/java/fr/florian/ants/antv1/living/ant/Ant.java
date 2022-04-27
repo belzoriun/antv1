@@ -11,7 +11,7 @@ public abstract class Ant extends Living{
     private static final int MAX_SIZE = 10;
 
     private double size;
-    private long uniqueAnthillId;
+    protected long uniqueAnthillId;
 
     private Color color;
 

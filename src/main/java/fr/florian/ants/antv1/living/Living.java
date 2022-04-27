@@ -39,4 +39,7 @@ public abstract class Living implements Runnable, Drawable {
         }
     }
 
+    public void kill() {
+        this.alive = false;
+    }
 }
