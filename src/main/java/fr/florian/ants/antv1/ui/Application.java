@@ -1,7 +1,12 @@
 package fr.florian.ants.antv1.ui;
 
+import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.map.Map;
+import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.resource.BasicResource;
+import fr.florian.ants.antv1.util.resource.ExtremelyRareResource;
 import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
+import fr.florian.ants.antv1.util.resource.RareResource;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -13,12 +18,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        Map.getInstance().init(new RandomResourcePlacer());
+        Map.getInstance().init(new RandomResourcePlacer(List.of(new BasicResource(), new RareResource(), new ExtremelyRareResource())));
+        Map.getInstance().spawn(new WorkerAnt(new Vector(0, 0)));
         Group root = new Group();
         Scene scene = new Scene(root);
         MainPane main = new MainPane();

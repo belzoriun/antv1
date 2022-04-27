@@ -1,11 +1,15 @@
 package fr.florian.ants.antv1.map;
 
+import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
 import javafx.scene.canvas.GraphicsContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Map {
@@ -15,12 +19,31 @@ public class Map {
     public static final int ANTHILL_COUNT = 3;
 
     private java.util.Map<Vector, Tile> tiles;
+    private List<Living> livings;
 
     private static Map instance = null;
 
     private Map()
     {
         tiles = new HashMap<>();
+        livings = new ArrayList<>();
+    }
+
+    public <T extends Living> T spawn(T living)
+    {
+        new Thread(living).start();
+        livings.add(living);
+        return living;
+    }
+
+    public Ant spawnAnt(Ant a)
+    {
+        return spawn(a);
+    }
+
+    public List<Living> getLivings()
+    {
+        return livings;
     }
 
     public static Map getInstance()
@@ -62,6 +85,11 @@ public class Map {
         }
 
         System.out.println("map generation done");
+    }
+
+    public Tile getTile(Vector pos)
+    {
+        return tiles.get(pos);
     }
 
     public void drawTile(Vector vector, Vector displayPos, GraphicsContext graphicsContext2D) {

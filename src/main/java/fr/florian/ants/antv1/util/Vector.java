@@ -37,6 +37,11 @@ public class Vector {
         return new Vector(this.x+v.getX(), this.y+v.getY());
     }
 
+    public Vector add(double v)
+    {
+        return new Vector(this.x+v, this.y+v);
+    }
+
     public Vector inverse()
     {
         this.x *= (-1);

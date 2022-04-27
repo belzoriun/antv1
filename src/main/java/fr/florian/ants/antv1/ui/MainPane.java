@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.ui;
 
+import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.Canvas;
@@ -82,6 +83,16 @@ public class MainPane extends Pane {
                         && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
                     drawTile(pos, displayPoint, context);
             }
+        }
+        for(Living l : Map.getInstance().getLivings())
+        {
+            Vector pos = l.getPosition();
+            Vector displayPoint = manager.toWorldPoint(pos);
+            if(displayPoint.getX()*TILE_SIZE+TILE_SIZE >= 0
+                    && displayPoint.getX()*TILE_SIZE-TILE_SIZE <= canvas.getWidth()
+                    && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
+                    && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
+                l.draw(context, displayPoint);
         }
     }
 

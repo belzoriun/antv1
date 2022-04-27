@@ -1,17 +1,27 @@
 package fr.florian.ants.antv1.living;
 
-public abstract class Living implements Runnable{
+import fr.florian.ants.antv1.util.Drawable;
+import fr.florian.ants.antv1.util.Vector;
+
+public abstract class Living implements Runnable, Drawable {
 
     private float actionThreshold; //in ms
     private boolean alive;
+    protected Vector position;
 
     private long lastTimeAct;
 
-    protected Living(float actionThreshold)
+    protected Living(Vector pos, float actionThreshold)
     {
         this.actionThreshold = actionThreshold;
         this.alive= true;
         lastTimeAct = 0L;
+        position = pos;
+    }
+
+    public Vector getPosition()
+    {
+        return position;
     }
 
     protected abstract void executeAction();

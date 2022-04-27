@@ -5,20 +5,20 @@ import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class BasicResource extends Resource{
-    public BasicResource() {
-        super(1, 0);
+public class RareResource extends Resource{
+    public RareResource() {
+        super(3, 0.8);
     }
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
         double dotSize = MainPane.TILE_SIZE/4;
-        context.setFill(Color.GREENYELLOW);
+        context.setFill(Color.DEEPPINK);
         context.fillOval(position.getX(), position.getY(), dotSize, dotSize);
     }
 
     @Override
     public Resource clone() {
-        return new BasicResource();
+        return new RareResource();
     }
 }
