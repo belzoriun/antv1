@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.living;
 
 import fr.florian.ants.antv1.util.Drawable;
+import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
 
 public abstract class Living implements Runnable, Drawable {
@@ -30,7 +31,8 @@ public abstract class Living implements Runnable, Drawable {
     public void run() {
         while(this.alive)
         {
-            executeAction();
+            if(!GameTimer.getInstance().isPaused())
+                executeAction();
             try {
                 Thread.sleep((long) actionThreshold);
             } catch (InterruptedException e) {

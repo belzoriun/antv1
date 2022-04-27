@@ -37,23 +37,22 @@ public class PheromoneManager extends Thread{
             } catch (InterruptedException e) {
                 break;
             }
-            List<Tile> trash = new ArrayList<>();
-            synchronized (managedTiles) {
-                for (Map.Entry<Tile, Long> entry : managedTiles.entrySet()) {
-                    if (entry.getKey().getPheromoneLevel() <= 0) {
-                        trash.add(entry.getKey());
-                        continue;
+            if(!GameTimer.getInstance().isPaused()) {
+                List<Tile> trash = new ArrayList<>();
+                synchronized (managedTiles) {
+                    for (Map.Entry<Tile, Long> entry : managedTiles.entrySet()) {
+                        if (entry.getKey().getPheromoneLevel() <= 0) {
+                            trash.add(entry.getKey());
+                            continue;
+                        } else if (entry.getValue() < 2000) {
+                            managedTiles.put(entry.getKey(), entry.getValue() + 10);
+                            continue;
+                        }
+                        entry.getKey().removePheromone();
                     }
-                    else if(entry.getValue() < 30000)
-                    {
-                        managedTiles.put(entry.getKey(), entry.getValue()+10);
-                        continue;
+                    for (Tile t : trash) {
+                        managedTiles.remove(t);
                     }
-                    entry.getKey().removePheromone();
-                }
-                for(Tile t : trash)
-                {
-                    managedTiles.remove(t);
                 }
             }
         }

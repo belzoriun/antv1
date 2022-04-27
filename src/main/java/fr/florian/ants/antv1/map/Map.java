@@ -20,6 +20,7 @@ public class Map {
     public static final int ANTHILL_COUNT = 3;
 
     private java.util.Map<Vector, Tile> tiles;
+    private List<AntHillTile> antHills;
     private List<Living> livings;
     private List<Thread> lives;
 
@@ -30,6 +31,7 @@ public class Map {
         lives = new ArrayList<>();
         tiles = new HashMap<>();
         livings = new ArrayList<>();
+        antHills = new ArrayList<>();
     }
 
     public <T extends Living> T spawn(T living)
@@ -77,6 +79,7 @@ public class Map {
             addTile(pos.left(), placer.placeTile(pos.left()));
             addTile(pos.right(), placer.placeTile(pos.right()));
             hill.makeInitialSpawns(pos);
+            antHills.add(hill);
         }
 
         System.out.println("placing resources");
@@ -110,6 +113,11 @@ public class Map {
         {
             tiles.get(vector).draw(graphicsContext2D, displayPos);
         }
+    }
+
+    public List<AntHillTile> getAntHills()
+    {
+        return antHills;
     }
 
     public void killAll()

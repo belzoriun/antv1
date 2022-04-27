@@ -71,16 +71,18 @@ public class WorkerAnt extends Ant {
             }
             Direction[] dirs = Direction.values();
             List<Direction> selection = new ArrayList<>();
+            int pheromoneLvl = 0;
             for (Direction dir : dirs) {
                 Vector pos = this.position.add(dir.getOffset());
                 Tile next = Map.getInstance().getTile(pos);
-                if(next != null) {
-                    synchronized (next) {
-                        if (!path.contains(pos)) {
-                            for (int i = 0; i < next.getPheromoneLevel() + 1; i++) {
-                                selection.add(dir);
-                            }
-                        }
+                if(next != null && !path.contains(pos)) {
+                    if(next.getPheromoneLevel() > pheromoneLvl)
+                    {
+                        selection = new ArrayList<>();
+                        pheromoneLvl = next.getPheromoneLevel();
+                    }
+                    if(next.getPheromoneLevel() == pheromoneLvl) {
+                        selection.add(dir);
                     }
                 }
             }
@@ -90,7 +92,6 @@ public class WorkerAnt extends Ant {
             } else {
                 dir = selection.get(new Random().nextInt(0, selection.size()));
             }
-            t.placePheromone();
             position = position.add(dir.getOffset());
             path.add(position);
         }
