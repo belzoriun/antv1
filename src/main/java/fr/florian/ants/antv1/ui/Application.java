@@ -25,7 +25,6 @@ public class Application extends javafx.application.Application {
     @Override
     public void start(Stage stage) throws IOException {
         Map.getInstance().init(new RandomResourcePlacer(List.of(new BasicResource(), new RareResource(), new ExtremelyRareResource())));
-        Map.getInstance().spawn(new WorkerAnt(new Vector(0, 0)));
         Group root = new Group();
         Scene scene = new Scene(root);
         MainPane main = new MainPane();

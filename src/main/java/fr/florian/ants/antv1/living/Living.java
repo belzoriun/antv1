@@ -30,11 +30,11 @@ public abstract class Living implements Runnable, Drawable {
     public void run() {
         while(this.alive)
         {
-            long time = System.currentTimeMillis();
-            if(time - lastTimeAct > actionThreshold)
-            {
-                lastTimeAct = time;
-                executeAction();
+            executeAction();
+            try {
+                Thread.sleep((long) actionThreshold);
+            } catch (InterruptedException e) {
+                this.alive = false;
             }
         }
     }

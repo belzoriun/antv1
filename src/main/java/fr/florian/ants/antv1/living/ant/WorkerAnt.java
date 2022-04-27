@@ -19,7 +19,7 @@ public class WorkerAnt extends Ant{
 
     public WorkerAnt(Vector ipos)
     {
-        super(ipos);
+        super(ipos, 7);
         holdedResources = new HoldedResourceList(5);
     }
 
@@ -46,13 +46,5 @@ public class WorkerAnt extends Ant{
                 }
             }
         }
-    }
-
-    @Override
-    public void draw(GraphicsContext context, Vector position) {
-        Vector center = position.mult(MainPane.TILE_SIZE).add(MainPane.TILE_SIZE/2);
-        double dotSize = MainPane.TILE_SIZE/5;
-        context.setFill(Color.BLACK);
-        context.fillOval(center.getX(), center.getY(), dotSize, dotSize);
     }
 }

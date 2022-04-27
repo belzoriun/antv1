@@ -64,11 +64,13 @@ public class Map {
             while(tiles.containsKey(pos)){
                 pos = new Vector(new Random().nextInt(0, WIDTH), new Random().nextInt(0, HEIGHT));
             }
-            this.tiles.put(pos, new AntHillTile());
+            AntHillTile hill = new AntHillTile();
+            this.tiles.put(pos, hill);
             this.tiles.put(pos.up(), placer.placeTile(pos.up()));
             this.tiles.put(pos.down(), placer.placeTile(pos.down()));
             this.tiles.put(pos.left(), placer.placeTile(pos.left()));
             this.tiles.put(pos.right(), placer.placeTile(pos.right()));
+            hill.makeInitialSpawns(pos);
         }
 
         System.out.println("placing resources");
