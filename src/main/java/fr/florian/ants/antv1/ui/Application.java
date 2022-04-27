@@ -22,14 +22,22 @@ import java.util.List;
 
 public class Application extends javafx.application.Application {
 
+    private static boolean executing;
+
+    public static boolean isExecuting()
+    {
+        return executing;
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
+        executing = true;
         Map.getInstance().init(new RandomResourcePlacer(List.of(new BasicResource(), new RareResource(), new ExtremelyRareResource())));
         Group root = new Group();
         Scene scene = new Scene(root);
         MainPane main = new MainPane();
         root.getChildren().add(main);
-        stage.setTitle("Hello!");
+        stage.setTitle("Battle Ants!");
         stage.setScene(scene);
         main.displayAll();
         new AnimationTimer()

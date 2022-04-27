@@ -17,9 +17,9 @@ public class WorkerAnt extends Ant{
 
     private HoldedResourceList holdedResources;
 
-    public WorkerAnt(Vector ipos)
+    public WorkerAnt(long anthillId,Color color, Vector ipos)
     {
-        super(ipos, 7);
+        super(anthillId, color, ipos, 7);
         holdedResources = new HoldedResourceList(5);
     }
 

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-public class ResourceTile implements Tile {
+public class ResourceTile extends Tile {
 
     private List<Resource> resources;
 

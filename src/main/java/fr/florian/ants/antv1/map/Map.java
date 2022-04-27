@@ -66,10 +66,11 @@ public class Map {
             }
             AntHillTile hill = new AntHillTile();
             this.tiles.put(pos, hill);
-            this.tiles.put(pos.up(), placer.placeTile(pos.up()));
-            this.tiles.put(pos.down(), placer.placeTile(pos.down()));
-            this.tiles.put(pos.left(), placer.placeTile(pos.left()));
-            this.tiles.put(pos.right(), placer.placeTile(pos.right()));
+            hill.start();
+            this.tiles.put(pos.up(), placer.placeTile(pos.up()).startSelf());
+            this.tiles.put(pos.down(), placer.placeTile(pos.down()).startSelf());
+            this.tiles.put(pos.left(), placer.placeTile(pos.left()).startSelf());
+            this.tiles.put(pos.right(), placer.placeTile(pos.right()).startSelf());
             hill.makeInitialSpawns(pos);
         }
 
@@ -81,7 +82,7 @@ public class Map {
                 Vector v = new Vector(x, y);
                 if(!tiles.containsKey(v))
                 {
-                    tiles.put(v, placer.placeTile(v));
+                    tiles.put(v, placer.placeTile(v).startSelf());
                 }
             }
         }
