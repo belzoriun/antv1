@@ -2,9 +2,12 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
+import fr.florian.ants.antv1.util.GameTimer;
+import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -15,7 +18,8 @@ import javafx.stage.Screen;
 public class MainPane extends Pane {
 
     public static double TILE_SIZE = 20;
-    public static final float MIN_TILE_SIZE = 6;
+    public static double MIN_TILE_SIZE = 5;
+    private static double MAX_TILE_SIZE = 70;
     private static final float DRAG_SPEED = 0.2f;
     private static final float ZOOM_FACTOR = 1.05f;
 
@@ -27,25 +31,59 @@ public class MainPane extends Pane {
     public MainPane()
     {
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        double futureTileSize = TILE_SIZE;
+        if(Map.WIDTH*TILE_SIZE < canvas.getWidth())
+        {
+            double wtileSize = canvas.getWidth()/Map.WIDTH;
+            if(wtileSize > futureTileSize) {
+                futureTileSize = wtileSize;
+                MAX_TILE_SIZE = futureTileSize * 2;
+                MIN_TILE_SIZE = futureTileSize;
+            }
+        }
+        if(Map.HEIGHT*TILE_SIZE < canvas.getHeight())
+        {
+            double htileSize = canvas.getHeight()/Map.HEIGHT;
+            if(htileSize > futureTileSize)
+            {
+                futureTileSize = htileSize;
+                MAX_TILE_SIZE = futureTileSize*2;
+                MIN_TILE_SIZE = futureTileSize;
+            }
+        }
+        TILE_SIZE = futureTileSize*1.5;
         this.getChildren().add(canvas);
         canvas.setOnMousePressed((MouseEvent e)->{
-            clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+            if(e.isPrimaryButtonDown()) {
+                clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+            }else if(e.isMiddleButtonDown() && e.isControlDown())
+            {
+                GameTimer.getInstance().setTickTimeDefault();
+            }
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
-            Vector newPos = new Vector(e.getSceneX()-clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE/TILE_SIZE)*DRAG_SPEED);
+            Vector newPos = new Vector(e.getSceneX() - clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE / TILE_SIZE) * DRAG_SPEED);
             manager.translateOrigin(newPos);
             clickPoint = new Vector(e.getSceneX(), e.getSceneY());
         });
         canvas.setOnScroll((ScrollEvent e)->{
-            Vector old = manager.toWorldPoint(new Vector(e.getSceneX()/TILE_SIZE, e.getSceneY()/TILE_SIZE));
-            if (e.getDeltaY() > 0) {
-                TILE_SIZE *= ZOOM_FACTOR;
-            } else {
-                TILE_SIZE /= ZOOM_FACTOR;
+            if(e.isControlDown()) {
+                long delta = 1L;
+                delta = GameTimer.getInstance().getTickTime()+(long)(e.getDeltaY())*delta;
+                GameTimer.getInstance().setTickTime(delta);
             }
-            if(TILE_SIZE < MIN_TILE_SIZE) TILE_SIZE = MIN_TILE_SIZE;
-            Vector newPos = manager.toWorldPoint(new Vector(e.getSceneX()/TILE_SIZE, e.getSceneY()/TILE_SIZE));
-            manager.translateOrigin(new Vector(newPos.getX()-old.getX(), newPos.getY()-old.getY()));
+            else {
+                Vector old = manager.toWorldPoint(new Vector(e.getSceneX() / TILE_SIZE, e.getSceneY() / TILE_SIZE));
+                if (e.getDeltaY() > 0) {
+                    TILE_SIZE *= ZOOM_FACTOR;
+                } else {
+                    TILE_SIZE /= ZOOM_FACTOR;
+                }
+                if (TILE_SIZE < MIN_TILE_SIZE) TILE_SIZE = MIN_TILE_SIZE;
+                if (TILE_SIZE > MAX_TILE_SIZE) TILE_SIZE = MAX_TILE_SIZE;
+                Vector newPos = manager.toWorldPoint(new Vector(e.getSceneX() / TILE_SIZE, e.getSceneY() / TILE_SIZE));
+                manager.translateOrigin(new Vector(newPos.getX() - old.getX(), newPos.getY() - old.getY()));
+            }
         });
     }
 

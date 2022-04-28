@@ -5,6 +5,7 @@ import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.MainPane;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -30,7 +31,9 @@ public class AntHillTile extends Tile{
     public void makeInitialSpawns(Vector pos)
     {
         for(int i = 0; i<50; i++)
-            Map.getInstance().spawn(new WorkerAnt(uniqueId, color, pos));
+            synchronized (Map.getInstance()) {
+                Map.getInstance().spawn(new WorkerAnt(uniqueId, color, pos));
+            }
     }
 
     public final long getUniqueId()
@@ -45,7 +48,14 @@ public class AntHillTile extends Tile{
 
     @Override
     public void onWalkOn(Living l) {
-
+        if(l instanceof Ant a && a.getAntHillId() != this.uniqueId)
+        {
+            l.kill();
+        }
+        else if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
+        {
+            a.heal();
+        }
     }
 
     @Override
@@ -53,6 +63,16 @@ public class AntHillTile extends Tile{
         if(a instanceof WorkerAnt want)
         {
             this.score += want.getResources().remove().getResourceScore();
+        }
+    }
+
+    @Override
+    public void onAntDieOn(Ant a) {
+        if(a instanceof WorkerAnt want)
+        {
+            while(!want.getResources().isEmpty()) {
+                this.score += want.getResources().remove().getResourceScore();
+            }
         }
     }
 

@@ -4,12 +4,10 @@ import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.ResourceTile;
 import fr.florian.ants.antv1.map.Tile;
-import fr.florian.ants.antv1.ui.MainPane;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.HoldedResourceList;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.Resource;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -18,13 +16,13 @@ import java.util.Random;
 
 public class WorkerAnt extends Ant {
 
-    private HoldedResourceList holdedResources;
+    private final HoldedResourceList holdedResources;
     private List<Vector> path;
 
     private boolean backToColony;
 
     public WorkerAnt(long anthillId, Color color, Vector ipos) {
-        super(anthillId, color, ipos, 7);
+        super(anthillId, color, ipos, 7, 1);
         holdedResources = new HoldedResourceList(5);
         path = new ArrayList<>();
         path.add(ipos);
@@ -53,6 +51,8 @@ public class WorkerAnt extends Ant {
                 }
                 else
                 {
+                    Direction h = Direction.fromOffset(path.get(path.size()-1).add(position.mult(-1)));
+                    headingDirection = h;
                     this.position = path.remove(path.size()-1);
                 }
                 return;
@@ -62,7 +62,7 @@ public class WorkerAnt extends Ant {
                     if (res.resourceCount() > 0)
                     {
                         try {
-                            this.holdedResources.add(res.take());
+                            takeResource(res);
                         } catch (Exception e) {
                         }
                         return;
@@ -89,9 +89,14 @@ public class WorkerAnt extends Ant {
             Direction dir;
             if (selection.isEmpty()) {
                 dir = Direction.random();
+                while(Map.getInstance().getTile(position.add(dir.getOffset())) == null)
+                {
+                    dir = Direction.random();
+                }
             } else {
                 dir = selection.get(new Random().nextInt(0, selection.size()));
             }
+            headingDirection = dir;
             position = position.add(dir.getOffset());
             path.add(position);
         }

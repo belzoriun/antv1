@@ -3,6 +3,7 @@ package fr.florian.ants.antv1.util;
 import fr.florian.ants.antv1.util.resource.Resource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class HoldedResourceList {
@@ -33,5 +34,9 @@ public class HoldedResourceList {
 
     public boolean isEmpty() {
         return resources.isEmpty();
+    }
+
+    public Collection<? extends Resource> getAll() {
+        return resources;
     }
 }

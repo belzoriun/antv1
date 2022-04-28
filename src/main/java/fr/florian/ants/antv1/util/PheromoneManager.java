@@ -18,6 +18,11 @@ public class PheromoneManager extends Thread{
         managedTiles = new HashMap<>();
     }
 
+    public static void forceInit()
+    {
+        instance = new PheromoneManager();
+    }
+
     public static PheromoneManager getInstance()
     {
         if(instance == null)
@@ -32,27 +37,21 @@ public class PheromoneManager extends Thread{
     {
         while(Application.isExecuting())
         {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                break;
-            }
-            if(!GameTimer.getInstance().isPaused()) {
-                List<Tile> trash = new ArrayList<>();
-                synchronized (managedTiles) {
-                    for (Map.Entry<Tile, Long> entry : managedTiles.entrySet()) {
-                        if (entry.getKey().getPheromoneLevel() <= 0) {
-                            trash.add(entry.getKey());
-                            continue;
-                        } else if (entry.getValue() < 2000) {
-                            managedTiles.put(entry.getKey(), entry.getValue() + 10);
-                            continue;
-                        }
-                        entry.getKey().removePheromone();
+            TickAwaiter.waitTick();
+            List<Tile> trash = new ArrayList<>();
+            synchronized (managedTiles) {
+                for (Map.Entry<Tile, Long> entry : managedTiles.entrySet()) {
+                    if (entry.getKey().getPheromoneLevel() <= 0) {
+                        trash.add(entry.getKey());
+                        continue;
+                    } else if (entry.getValue() < GameTimer.getInstance().getTickTime()*40) {
+                        managedTiles.put(entry.getKey(), entry.getValue() + GameTimer.getInstance().getTickTime());
+                        continue;
                     }
-                    for (Tile t : trash) {
-                        managedTiles.remove(t);
-                    }
+                    entry.getKey().removePheromone();
+                }
+                for (Tile t : trash) {
+                    managedTiles.remove(t);
                 }
             }
         }

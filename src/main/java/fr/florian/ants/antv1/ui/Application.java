@@ -5,10 +5,7 @@ import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.PheromoneManager;
 import fr.florian.ants.antv1.util.Vector;
-import fr.florian.ants.antv1.util.resource.BasicResource;
-import fr.florian.ants.antv1.util.resource.ExtremelyRareResource;
-import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
-import fr.florian.ants.antv1.util.resource.RareResource;
+import fr.florian.ants.antv1.util.resource.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -28,32 +25,65 @@ public class Application extends javafx.application.Application {
 
     private static boolean executing;
     private static PauseMenu menu;
+    private static Stage stage;
+
+    private static final IResourcePlacer placer = new RandomResourcePlacer(List.of(new BasicResource(),
+            new RareResource(),
+            new ExtremelyRareResource()));
 
     public static boolean isExecuting()
     {
         return executing;
     }
 
+    public static void restart() {
+        executing = false;
+        Map.getInstance().killAll();
+        try {
+            PheromoneManager.getInstance().join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        PheromoneManager.forceInit();
+        GameTimer.getInstance().stopTime();
+        try {
+            GameTimer.getInstance().join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        initGame();
+    }
+
+    private static void initGame()
+    {
+        executing = true;
+        GameTimer.init(1);//100 minute
+        GameTimer.getInstance().start();
+        Map.getInstance().init(placer);
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
-        executing = true;
-        GameTimer.init(6000);//1 minute
-        GameTimer.getInstance().start();
-        Map.getInstance().init(new RandomResourcePlacer(List.of(new BasicResource(),
-                new RareResource(),
-                new ExtremelyRareResource())));
+        initGame();
+        Application.stage = stage;
         Group root = new Group();
         Scene scene = new Scene(root);
         MainPane main = new MainPane();
         root.getChildren().add(main);
         stage.setTitle("Battle Ants!");
         stage.setScene(scene);
-        main.displayAll();
         new AnimationTimer()
         {
             @Override
             public void handle(long currentNanoTime)
             {
+                synchronized (Map.getInstance()) {
+                    if(Map.getInstance().updateLivings() <= 0)
+                    {
+                        menu.setEndMenu();
+                        menu.pauseGame();
+                    }
+                }
                 main.displayAll();
                 try {
                     Thread.sleep(10);
@@ -61,7 +91,7 @@ public class Application extends javafx.application.Application {
             }
         }.start();
         stage.show();
-        menu = new PauseMenu(scene.getWindow());
+        menu = new PauseMenu(stage);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent evt) {
@@ -79,9 +109,6 @@ public class Application extends javafx.application.Application {
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.setFullScreen(true);
         stage.setResizable(false);
-        stage.setOnCloseRequest((WindowEvent e)->{
-            endGame();
-        });
     }
 
     public static void endGame()
@@ -104,5 +131,6 @@ public class Application extends javafx.application.Application {
 
     public static void main(String[] args) {
         launch();
+        endGame();
     }
 }

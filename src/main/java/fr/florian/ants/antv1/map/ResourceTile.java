@@ -4,12 +4,12 @@ import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.MainPane;
+import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
-import javafx.scene.text.Font;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,13 +60,36 @@ public class ResourceTile extends Tile {
     }
 
     @Override
+    public void onAntDieOn(Ant a) {
+        if(a instanceof WorkerAnt w)
+        {
+            this.resources.addAll(w.getResources().getAll());
+        }
+    }
+
+    @Override
     public void draw(GraphicsContext context, Vector position) {
-        Color base = Color.SANDYBROWN;
         int maxInterpolateValue = this.getPheromoneLevel();
         if(maxInterpolateValue > 10) maxInterpolateValue = 10;
-        base = base.interpolate(Color.RED, maxInterpolateValue/10.0);
-        context.setFill(base);
-        context.fillRect(position.getX()*MainPane.TILE_SIZE-1, position.getY()*MainPane.TILE_SIZE-1, MainPane.TILE_SIZE+2, MainPane.TILE_SIZE+2);
+        Color base = new Color(49/255, 60/255, 100/255, 0.6).interpolate(new Color(1, 0, 0, 0.6), maxInterpolateValue/10.0);
+        if(resources.isEmpty()) {
+            context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
+                    , position.getX() * MainPane.TILE_SIZE
+                    , position.getY() * MainPane.TILE_SIZE
+                    , MainPane.TILE_SIZE
+                    , MainPane.TILE_SIZE);
+        }else
+        {
+            context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_2)
+                    , position.getX() * MainPane.TILE_SIZE
+                    , position.getY() * MainPane.TILE_SIZE
+                    , MainPane.TILE_SIZE
+                    , MainPane.TILE_SIZE);
+        }
+        if(getPheromoneLevel() >= 1) {
+            context.setFill(base);
+            context.fillRect(position.getX() * MainPane.TILE_SIZE, position.getY() * MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
+        }
         double xMin = 0.3;
         double xMax = 0.7;
         double yMin = 0.3;

@@ -3,6 +3,7 @@ package fr.florian.ants.antv1.map;
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.util.PheromoneManager;
+import fr.florian.ants.antv1.util.TickAwaiter;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
@@ -15,8 +16,8 @@ import java.util.Random;
 
 public class Map {
 
-    public static final int WIDTH = 500;
-    public static final int HEIGHT = 500;
+    public static final int WIDTH = 50;
+    public static final int HEIGHT = 50;
     public static final int ANTHILL_COUNT = 3;
 
     private java.util.Map<Vector, Tile> tiles;
@@ -105,6 +106,8 @@ public class Map {
 
     public Tile getTile(Vector pos)
     {
+        if(pos.getX()<0|| pos.getX()>WIDTH||pos.getY()<0||pos.getY()>HEIGHT)
+            return  null;
         return tiles.get(pos);
     }
 
@@ -124,8 +127,11 @@ public class Map {
     {
         for(Living l : livings)
         {
-            l.kill();
+            synchronized (l) {
+                l.kill();
+            }
         }
+        TickAwaiter.emitTick();
         for(Thread t : lives)
         {
             try {
@@ -133,5 +139,35 @@ public class Map {
             } catch (InterruptedException e) {
             }
         }
+    }
+
+    public int updateLivings()
+    {
+        List<Living> trash = new ArrayList<>();
+        for(Living l : livings)
+        {
+            if(!l.isAlive())
+            {
+                trash.add(l);
+            }
+        }
+        for(Living l : trash)
+        {
+            synchronized (l)
+            {
+                livings.remove(l);
+            }
+        }
+        return livings.size();
+    }
+
+    public List<Living> getLivingsAt(Vector position) {
+        List<Living> res = new ArrayList<>();
+        for (Living l : livings) {
+            if (l.getPosition().equals(position)) {
+                res.add(l);
+            }
+        }
+        return res;
     }
 }

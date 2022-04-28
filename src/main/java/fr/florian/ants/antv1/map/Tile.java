@@ -33,4 +33,5 @@ public abstract class Tile implements Drawable {
 
     public abstract void onWalkOn(Living l);
     public abstract void onInteract(Ant a);
+    public abstract void onAntDieOn(Ant a);
 }
