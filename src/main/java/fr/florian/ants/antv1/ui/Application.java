@@ -95,6 +95,7 @@ public class Application extends javafx.application.Application {
         Application.stage = stage;
         Group root = new Group();
         Scene scene = new Scene(root);
+        scene.getRoot().requestFocus();
         main = new MainPane();
         initGame();
         root.getChildren().add(main);
@@ -113,6 +114,9 @@ public class Application extends javafx.application.Application {
                     else {
                         menu.pauseGame();
                     }
+                }
+                if (evt.getCode().equals(KeyCode.TAB)) {
+                    main.toNextDisplay();
                 }
             }
         });

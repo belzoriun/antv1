@@ -6,6 +6,7 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.*;
@@ -64,12 +65,6 @@ public class MainPane extends Pane {
                 GameTimer.getInstance().setTickTimeDefault();
             }
         });
-        this.setOnKeyPressed((KeyEvent e)->{
-            if(e.getCode() == KeyCode.TAB)
-            {
-                displayType = displayType.next();
-            }
-        });
         canvas.setOnMouseDragged((MouseEvent e)->{
             Vector newPos = new Vector(e.getSceneX() - clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE / TILE_SIZE) * DRAG_SPEED);
             manager.translateOrigin(newPos);
@@ -94,6 +89,11 @@ public class MainPane extends Pane {
                 manager.translateOrigin(new Vector(newPos.getX() - old.getX(), newPos.getY() - old.getY()));
             }
         });
+    }
+
+    public void toNextDisplay()
+    {
+        displayType = displayType.next();
     }
 
     private void applyShaders()
