@@ -23,6 +23,8 @@ public class MainPane extends Pane {
     private static final float DRAG_SPEED = 0.2f;
     private static final float ZOOM_FACTOR = 1.05f;
 
+    private DisplayType displayType;
+
     private Canvas canvas;
     private MarkerManager manager = new MarkerManager();
 
@@ -30,6 +32,7 @@ public class MainPane extends Pane {
 
     public MainPane()
     {
+        displayType = DisplayType.DEFAULT;
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         double futureTileSize = TILE_SIZE;
         if(Map.WIDTH*TILE_SIZE < canvas.getWidth())
@@ -59,6 +62,12 @@ public class MainPane extends Pane {
             }else if(e.isMiddleButtonDown() && e.isControlDown())
             {
                 GameTimer.getInstance().setTickTimeDefault();
+            }
+        });
+        this.setOnKeyPressed((KeyEvent e)->{
+            if(e.getCode() == KeyCode.TAB)
+            {
+                displayType = displayType.next();
             }
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
@@ -141,7 +150,7 @@ public class MainPane extends Pane {
                     && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
                     && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
                 l.draw(context, displayPoint);
-            if(l instanceof AntSignalSender sender)
+            if(l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES))
             {
                 List<AntSignal> sigs = sender.getSignalList();
                 synchronized (sigs) {
@@ -158,6 +167,8 @@ public class MainPane extends Pane {
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)
     {
         Map.getInstance().drawTile(pos, displayPos, context);
+        if(displayType == DisplayType.PHEROMONES || displayType == DisplayType.SIGNALSANDPHEROMONES)
+            Map.getInstance().drawPheromones(pos, displayPos, context);
     }
 
 

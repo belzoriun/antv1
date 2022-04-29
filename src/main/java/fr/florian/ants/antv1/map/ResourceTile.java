@@ -69,9 +69,6 @@ public class ResourceTile extends Tile {
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
-        int maxInterpolateValue = this.getPheromoneLevel();
-        if(maxInterpolateValue > 10) maxInterpolateValue = 10;
-        Color base = new Color(49/255, 60/255, 100/255, 0.6).interpolate(new Color(1, 0, 0, 0.6), maxInterpolateValue/10.0);
         if(resources.isEmpty()) {
             context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
                     , position.getX() * MainPane.TILE_SIZE
@@ -85,10 +82,6 @@ public class ResourceTile extends Tile {
                     , position.getY() * MainPane.TILE_SIZE
                     , MainPane.TILE_SIZE
                     , MainPane.TILE_SIZE);
-        }
-        if(getPheromoneLevel() >= 1) {
-            context.setFill(base);
-            context.fillRect(position.getX() * MainPane.TILE_SIZE, position.getY() * MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
         }
         double xMin = 0.3;
         double xMax = 0.7;

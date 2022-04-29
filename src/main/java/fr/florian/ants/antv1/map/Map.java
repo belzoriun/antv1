@@ -2,12 +2,14 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.ui.MainPane;
 import fr.florian.ants.antv1.util.PheromoneManager;
 import fr.florian.ants.antv1.util.TickAwaiter;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,5 +176,18 @@ public class Map {
             }
         }
         return res;
+    }
+
+    public void drawPheromones(Vector pos, Vector displayPos, GraphicsContext context) {
+        Tile t = getTile(pos);
+        if(t != null) {
+            int maxInterpolateValue = t.getPheromoneLevel();
+            if (maxInterpolateValue > 10) maxInterpolateValue = 10;
+            Color base = new Color(49 / 255, 60 / 255, 100 / 255, 0.6).interpolate(new Color(1, 0, 0, 0.6), maxInterpolateValue / 10.0);
+            if (t.getPheromoneLevel() >= 1) {
+                context.setFill(base);
+                context.fillRect(displayPos.getX() * MainPane.TILE_SIZE, displayPos.getY() * MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
+            }
+        }
     }
 }
