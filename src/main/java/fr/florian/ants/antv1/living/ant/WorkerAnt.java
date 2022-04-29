@@ -54,9 +54,19 @@ public class WorkerAnt extends Ant {
                 }
                 else
                 {
-                    Direction h = Direction.fromOffset(path.get(path.size()-1).add(position.mult(-1)));
-                    headingDirection = h;
-                    this.position = path.remove(path.size()-1);
+                    if(path.isEmpty())
+                    {
+                        if(t instanceof ResourceTile rt) {
+                            while(!getResources().isEmpty()) {
+                                rt.getResources().add(getResources().remove());
+                            }
+                        }
+                    }
+                    else {
+                        Direction h = Direction.fromOffset(path.get(path.size() - 1).add(position.mult(-1)));
+                        headingDirection = h;
+                        this.position = path.remove(path.size() - 1);
+                    }
                 }
                 return;
             }

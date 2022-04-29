@@ -87,6 +87,16 @@ public class MainPane extends Pane {
         });
     }
 
+    private void applyShaders()
+    {
+        double transition = Math.exp(6*Math.pow(GameTimer.getInstance().getDayNightTime()-1.2, 7));
+        Color day = new Color(109/255.0, 223/255.0, 1, 0);
+        Color night = new Color(0/255.0, 4/255.0, 103/255.0, 0.4);
+        Color dayNightShader = night.interpolate(day, transition);
+        canvas.getGraphicsContext2D().setFill(dayNightShader);
+        canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
     public void displayAll()
     {
         if(manager.getOriginX() > 0)
@@ -132,6 +142,7 @@ public class MainPane extends Pane {
                     && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
                 l.draw(context, displayPoint);
         }
+        applyShaders();
     }
 
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)

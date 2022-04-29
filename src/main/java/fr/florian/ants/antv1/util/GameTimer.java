@@ -15,7 +15,7 @@ public class GameTimer extends Thread{
     private boolean transitToDay;
 
     private static final long DEFAULT_TICK_TIME = 50;
-    private static final int DAY_DURATION = 50;
+    private static final int DAY_DURATION = 200;
 
     private GameTimer(long totalTime)
     {
@@ -39,11 +39,11 @@ public class GameTimer extends Thread{
                 TickAwaiter.emitTick();
                 if(transitToDay)
                 {
-                    dayNightTime += 1/DAY_DURATION;
+                    dayNightTime += 1/(double)DAY_DURATION;
                 }
                 else
                 {
-                    dayNightTime -= 1/DAY_DURATION;
+                    dayNightTime -= 1/(double)DAY_DURATION;
                 }
                 if(dayNightTime<=0)
                 {
@@ -67,6 +67,11 @@ public class GameTimer extends Thread{
     public boolean isDay()
     {
         return dayNightTime > 0.5;
+    }
+
+    public double getDayNightTime()
+    {
+        return dayNightTime;
     }
 
     public void stopTime()
