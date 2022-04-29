@@ -2,6 +2,8 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.ant.QueenAnt;
+import fr.florian.ants.antv1.living.ant.SoldierAnt;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.MainPane;
 import fr.florian.ants.antv1.util.Vector;
@@ -30,10 +32,24 @@ public class AntHillTile extends Tile{
 
     public void makeInitialSpawns(Vector pos)
     {
-        for(int i = 0; i<50; i++)
-            synchronized (Map.getInstance()) {
-                Map.getInstance().spawn(new WorkerAnt(uniqueId, color, pos));
+        QueenAnt q = new QueenAnt(uniqueId, color, pos);
+        synchronized (Map.getInstance()) {
+            Map.getInstance().spawn(q);
+        }
+        SoldierAnt s = new SoldierAnt(uniqueId, color, pos);
+        synchronized (Map.getInstance()) {
+            q.subscribe(s);
+            Map.getInstance().spawn(s);
+        }
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<10; j++) {
+                synchronized (Map.getInstance()) {
+                    WorkerAnt w = new WorkerAnt(uniqueId, color, pos);
+                    s.subscribe(w);
+                    Map.getInstance().spawn(w);
+                }
             }
+        }
     }
 
     public final long getUniqueId()

@@ -3,17 +3,17 @@ package fr.florian.ants.antv1.ui;
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
-import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.signals.AntSignal;
+import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
+
+import java.util.List;
 
 public class MainPane extends Pane {
 
@@ -141,6 +141,16 @@ public class MainPane extends Pane {
                     && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
                     && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
                 l.draw(context, displayPoint);
+            if(l instanceof AntSignalSender sender)
+            {
+                List<AntSignal> sigs = sender.getSignalList();
+                synchronized (sigs) {
+                    for (AntSignal s : sigs) {
+                        if (!s.mayDissipate())
+                            s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+                    }
+                }
+            }
         }
         applyShaders();
     }

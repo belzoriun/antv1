@@ -15,7 +15,7 @@ public class GameTimer extends Thread{
     private boolean transitToDay;
 
     private static final long DEFAULT_TICK_TIME = 50;
-    private static final int DAY_DURATION = 200;
+    private static final int DAY_DURATION = 2000;
 
     private GameTimer(long totalTime)
     {

@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.ResourceTile;
 import fr.florian.ants.antv1.map.Tile;
+import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.HoldedResourceList;
 import fr.florian.ants.antv1.util.Vector;
@@ -23,7 +24,7 @@ public class WorkerAnt extends Ant {
     private boolean backToColony;
 
     public WorkerAnt(long anthillId, Color color, Vector ipos) {
-        super(anthillId, color, ipos, 7, 1);
+        super(anthillId, color, ipos, 8, 1);
         holdedResources = new HoldedResourceList(5);
         path = new ArrayList<>();
         path.add(ipos);
@@ -111,6 +112,11 @@ public class WorkerAnt extends Ant {
                 path.add(position);
             }
         }
+    }
+
+    @Override
+    protected void onOrderRecieved(AntOrder order) {
+        //TODO manager order
     }
 
     private void takeResource(ResourceTile tile) {

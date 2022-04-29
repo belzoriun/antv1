@@ -104,4 +104,8 @@ public class Vector {
     public int hashCode() {
         return Objects.hash(x, y);
     }
+
+    public double delta(Vector from) {
+        return Math.sqrt(Math.pow(from.getX()-x, 2)+Math.pow(from.getY() - y, 2));
+    }
 }

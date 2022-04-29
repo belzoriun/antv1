@@ -4,29 +4,34 @@ import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.ui.MainPane;
-import fr.florian.ants.antv1.util.Direction;
-import fr.florian.ants.antv1.util.FightManager;
-import fr.florian.ants.antv1.util.ResourceLoader;
-import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.*;
+import fr.florian.ants.antv1.util.signals.AntSignal;
+import fr.florian.ants.antv1.util.signals.AntSignalReciever;
+import fr.florian.ants.antv1.util.signals.AntSubscription;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.transform.Rotate;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.Flow;
 
-public abstract class Ant extends Living{
+public abstract class Ant extends Living implements AntSignalReciever {
 
     private static final int MAX_SIZE = 10;
+    private static long CURRENT_ANT_ID = 0L;
 
     private double size;
     protected long uniqueAnthillId;
     private boolean weak;
     private final int strenght;
+    private long antId;
+    private AntSubscription sub;
 
     private java.util.Map<Direction, Image> antImages;
 
@@ -43,6 +48,10 @@ public abstract class Ant extends Living{
 
     protected void act()
     {
+        if(sub != null)
+        {
+            sub.request(1L);
+        }
         synchronized (Map.getInstance()) {
             Tile t = Map.getInstance().getTile(position);
             if (t == null) {
@@ -57,8 +66,10 @@ public abstract class Ant extends Living{
     public void onKilled()
     {
         Tile t = Map.getInstance().getTile(position);
-        synchronized (t) {
-            t.onAntDieOn(this);
+        if(t != null) {
+            synchronized (t) {
+                t.onAntDieOn(this);
+            }
         }
     }
 
@@ -110,6 +121,11 @@ public abstract class Ant extends Living{
         }
     }
 
+    public long getId()
+    {
+        return antId;
+    }
+
 
     public void weaken()
     {
@@ -126,6 +142,8 @@ public abstract class Ant extends Living{
         return uniqueAnthillId;
     }
 
+    protected abstract void onOrderRecieved(AntOrder order);
+
     protected Ant(long anthillId, Color color, Vector ipos, double size, int strenght) {
         super(ipos);
         headingDirection = Direction.UP;
@@ -136,6 +154,7 @@ public abstract class Ant extends Living{
         this.uniqueAnthillId = anthillId;
         this.color = color;
         antImages = new HashMap<>();
+        this.antId = CURRENT_ANT_ID++;
 
         antImages.put(Direction.LEFT, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_LEFT), color));
         antImages.put(Direction.RIGHT, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_RIGHT), color));
@@ -183,5 +202,39 @@ public abstract class Ant extends Living{
         Image i = antImages.get(headingDirection);
         Vector center = position.mult(MainPane.TILE_SIZE).add(MainPane.TILE_SIZE / 2 - dotSize / 2);
         context.drawImage(i, center.getX(), center.getY(), dotSize, dotSize);
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        if(subscription instanceof AntSubscription asub)
+        {
+            this.sub = asub;
+        }
+    }
+
+    @Override
+    public void onNext(AntSignal item) {
+        AntOrder order = item.getOrder(position);
+        if(order != null)
+        {
+            sub.acknoledge(item);
+            onOrderRecieved(order);
+        }
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    @Override
+    public void onComplete() {
+        this.sub = null;
     }
 }
