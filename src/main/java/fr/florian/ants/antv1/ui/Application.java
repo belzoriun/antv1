@@ -26,6 +26,9 @@ public class Application extends javafx.application.Application {
     private static boolean executing;
     private static PauseMenu menu;
     private static Stage stage;
+    private static MainPane main;
+
+    private static AnimationTimer refreshHandler;
 
     private static final IResourcePlacer placer = new RandomResourcePlacer(List.of(new BasicResource(),
             new RareResource(),
@@ -37,6 +40,8 @@ public class Application extends javafx.application.Application {
     }
 
     public static void restart() {
+        System.out.println("restarting ...");
+        refreshHandler.stop();
         executing = false;
         Map.getInstance().killAll();
         try {
@@ -51,28 +56,19 @@ public class Application extends javafx.application.Application {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Map.anihilate();
         initGame();
     }
 
     private static void initGame()
     {
         executing = true;
-        GameTimer.init(1);//100 minute
-        GameTimer.getInstance().start();
         Map.getInstance().init(placer);
-    }
-
-    @Override
-    public void start(Stage stage) throws IOException {
-        initGame();
-        Application.stage = stage;
-        Group root = new Group();
-        Scene scene = new Scene(root);
-        MainPane main = new MainPane();
-        root.getChildren().add(main);
-        stage.setTitle("Battle Ants!");
-        stage.setScene(scene);
-        new AnimationTimer()
+        System.out.println("initialized map");
+        GameTimer.init(600000);//100 minute
+        GameTimer.getInstance().start();
+        System.out.println("initialized timer");
+        refreshHandler = new AnimationTimer()
         {
             @Override
             public void handle(long currentNanoTime)
@@ -80,6 +76,7 @@ public class Application extends javafx.application.Application {
                 synchronized (Map.getInstance()) {
                     if(Map.getInstance().updateLivings() <= 0)
                     {
+                        System.out.println("all ants got killed ...");
                         menu.setEndMenu();
                         menu.pauseGame();
                     }
@@ -89,7 +86,20 @@ public class Application extends javafx.application.Application {
                     Thread.sleep(10);
                 } catch (InterruptedException e) { e.printStackTrace();}
             }
-        }.start();
+        };
+        refreshHandler.start();
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException {
+        Application.stage = stage;
+        Group root = new Group();
+        Scene scene = new Scene(root);
+        main = new MainPane();
+        initGame();
+        root.getChildren().add(main);
+        stage.setTitle("Battle Ants!");
+        stage.setScene(scene);
         stage.show();
         menu = new PauseMenu(stage);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {

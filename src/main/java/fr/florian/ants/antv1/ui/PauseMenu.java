@@ -92,7 +92,7 @@ public class PauseMenu {
         });
         restart.setOnAction((ActionEvent e) -> {
             Application.restart();
-            System.out.println("restart");
+            stage.hide();
             main.getChildren().remove(restart);
             main.add(continu, 1, Map.getInstance().getAntHills().size());
         });

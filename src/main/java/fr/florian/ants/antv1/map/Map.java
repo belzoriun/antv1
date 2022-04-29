@@ -63,6 +63,11 @@ public class Map {
         return instance;
     }
 
+    public static void anihilate()
+    {
+        instance = null;
+    }
+
     public void init(IResourcePlacer placer)
     {
         PheromoneManager.getInstance().start();

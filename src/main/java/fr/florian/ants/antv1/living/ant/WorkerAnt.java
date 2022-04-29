@@ -18,6 +18,7 @@ public class WorkerAnt extends Ant {
 
     private final HoldedResourceList holdedResources;
     private List<Vector> path;
+    private List<Vector> deadCells;
 
     private boolean backToColony;
 
@@ -26,6 +27,7 @@ public class WorkerAnt extends Ant {
         holdedResources = new HoldedResourceList(5);
         path = new ArrayList<>();
         path.add(ipos);
+        deadCells = new ArrayList<>();
         backToColony = false;
     }
 
@@ -44,6 +46,7 @@ public class WorkerAnt extends Ant {
                         backToColony = false;
                         this.path = new ArrayList<>();
                         this.path.add(position);
+                        this.deadCells.clear();
                     }
                     else {
                         anth.onInteract(this);
@@ -75,7 +78,7 @@ public class WorkerAnt extends Ant {
             for (Direction dir : dirs) {
                 Vector pos = this.position.add(dir.getOffset());
                 Tile next = Map.getInstance().getTile(pos);
-                if(next != null && !path.contains(pos)) {
+                if(next != null && !path.contains(pos) && ! deadCells.contains(pos)) {
                     if(next.getPheromoneLevel() > pheromoneLvl)
                     {
                         selection = new ArrayList<>();
@@ -86,19 +89,17 @@ public class WorkerAnt extends Ant {
                     }
                 }
             }
-            Direction dir;
             if (selection.isEmpty()) {
-                dir = Direction.random();
-                while(Map.getInstance().getTile(position.add(dir.getOffset())) == null)
-                {
-                    dir = Direction.random();
-                }
+                deadCells.add(position);
+                Vector newPos = path.remove(path.size()-1);
+                headingDirection = Direction.fromOffset(position.add(newPos.mult(-1)));
+                position = newPos;
             } else {
-                dir = selection.get(new Random().nextInt(0, selection.size()));
+                Direction dir = selection.get(new Random().nextInt(0, selection.size()));
+                headingDirection = dir;
+                position = position.add(dir.getOffset());
+                path.add(position);
             }
-            headingDirection = dir;
-            position = position.add(dir.getOffset());
-            path.add(position);
         }
     }
 
