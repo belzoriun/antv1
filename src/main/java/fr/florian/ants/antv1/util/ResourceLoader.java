@@ -15,6 +15,7 @@ public class ResourceLoader {
     public static final String ANT_LEFT = "ant_left.png";
     public static final String ANT_RIGHT = "ant_right.png";
     public static final String ANT_DOWN = "ant_down.png";
+    public static final String SUGAR = "sugar.png";
 
     private Map<String, Image> streams;
     private ClassLoader loader;
@@ -36,6 +37,7 @@ public class ResourceLoader {
             instance.loadResource(ANT_LEFT);
             instance.loadResource(ANT_RIGHT);
             instance.loadResource(ANT_DOWN);
+            instance.loadResource(SUGAR);
         }
         return instance;
     }

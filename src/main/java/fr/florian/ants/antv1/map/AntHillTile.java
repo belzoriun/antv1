@@ -5,9 +5,8 @@ import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.QueenAnt;
 import fr.florian.ants.antv1.living.ant.SoldierAnt;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
-import fr.florian.ants.antv1.ui.MainPane;
+import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.Vector;
-import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -36,12 +35,12 @@ public class AntHillTile extends Tile{
         synchronized (Map.getInstance()) {
             Map.getInstance().spawn(q);
         }
-        SoldierAnt s = new SoldierAnt(uniqueId, color, pos);
-        synchronized (Map.getInstance()) {
-            q.subscribe(s);
-            Map.getInstance().spawn(s);
-        }
         for(int i = 0; i<5; i++) {
+            SoldierAnt s = new SoldierAnt(uniqueId, color, pos);
+            synchronized (Map.getInstance()) {
+                q.subscribe(s);
+                Map.getInstance().spawn(s);
+            }
             for(int j = 0; j<10; j++) {
                 synchronized (Map.getInstance()) {
                     WorkerAnt w = new WorkerAnt(uniqueId, color, pos);
@@ -100,6 +99,6 @@ public class AntHillTile extends Tile{
     @Override
     public void draw(GraphicsContext context, Vector position) {
         context.setFill(color);
-        context.fillRect(position.getX()* MainPane.TILE_SIZE, position.getY()*MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
+        context.fillRect(position.getX()* WorldView.TILE_SIZE, position.getY()* WorldView.TILE_SIZE, WorldView.TILE_SIZE, WorldView.TILE_SIZE);
     }
 }

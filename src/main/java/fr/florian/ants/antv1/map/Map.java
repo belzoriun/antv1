@@ -1,15 +1,14 @@
 package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.ui.MainPane;
-import fr.florian.ants.antv1.util.PheromoneManager;
+import fr.florian.ants.antv1.ui.WorldView;
+import fr.florian.ants.antv1.util.pheromone.Pheromone;
+import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.TickAwaiter;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
-import fr.florian.ants.antv1.util.resource.RandomResourcePlacer;
+import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ public class Map {
 
     public static final int WIDTH = 50;
     public static final int HEIGHT = 50;
-    public static final int ANTHILL_COUNT = 5;
+    public static final int ANTHILL_COUNT = 3;
 
     private java.util.Map<Vector, Tile> tiles;
     private List<AntHillTile> antHills;
@@ -44,11 +43,6 @@ public class Map {
         lives.add(t);
         livings.add(living);
         return living;
-    }
-
-    public Ant spawnAnt(Ant a)
-    {
-        return spawn(a);
     }
 
     public List<Living> getLivings()
@@ -181,12 +175,21 @@ public class Map {
     public void drawPheromones(Vector pos, Vector displayPos, GraphicsContext context) {
         Tile t = getTile(pos);
         if(t != null) {
-            int maxInterpolateValue = t.getPheromoneLevel();
-            if (maxInterpolateValue > 10) maxInterpolateValue = 10;
-            Color base = new Color(49 / 255, 60 / 255, 100 / 255, 0.6).interpolate(new Color(1, 0, 0, 0.6), maxInterpolateValue / 10.0);
-            if (t.getPheromoneLevel() >= 1) {
-                context.setFill(base);
-                context.fillRect(displayPos.getX() * MainPane.TILE_SIZE, displayPos.getY() * MainPane.TILE_SIZE, MainPane.TILE_SIZE, MainPane.TILE_SIZE);
+            for(Pheromone p : t.getAllPheromones())
+            {
+                if(p != null)
+                    p.draw(context, displayPos);
+            }
+        }
+    }
+
+    public void displayResources(GraphicsContext context, Vector pos, Vector displayPos) {
+        Tile t = getTile(pos);
+        if(t != null) {
+            if(t instanceof ResourceTile rt) {
+                for (Resource r : rt.getResources()) {
+                    r.draw(context, r.getPosition().mult(WorldView.TILE_SIZE).add(displayPos.mult(WorldView.TILE_SIZE)));
+                }
             }
         }
     }

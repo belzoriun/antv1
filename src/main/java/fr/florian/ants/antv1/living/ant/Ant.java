@@ -3,7 +3,7 @@ package fr.florian.ants.antv1.living.ant;
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
-import fr.florian.ants.antv1.ui.MainPane;
+import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalReciever;
@@ -11,11 +11,8 @@ import fr.florian.ants.antv1.util.signals.AntSubscription;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.transform.Rotate;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -198,9 +195,9 @@ public abstract class Ant extends Living implements AntSignalReciever {
     @Override
     public void draw(GraphicsContext context, Vector position)
     {
-        double dotSize = MainPane.TILE_SIZE / (MAX_SIZE + 1 - size);
+        double dotSize = WorldView.TILE_SIZE / (MAX_SIZE + 1 - size);
         Image i = antImages.get(headingDirection);
-        Vector center = position.mult(MainPane.TILE_SIZE).add(MainPane.TILE_SIZE / 2 - dotSize / 2);
+        Vector center = position.mult(WorldView.TILE_SIZE).add(WorldView.TILE_SIZE / 2 - dotSize / 2);
         context.drawImage(i, center.getX(), center.getY(), dotSize, dotSize);
     }
 

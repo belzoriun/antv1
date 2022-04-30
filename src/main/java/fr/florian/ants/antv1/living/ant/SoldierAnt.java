@@ -2,10 +2,7 @@ package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.Map;
-import fr.florian.ants.antv1.util.AntOrder;
-import fr.florian.ants.antv1.util.Direction;
-import fr.florian.ants.antv1.util.Drawable;
-import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
@@ -22,30 +19,40 @@ public class SoldierAnt extends Ant implements AntSignalSender{
 
     private List<AntSignal> sigs;
     private List<AntSubscription> subs;
+    private Vector initialPosition;
+    private int actionCounter;
+
+    private static final double MAX_ANTHILL_DISTANCE = 20;
+    private static final int TICKS_PER_ACTION = 3;
 
     public SoldierAnt(long anthillId, Color color, Vector ipos) {
         super(anthillId, color, ipos, 9.2, 3);
         sigs = new ArrayList<>();
         subs = new ArrayList<>();
+        initialPosition = ipos;
+        actionCounter = TICKS_PER_ACTION;
     }
 
     @Override
     protected void executeAction() {
-        headingDirection = Direction.random();
-        while(Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null) {
+        if(actionCounter <= 0) {
             headingDirection = Direction.random();
-        }
-        position = position.add(headingDirection.getOffset());
-        synchronized (sigs)
-        {
-            List<AntSignal> trash = new ArrayList<>();
-            for (AntSignal sig : sigs) {
-                if (sig.mayDissipate()) {
-                    trash.add(sig);
-                }
+            while (position.add(headingDirection.getOffset()).delta(initialPosition) > MAX_ANTHILL_DISTANCE || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null) {
+                headingDirection = Direction.random();
             }
-            sigs.removeAll(trash);
+            position = position.add(headingDirection.getOffset());
+            synchronized (sigs) {
+                List<AntSignal> trash = new ArrayList<>();
+                for (AntSignal sig : sigs) {
+                    if (sig.mayDissipate()) {
+                        trash.add(sig);
+                    }
+                }
+                sigs.removeAll(trash);
+            }
+            actionCounter = TICKS_PER_ACTION;
         }
+        actionCounter --;
     }
 
     @Override

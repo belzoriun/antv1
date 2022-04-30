@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.util.AntOrder;
+import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
@@ -9,6 +10,7 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Flow;
 import java.util.concurrent.ForkJoinPool;
@@ -31,7 +33,12 @@ public class QueenAnt extends Ant implements AntSignalSender {
     @Override
     protected void executeAction() {
         if(timeOperationCounter <= 0) {
-            AntSignal newSig = new AntSignal(this, position, AntOrder.SEARCHFORFOOD, 30, 0.3);
+            AntOrder order = AntOrder.SEARCHFORFOOD;
+            if(GameTimer.getInstance().getRemainingTimeFraction()<=0.3)
+            {
+                order = AntOrder.BACKTOCOLONY;
+            }
+            AntSignal newSig = new AntSignal(this, position, order, 30, 0.3);
             for (AntSubscription sub : subs) {
                 sub.emitSignal(newSig);
             }

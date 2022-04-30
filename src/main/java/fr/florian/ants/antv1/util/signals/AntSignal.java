@@ -1,15 +1,13 @@
 package fr.florian.ants.antv1.util.signals;
 
 import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.living.ant.QueenAnt;
-import fr.florian.ants.antv1.ui.MainPane;
+import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.TickAwaiter;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 public class AntSignal implements Runnable, Drawable {
     private final Vector from;
@@ -75,26 +73,15 @@ public class AntSignal implements Runnable, Drawable {
     public void draw(GraphicsContext context, Vector position) {
         synchronized (lock)
         {
+            context.setLineWidth(5);
             Color color = sender.getColor();
-            int width = 25;
-            for(int i = 0; i<width; i++) {
-                double r = color.getRed()+i/255.0;
-                double g = color.getGreen()+i/255.0;
-                double b = color.getBlue()+i/255.0;
-                double a = 1/Math.exp(0.15*i);
-                if(r>1) {
-                    r = 1;
-                }
-                if(g>1) {
-                    g = 1;
-                }
-                if(b>1)
-                {
-                    b=1;
-                }
-                color = new Color(r, g, b, a);
-                drawSignalCircle(context, position, color, (size* MainPane.TILE_SIZE*2)-i);
-            }
+            double r = color.getRed();
+            double g = color.getGreen();
+            double b = color.getBlue();
+            double a = Math.pow(Math.log(size/maxSize), 2);
+            if(a>1) a = 1;
+            color = new Color(r, g, b, a);
+            drawSignalCircle(context, position, color, (size* WorldView.TILE_SIZE*2));
         }
     }
 
@@ -103,8 +90,15 @@ public class AntSignal implements Runnable, Drawable {
         double worldSize = size;
         context.setLineWidth(2);
         context.setStroke(color);
-        context.strokeOval(position.getX() * MainPane.TILE_SIZE+MainPane.TILE_SIZE/2-worldSize/2
-                , position.getY()*MainPane.TILE_SIZE+MainPane.TILE_SIZE/2-worldSize/2
+        if(order == AntOrder.BACKTOCOLONY) {
+            context.setLineDashes(10);
+        }
+        else if(order == AntOrder.SEARCHFORFOOD)
+        {
+            context.setLineDashes(0);
+        }
+        context.strokeOval(position.getX() * WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2-worldSize/2
+                , position.getY()* WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2-worldSize/2
                 , worldSize
                 , worldSize);
     }

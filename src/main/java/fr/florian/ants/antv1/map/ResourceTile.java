@@ -3,13 +3,11 @@ package fr.florian.ants.antv1.map;
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
-import fr.florian.ants.antv1.ui.MainPane;
+import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,34 +69,17 @@ public class ResourceTile extends Tile {
     public void draw(GraphicsContext context, Vector position) {
         if(resources.isEmpty()) {
             context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
-                    , position.getX() * MainPane.TILE_SIZE
-                    , position.getY() * MainPane.TILE_SIZE
-                    , MainPane.TILE_SIZE
-                    , MainPane.TILE_SIZE);
+                    , position.getX() * WorldView.TILE_SIZE
+                    , position.getY() * WorldView.TILE_SIZE
+                    , WorldView.TILE_SIZE
+                    , WorldView.TILE_SIZE);
         }else
         {
             context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_2)
-                    , position.getX() * MainPane.TILE_SIZE
-                    , position.getY() * MainPane.TILE_SIZE
-                    , MainPane.TILE_SIZE
-                    , MainPane.TILE_SIZE);
-        }
-        double xMin = 0.3;
-        double xMax = 0.7;
-        double yMin = 0.3;
-        double yMax = 0.7;
-        for(int i = resources.size()-1; i>=resources.size()-6; i--)
-        {
-            if(i<0)
-                break;
-            Resource resource = resources.get(i);
-            if(!displayPositions.containsKey(resource))
-            {
-                Vector pos = new Vector(new Random().nextDouble(xMin, xMax), new Random().nextDouble(yMin, yMax));
-                displayPositions.put(resource, pos);
-            }
-            Vector pos = displayPositions.get(resource);
-            resource.draw(context, position.mult(MainPane.TILE_SIZE).add(pos.mult(MainPane.TILE_SIZE)));
+                    , position.getX() * WorldView.TILE_SIZE
+                    , position.getY() * WorldView.TILE_SIZE
+                    , WorldView.TILE_SIZE
+                    , WorldView.TILE_SIZE);
         }
     }
 }

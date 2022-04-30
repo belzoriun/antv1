@@ -58,10 +58,7 @@ public class GameTimer extends Thread{
                 remainingTime -= 50;
             }
         }
-        System.out.println("time out ...");
-        Platform.runLater(()->{
-            Application.showEndMenu();
-        });
+        Platform.runLater(Application::showEndMenu);
     }
 
     public boolean isDay()
@@ -91,7 +88,17 @@ public class GameTimer extends Thread{
 
     public double getRemainingTimeFraction()
     {
-        return remainingTime/totalTime;
+        return remainingTime/(double)totalTime;
+    }
+
+    public double getTotalTime()
+    {
+        return totalTime;
+    }
+
+    public double getRemainingTime()
+    {
+        return remainingTime;
     }
 
     public boolean isPaused()
