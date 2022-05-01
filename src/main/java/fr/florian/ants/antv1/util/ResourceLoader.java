@@ -11,7 +11,7 @@ public class ResourceLoader {
 
     public static final String GRASS_RES_1 = "grass_1.png";
     public static final String GRASS_RES_2 = "grass_2.png";
-    public static final String ANT = "ant_up.png";
+    public static final String ANT = "ant.png";
     public static final String SUGAR = "sugar.png";
 
     private Map<String, Image> streams;
