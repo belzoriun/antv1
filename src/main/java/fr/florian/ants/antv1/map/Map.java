@@ -80,7 +80,9 @@ public class Map {
             addTile(pos.down(), placer.placeTile(pos.down()));
             addTile(pos.left(), placer.placeTile(pos.left()));
             addTile(pos.right(), placer.placeTile(pos.right()));
+            System.out.println("placed ant hill "+i);
             hill.makeInitialSpawns(pos);
+            System.out.println("spawned ants for ant hill "+i);
             antHills.add(hill);
         }
 

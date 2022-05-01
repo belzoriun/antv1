@@ -30,8 +30,6 @@ public abstract class Ant extends Living implements AntSignalReciever {
     private long antId;
     private AntSubscription sub;
 
-    private java.util.Map<Direction, Image> antImages;
-
     protected Direction headingDirection;
 
     private Color color;
@@ -150,55 +148,34 @@ public abstract class Ant extends Living implements AntSignalReciever {
         this.size = size;
         this.uniqueAnthillId = anthillId;
         this.color = color;
-        antImages = new HashMap<>();
         this.antId = CURRENT_ANT_ID++;
-
-        antImages.put(Direction.LEFT, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_LEFT), color));
-        antImages.put(Direction.RIGHT, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_RIGHT), color));
-        antImages.put(Direction.UP, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_UP), color));
-        antImages.put(Direction.DOWN, colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT_DOWN), color));
-    }
-
-    private Image colorAntImage(Image i, Color c)
-    {
-        WritableImage res = new WritableImage((int) i.getWidth(), (int) i.getHeight());
-        PixelReader reader = i.getPixelReader();
-        for(int x = 0; x<i.getWidth(); x++)
-        {
-            for(int y = 0; y<i.getHeight(); y++)
-            {
-                double redColor = Math.round(reader.getColor(x, y).getRed() * 100000.0) / 100000.0;
-                double redColorA1 = Math.round(84/255.0 * 100000.0) / 100000.0;
-                double redColorA2 = Math.round(125/255.0 * 100000.0) / 100000.0;
-                double redColorA3 = Math.round(161/255.0 * 100000.0) / 100000.0;
-                if(redColor == redColorA1)
-                {
-                    res.getPixelWriter().setColor(x, y, c.darker());
-                }
-                else if(redColor == redColorA2)
-                {
-                    res.getPixelWriter().setColor(x, y, c);
-                }
-                else if(redColor == redColorA3)
-                {
-                    res.getPixelWriter().setColor(x, y, c.brighter());
-                }
-                else
-                {
-                    res.getPixelWriter().setColor(x, y, reader.getColor(x, y));
-                }
-            }
-        }
-        return res;
     }
 
     @Override
     public void draw(GraphicsContext context, Vector position)
     {
         double dotSize = WorldView.TILE_SIZE / (MAX_SIZE + 1 - size);
-        Image i = antImages.get(headingDirection);
-        Vector center = position.mult(WorldView.TILE_SIZE).add(WorldView.TILE_SIZE / 2 - dotSize / 2);
-        context.drawImage(i, center.getX(), center.getY(), dotSize, dotSize);
+        Image i = ResourceLoader.getInstance().loadResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue());
+        Vector center = position.add(WorldView.TILE_SIZE / 2-dotSize/2);
+        double rotation = 0;
+        if(headingDirection != null) {
+            switch (headingDirection) {
+                case LEFT:
+                    rotation = 90;
+                    break;
+                case RIGHT:
+                    rotation = -90;
+                    break;
+                case DOWN:
+                    rotation = 180;
+                    break;
+                case UP:
+                default:
+                    rotation = 0;
+                    break;
+            }
+        }
+        WorldView.drawRotatedImage(context, i, center, rotation, dotSize);
     }
 
     public Color getColor() {

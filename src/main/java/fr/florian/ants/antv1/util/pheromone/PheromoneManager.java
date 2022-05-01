@@ -61,7 +61,16 @@ public class PheromoneManager extends Thread{
             synchronized (lock) {
                 while(!toBeManaged.isEmpty())
                 {
-                    managedTiles.put(toBeManaged.remove(0), 0L);
+                    PheromoneFollower follower = toBeManaged.remove(0);
+                    for(Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet())
+                    {
+                        if(entry.getKey().getAntHillId() == follower.getAntHillId()
+                                && entry.getKey().getPheromone().getClass().equals(follower.getPheromone().getClass()))
+                        {
+                            entry.setValue(0L);
+                        }
+                    }
+                    managedTiles.put(follower, 0L);
                 }
             }
             TickAwaiter.waitTick();

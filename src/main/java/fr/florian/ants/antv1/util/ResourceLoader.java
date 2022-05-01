@@ -11,10 +11,7 @@ public class ResourceLoader {
 
     public static final String GRASS_RES_1 = "grass_1.png";
     public static final String GRASS_RES_2 = "grass_2.png";
-    public static final String ANT_UP = "ant_up.png";
-    public static final String ANT_LEFT = "ant_left.png";
-    public static final String ANT_RIGHT = "ant_right.png";
-    public static final String ANT_DOWN = "ant_down.png";
+    public static final String ANT = "ant_up.png";
     public static final String SUGAR = "sugar.png";
 
     private Map<String, Image> streams;
@@ -33,13 +30,15 @@ public class ResourceLoader {
             instance = new ResourceLoader();
             instance.loadResource(GRASS_RES_1);
             instance.loadResource(GRASS_RES_2);
-            instance.loadResource(ANT_UP);
-            instance.loadResource(ANT_LEFT);
-            instance.loadResource(ANT_RIGHT);
-            instance.loadResource(ANT_DOWN);
+            instance.loadResource(ANT);
             instance.loadResource(SUGAR);
         }
         return instance;
+    }
+
+    public void saveResource(String name, Image i)
+    {
+        streams.put(name, i);
     }
 
     public Image loadResource(String res)

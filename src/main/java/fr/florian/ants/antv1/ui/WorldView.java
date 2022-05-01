@@ -8,6 +8,7 @@ import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -140,17 +141,15 @@ public class WorldView extends Pane {
                     drawTile(pos, displayPoint, context);
             }
         }
-        for(Living l : Map.getInstance().getLivings())
-        {
+        for (Living l : Map.getInstance().getLivings()) {
             Vector pos = l.getPosition();
-            Vector displayPoint = manager.toWorldPoint(pos);
-            if(displayPoint.getX()*TILE_SIZE+TILE_SIZE >= 0
-                    && displayPoint.getX()*TILE_SIZE-TILE_SIZE <= canvas.getWidth()
-                    && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
-                    && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
+            Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
+            if (displayPoint.getX() + TILE_SIZE >= 0
+                    && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
+                    && displayPoint.getY() + TILE_SIZE >= 0
+                    && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
                 l.draw(context, displayPoint);
-            if(l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES))
-            {
+            if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES)) {
                 List<AntSignal> sigs = sender.getSignalList();
                 synchronized (sigs) {
                     for (AntSignal s : sigs) {
@@ -169,6 +168,15 @@ public class WorldView extends Pane {
         if(displayType == DisplayType.PHEROMONES || displayType == DisplayType.SIGNALSANDPHEROMONES)
             Map.getInstance().drawPheromones(pos, displayPos, context);
         Map.getInstance().displayResources(context, pos, displayPos);
+    }
+
+    public static void drawRotatedImage(GraphicsContext context, Image i, Vector position, double angle, double size)
+    {
+        context.save();
+        context.translate(position.getX()+size/2, position.getY()+size/2);
+        context.rotate(-angle);
+        context.drawImage(i, -size/2, -size/2, size, size);
+        context.restore();
     }
 
 

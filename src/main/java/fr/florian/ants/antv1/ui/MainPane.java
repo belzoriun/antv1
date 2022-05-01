@@ -60,7 +60,7 @@ public class MainPane extends Pane {
     {
         Map.getInstance().killAll();
         refreshHandler.stop();
-        Application.stage.getScene().removeEventFilter(KeyEvent.KEY_PRESSED, keyHandler);
+        Application.stage.getScene().removeEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
         try {
             PheromoneManager.getInstance().stopExecution();
             TickAwaiter.emitTick();
@@ -96,7 +96,7 @@ public class MainPane extends Pane {
         this.getChildren().add(worldView);
         refreshHandler.start();
         this.menu = new PauseMenu(Application.stage);
-        Application.stage.getScene().addEventFilter(KeyEvent.KEY_PRESSED, keyHandler);
+        Application.stage.getScene().addEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
         time = new TimeDisplay();
         this.getChildren().add(time);
     }
