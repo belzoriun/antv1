@@ -22,7 +22,7 @@ public class Application extends javafx.application.Application {
     public static Stage stage;
     private static MainPane main;
 
-    private static final IResourcePlacer placer = new RandomResourcePlacer(List.of(new BasicResource(null),
+    private static final IResourcePlacer placer = new NoiseRessourcePlacer(0L, List.of(new BasicResource(null),
             new RareResource(null),
             new ExtremelyRareResource(null)));
 
@@ -34,6 +34,7 @@ public class Application extends javafx.application.Application {
 
     private static void initGame()
     {
+        PheromoneManager.forceInit();
         Map.getInstance().init(placer);
         System.out.println("initialized map");
         GameTimer.init(120*1000);//2 minute

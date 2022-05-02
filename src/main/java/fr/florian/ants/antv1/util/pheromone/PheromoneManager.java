@@ -56,40 +56,48 @@ public class PheromoneManager extends Thread{
     @Override
     public void run()
     {
-        while(executing)
-        {
-            synchronized (lock) {
-                while(!toBeManaged.isEmpty())
-                {
-                    PheromoneFollower follower = toBeManaged.remove(0);
-                    for(Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet())
-                    {
-                        if(entry.getKey().getAntHillId() == follower.getAntHillId()
-                                && entry.getKey().getPheromone().getClass().equals(follower.getPheromone().getClass()))
-                        {
-                            entry.setValue(0L);
+        try {
+            while (executing) {
+                synchronized (lock) {
+                    while (!toBeManaged.isEmpty()) {
+                        PheromoneFollower follower = toBeManaged.remove(0);
+                        boolean found = false;
+                        for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
+                            if (entry.getKey().getAntHillId() == follower.getAntHillId()
+                                    && entry.getKey().getPheromone().equals(follower.getPheromone())
+                                    && entry.getKey().getTile() == follower.getTile()) {
+                                entry.setValue(0L);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            managedTiles.put(follower, 0L);
                         }
                     }
-                    managedTiles.put(follower, 0L);
                 }
-            }
-            TickAwaiter.waitTick();
-            List<PheromoneFollower> trash = new ArrayList<>();
-            for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
-                synchronized (entry.getKey().getTile()) {
-                    if (entry.getKey().getTile().getPheromoneLevel(entry.getKey().getAntHillId()) <= 0) {
-                        trash.add(entry.getKey());
-                        continue;
-                    } else if (entry.getValue() < GameTimer.getInstance().getTickTime() * 50) {
-                        managedTiles.put(entry.getKey(), entry.getValue() + GameTimer.getInstance().getTickTime());
-                        continue;
+                TickAwaiter.waitTick();
+                List<PheromoneFollower> trash = new ArrayList<>();
+                for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
+                    synchronized (entry.getKey().getTile()) {
+                        if (entry.getKey().getTile().getPheromoneLevel(entry.getKey().getAntHillId()) <= 0) {
+                            trash.add(entry.getKey());
+                            continue;
+                        } else if (entry.getValue() < GameTimer.getInstance().getTickTime() * 50) {
+                            managedTiles.put(entry.getKey(), entry.getValue() + GameTimer.getInstance().getTickTime());
+                            continue;
+                        } else {
+                            entry.getKey().getTile().removePheromone(entry.getKey().getAntHillId(), entry.getKey().getPheromone());
+                            managedTiles.put(entry.getKey(), 0L);
+                        }
                     }
-                    entry.getKey().getTile().removePheromone(entry.getKey().getAntHillId(), entry.getKey().getPheromone());
+                }
+                for (PheromoneFollower t : trash) {
+                    managedTiles.remove(t);
                 }
             }
-            for (PheromoneFollower t : trash) {
-                managedTiles.remove(t);
-            }
+        }catch(Exception e)
+        {
         }
     }
 

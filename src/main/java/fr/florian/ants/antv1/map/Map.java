@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.ant.DeadAnt;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
@@ -25,7 +26,7 @@ public class Map {
     private List<AntHillTile> antHills;
     private List<Living> livings;
     private List<Thread> lives;
-
+    private List<DeadAnt> deadAnts;
     private static Map instance = null;
 
     private Map()
@@ -34,6 +35,7 @@ public class Map {
         tiles = new HashMap<>();
         livings = new ArrayList<>();
         antHills = new ArrayList<>();
+        deadAnts = new ArrayList<>();
     }
 
     public <T extends Living> T spawn(T living)
@@ -80,9 +82,7 @@ public class Map {
             addTile(pos.down(), placer.placeTile(pos.down()));
             addTile(pos.left(), placer.placeTile(pos.left()));
             addTile(pos.right(), placer.placeTile(pos.right()));
-            System.out.println("placed ant hill "+i);
             hill.makeInitialSpawns(pos);
-            System.out.println("spawned ants for ant hill "+i);
             antHills.add(hill);
         }
 
@@ -130,17 +130,9 @@ public class Map {
     {
         for(Living l : livings)
         {
-            synchronized (l) {
+            new Thread(()-> {
                 l.kill();
-            }
-        }
-        TickAwaiter.emitTick();
-        for(Thread t : lives)
-        {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-            }
+            }).start();
         }
     }
 
@@ -190,9 +182,18 @@ public class Map {
         if(t != null) {
             if(t instanceof ResourceTile rt) {
                 for (Resource r : rt.getResources()) {
-                    r.draw(context, r.getPosition().mult(WorldView.TILE_SIZE).add(displayPos.mult(WorldView.TILE_SIZE)));
+                    r.draw(context, r.getPosition().mult(WorldView.TILE_SIZE).add(displayPos));
                 }
             }
         }
+    }
+
+    public void addDeadAnt(DeadAnt d) {
+        deadAnts.add(d);
+    }
+
+    public List<DeadAnt> getDeadAnts()
+    {
+        return deadAnts;
     }
 }

@@ -58,7 +58,6 @@ public class GameTimer extends Thread{
                 remainingTime -= 50;
             }
         }
-        Platform.runLater(Application::showEndMenu);
     }
 
     public boolean isDay()

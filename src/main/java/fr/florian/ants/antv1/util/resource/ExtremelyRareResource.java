@@ -22,7 +22,7 @@ public class ExtremelyRareResource extends Resource{
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
-        double dotSize = WorldView.TILE_SIZE/4;
+        double dotSize = WorldView.TILE_SIZE/3;
         Image i = ResourceLoader.getInstance().loadResource(ResourceLoader.SUGAR);
         WorldView.drawRotatedImage(context, i, position, rotation, dotSize);
     }

@@ -31,6 +31,8 @@ public class AntHillTile extends Tile{
         color = Color.rgb(new Random().nextInt(0, 160), new Random().nextInt(0, 160), new Random().nextInt(0, 160));
         ResourceLoader.getInstance().saveResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
                 , ImageColorer.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT), color));
+        ResourceLoader.getInstance().saveResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
+                , ImageColorer.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANTHILL), color));
     }
 
     public void makeInitialSpawns(Vector pos)
@@ -102,7 +104,14 @@ public class AntHillTile extends Tile{
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
-        context.setFill(color);
-        context.fillRect(position.getX()* WorldView.TILE_SIZE, position.getY()* WorldView.TILE_SIZE, WorldView.TILE_SIZE, WorldView.TILE_SIZE);
+        context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
+                , position.getX()
+                , position.getY()
+                , WorldView.TILE_SIZE
+                , WorldView.TILE_SIZE);
+        Vector hpos = position.add(new Vector(0, -WorldView.TILE_SIZE/2));
+        WorldView.drawRotatedImage(context,
+                ResourceLoader.getInstance().loadResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()),
+                hpos, 0, WorldView.TILE_SIZE);
     }
 }

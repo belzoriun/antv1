@@ -29,10 +29,13 @@ public abstract class Living implements Runnable, Drawable {
 
     @Override
     public void run() {
-        while(this.alive)
+        try {
+            while (this.alive) {
+                TickAwaiter.waitTick();
+                act();
+            }
+        }catch(Exception e)
         {
-            TickAwaiter.waitTick();
-            act();
         }
     }
 

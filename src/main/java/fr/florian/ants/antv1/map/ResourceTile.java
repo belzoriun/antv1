@@ -67,19 +67,10 @@ public class ResourceTile extends Tile {
 
     @Override
     public void draw(GraphicsContext context, Vector position) {
-        if(resources.isEmpty()) {
-            context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
-                    , position.getX() * WorldView.TILE_SIZE
-                    , position.getY() * WorldView.TILE_SIZE
-                    , WorldView.TILE_SIZE
-                    , WorldView.TILE_SIZE);
-        }else
-        {
-            context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_2)
-                    , position.getX() * WorldView.TILE_SIZE
-                    , position.getY() * WorldView.TILE_SIZE
-                    , WorldView.TILE_SIZE
-                    , WorldView.TILE_SIZE);
-        }
+        context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
+                , position.getX()
+                , position.getY()
+                , WorldView.TILE_SIZE
+                , WorldView.TILE_SIZE);
     }
 }

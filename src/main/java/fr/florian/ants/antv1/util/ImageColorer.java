@@ -39,4 +39,22 @@ public class ImageColorer {
         }
         return res;
     }
+
+    public static Image fade(Image i, double alpha)
+    {
+        WritableImage res = new WritableImage((int) i.getWidth(), (int) i.getHeight());
+        PixelReader reader = i.getPixelReader();
+        for(int x = 0; x<i.getWidth(); x++)
+        {
+            for(int y = 0; y<i.getHeight(); y++)
+            {
+                Color base = i.getPixelReader().getColor(x, y);
+                if(base.getOpacity() > 0) {
+                    Color c = new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+                    res.getPixelWriter().setColor(x, y, c);
+                }
+            }
+        }
+        return res;
+    }
 }

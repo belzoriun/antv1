@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.ui.WorldView;
@@ -20,7 +21,7 @@ import java.util.concurrent.Flow;
 
 public abstract class Ant extends Living implements AntSignalReciever {
 
-    private static final int MAX_SIZE = 10;
+    public static final int MAX_SIZE = 10;
     private static long CURRENT_ANT_ID = 0L;
 
     private double size;
@@ -62,9 +63,8 @@ public abstract class Ant extends Living implements AntSignalReciever {
     {
         Tile t = Map.getInstance().getTile(position);
         if(t != null) {
-            synchronized (t) {
-                t.onAntDieOn(this);
-            }
+            t.onAntDieOn(this);
+            Map.getInstance().addDeadAnt(new DeadAnt(position, color, size));
         }
     }
 
@@ -154,6 +154,10 @@ public abstract class Ant extends Living implements AntSignalReciever {
     @Override
     public void draw(GraphicsContext context, Vector position)
     {
+        if(Map.getInstance().getTile(this.position) instanceof AntHillTile ah && ah.getUniqueId() == uniqueAnthillId)
+        {
+            return;
+        }
         double dotSize = WorldView.TILE_SIZE / (MAX_SIZE + 1 - size);
         Image i = ResourceLoader.getInstance().loadResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue());
         Vector center = position.add(WorldView.TILE_SIZE / 2-dotSize/2);

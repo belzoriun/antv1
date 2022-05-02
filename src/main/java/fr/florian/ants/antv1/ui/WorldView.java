@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.ant.DeadAnt;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
@@ -128,38 +129,43 @@ public class WorldView extends Pane {
         }
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
-        for(int x = 0; x< Map.WIDTH; x++)
-        {
-            for(int y = 0; y<Map.HEIGHT; y++)
-            {
-                Vector pos = new Vector(x, y);
-                Vector displayPoint = manager.toWorldPoint(pos);
-                if(displayPoint.getX()*TILE_SIZE+TILE_SIZE >= 0
-                        && displayPoint.getX()*TILE_SIZE-TILE_SIZE <= canvas.getWidth()
-                        && displayPoint.getY()*TILE_SIZE+TILE_SIZE >= 0
-                        && displayPoint.getY()*TILE_SIZE-TILE_SIZE <= canvas.getHeight())
-                    drawTile(pos, displayPoint, context);
+        synchronized (Map.getInstance()) {
+            for (int x = 0; x < Map.WIDTH; x++) {
+                for (int y = 0; y < Map.HEIGHT; y++) {
+                    Vector pos = new Vector(x, y);
+                    Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
+                    if (displayPoint.getX()  + TILE_SIZE >= 0
+                            && displayPoint.getX()  - TILE_SIZE <= canvas.getWidth()
+                            && displayPoint.getY()  + TILE_SIZE >= 0
+                            && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
+                        drawTile(pos, displayPoint, context);
+                }
             }
-        }
-        for (Living l : Map.getInstance().getLivings()) {
-            Vector pos = l.getPosition();
-            Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
-            if (displayPoint.getX() + TILE_SIZE >= 0
-                    && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
-                    && displayPoint.getY() + TILE_SIZE >= 0
-                    && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
-                l.draw(context, displayPoint);
-            if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES)) {
-                List<AntSignal> sigs = sender.getSignalList();
-                synchronized (sigs) {
-                    for (AntSignal s : sigs) {
-                        if (!s.mayDissipate())
-                            s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+            for (DeadAnt da : Map.getInstance().getDeadAnts()) {
+                Vector pos = da.getPosition();
+                Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
+                da.draw(context, displayPoint);
+            }
+            for (Living l : Map.getInstance().getLivings()) {
+                Vector pos = l.getPosition();
+                Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
+                if (displayPoint.getX() + TILE_SIZE >= 0
+                        && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
+                        && displayPoint.getY() + TILE_SIZE >= 0
+                        && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
+                    l.draw(context, displayPoint);
+                if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES)) {
+                    List<AntSignal> sigs = sender.getSignalList();
+                    synchronized (sigs) {
+                        for (AntSignal s : sigs) {
+                            if (!s.mayDissipate())
+                                s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+                        }
                     }
                 }
             }
+            applyShaders();
         }
-        applyShaders();
     }
 
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)

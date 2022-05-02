@@ -23,6 +23,7 @@ public class WorkerAnt extends Ant {
     private List<Vector> path;
     private List<Vector> deadCells;
     private StateMachine stageMachine;
+    private boolean pathCleared;
 
     private boolean backToColony;
 
@@ -36,6 +37,7 @@ public class WorkerAnt extends Ant {
 
         stageMachine = new StateMachine.StateMachineBuilder()
             .addState("food", ()->{
+                pathCleared = false;
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
                     synchronized (t) {
@@ -115,10 +117,10 @@ public class WorkerAnt extends Ant {
                     if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
                         if(holdedResources.isEmpty())
                         {
-                            backToColony = false;
                             this.path = new ArrayList<>();
                             this.path.add(position);
                             this.deadCells.clear();
+                            stageMachine.setTransition("backToFood");
                         }
                         else {
                             anth.onInteract(this);
@@ -149,16 +151,44 @@ public class WorkerAnt extends Ant {
             .get("food");
     }
 
+    private List<Vector> clearPath(List<Vector> in)
+    {
+        List<Vector> out = in;
+        int i = in.size()-2;
+        while(i > 1)
+        {
+            boolean loop = false;
+            List<Vector> trash = new ArrayList<>();
+            for(int j = i-1; j>0; j--)
+            {
+                trash.add(out.get(j));
+                if(out.get(i).equals(out.get(j)))
+                {
+                    loop = true;
+                    break;
+                }
+            }
+            if(loop)
+            {
+                out.removeAll(trash);
+            }
+            else
+            {
+                i--;
+            }
+        }
+        return out;
+    }
+
     @Override
     protected void executeAction() {
-        backToColony = this.holdedResources.isFull() || backToColony;
-        if(backToColony)
+        if(this.holdedResources.isFull())
         {
+            if(!pathCleared) {
+                pathCleared = true;
+                path = clearPath(path);
+            }
             stageMachine.setTransition("fullofresources");
-        }
-        else
-        {
-            stageMachine.setTransition("backtofood");
         }
         stageMachine.step();
     }

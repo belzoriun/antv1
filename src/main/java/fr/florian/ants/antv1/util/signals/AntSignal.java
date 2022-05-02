@@ -53,12 +53,15 @@ public class AntSignal implements Runnable, Drawable {
 
     @Override
     public void run() {
-        while(size < maxSize)
-        {
-            TickAwaiter.waitTick();
-            synchronized (lock) {
-                size += signalSpeed;
+        try {
+            while (size < maxSize) {
+                TickAwaiter.waitTick();
+                synchronized (lock) {
+                    size += signalSpeed;
+                }
             }
+        }catch(Exception e)
+        {
         }
     }
 

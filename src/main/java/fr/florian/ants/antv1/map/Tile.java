@@ -6,14 +6,13 @@ import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.pheromone.PheromoneFollower;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
+import fr.florian.ants.antv1.util.pheromone.PheromoneSet;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public abstract class Tile implements Drawable {
 
-    private java.util.Map<Long, List<Pheromone>> pheromones;
+    private java.util.Map<Long, PheromoneSet> pheromones;
 
     protected Tile()
     {
@@ -23,22 +22,26 @@ public abstract class Tile implements Drawable {
     public void placePheromone(long antHillId, Pheromone p)
     {
         if (!pheromones.containsKey(antHillId)) {
-            pheromones.put(antHillId, new ArrayList<>());
+            pheromones.put(antHillId, new PheromoneSet());
         }
         pheromones.get(antHillId).add(p);
         PheromoneManager.getInstance().manageTile(this, p, antHillId);
     }
 
-    public void removePheromone(long antHillId, Pheromone pheromone)
+    public void removePheromone(long antHillId, Class<? extends Pheromone> pheromone)
     {
+        if(!pheromones.containsKey(antHillId))
+        {
+            return;
+        }
         if (pheromones.containsKey(antHillId)) {
-            List<Pheromone> l = pheromones.get(antHillId);
-            if (l.isEmpty()) {
+            PheromoneSet l = pheromones.get(antHillId);
+            if (l.hasPheromones()) {
                 pheromones.remove(antHillId);
                 return;
             }
-            l.remove(pheromone);
-            if (l.isEmpty()) {
+            pheromones.get(antHillId).remove(pheromone);
+            if (l.hasPheromones()) {
                 pheromones.remove(antHillId);
             }
         }
@@ -46,28 +49,28 @@ public abstract class Tile implements Drawable {
 
     public int getPheromoneLevel(long antHillId)
     {
-        List<Pheromone> l = pheromones.get(antHillId);
-        if (l != null) {
-            return l.size();
+        if(!pheromones.containsKey(antHillId))
+        {
+            return 0;
         }
-        return 0;
+        return pheromones.get(antHillId).getTotalLevel();
     }
 
     public int getPheromoneLevel(long antHillId, Class<? extends Pheromone> pheromoneType)
     {
-        List<Pheromone> l = pheromones.get(antHillId);
-        if (l != null) {
-            return l.stream().filter((Pheromone p) -> p != null && p.getClass().equals(pheromoneType)).toList().size();
+        if(!pheromones.containsKey(antHillId))
+        {
+            return 0;
         }
-        return 0;
+        return pheromones.get(antHillId).getTotalLevel(pheromoneType);
     }
 
     public List<Pheromone> getAllPheromones()
     {
         List<Pheromone> res = new ArrayList<>();
-        for(java.util.Map.Entry<Long, List<Pheromone>> entry : pheromones.entrySet())
+        for(java.util.Map.Entry<Long, PheromoneSet> entry : pheromones.entrySet())
         {
-            res.addAll(entry.getValue());
+            res.addAll(entry.getValue().getAllPheromones());
         }
         return res;
     }
