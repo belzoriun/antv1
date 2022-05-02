@@ -7,19 +7,20 @@ import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 
-public class MainPane extends Pane {
+public class MainPane extends BorderPane {
 
     private PauseMenu menu;
     private WorldView worldView;
-    private TimeDisplay time;
     private AnimationTimer refreshHandler;
     private EventHandler<KeyEvent> keyHandler;
     private DataDisplay data;
@@ -98,7 +99,6 @@ public class MainPane extends Pane {
     private void update()
     {
         worldView.displayAll();
-        time.update();
         data.update();
         if(GameTimer.getInstance().getRemainingTime() <= 0)
         {
@@ -114,15 +114,14 @@ public class MainPane extends Pane {
 
     public void init() {
         this.worldView = new WorldView();
-        this.getChildren().add(worldView);
+        data = new DataDisplay(worldView);
+        data.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
+        setRight(data);
+        data.setPadding(new Insets(10));
+        worldView.bindWidth(Application.stage.widthProperty().subtract(data.widthProperty()));
+        setCenter(worldView);
         refreshHandler.start();
         this.menu = new PauseMenu(Application.stage);
         Application.stage.getScene().addEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
-        time = new TimeDisplay();
-        this.getChildren().add(time);
-        data = new DataDisplay();
-        data.getTransforms().add(new Translate(getWidth()-data.getWidth(), getHeight()-data.getHeight()));
-        data.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-        getChildren().add(data);
     }
 }

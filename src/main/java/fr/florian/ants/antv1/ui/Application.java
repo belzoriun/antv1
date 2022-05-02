@@ -35,7 +35,7 @@ public class Application extends javafx.application.Application {
     private static void initGame()
     {
         PheromoneManager.forceInit();
-        Map.getInstance().init(placer);
+        Map.getInstance().init(0L, placer);
         System.out.println("initialized map");
         GameTimer.init(120*1000);//2 minute
         GameTimer.getInstance().start();

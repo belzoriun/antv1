@@ -6,9 +6,10 @@ public class DataDisplay extends GridPane {
 
     private ScoreDisplay score;
 
-    public DataDisplay()
+    public DataDisplay(WorldView view)
     {
-        score = new ScoreDisplay();
+        setVgap(20);
+        score = new ScoreDisplay(view);
         add(score, 0, 0);
     }
 

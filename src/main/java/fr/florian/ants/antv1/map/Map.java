@@ -18,8 +18,8 @@ import java.util.Random;
 
 public class Map {
 
-    public static final int WIDTH = 50;
-    public static final int HEIGHT = 50;
+    public static final int WIDTH = 500;
+    public static final int HEIGHT = 500;
     public static final int ANTHILL_COUNT = 3;
 
     private java.util.Map<Vector, Tile> tiles;
@@ -66,15 +66,15 @@ public class Map {
         instance = null;
     }
 
-    public void init(IResourcePlacer placer)
+    public void init(long seed, IResourcePlacer placer)
     {
         PheromoneManager.getInstance().start();
         System.out.println("placing ant hills");
         for(int i = 0; i<ANTHILL_COUNT; i++)
         {
-            Vector pos = new Vector(new Random().nextInt(0, WIDTH), new Random().nextInt(0, HEIGHT));
+            Vector pos = new Vector(new Random().nextInt(0, WIDTH), new Random(seed).nextInt(0, HEIGHT));
             while(tiles.containsKey(pos)){
-                pos = new Vector(new Random().nextInt(0, WIDTH), new Random().nextInt(0, HEIGHT));
+                pos = new Vector(new Random().nextInt(0, WIDTH), new Random(seed).nextInt(0, HEIGHT));
             }
             AntHillTile hill = new AntHillTile();
             addTile(pos, hill);
@@ -195,5 +195,16 @@ public class Map {
     public List<DeadAnt> getDeadAnts()
     {
         return deadAnts;
+    }
+
+    public Vector getTilePosition(Tile tile) {
+        for(java.util.Map.Entry<Vector, Tile> entry : tiles.entrySet())
+        {
+            if(entry.getValue() == tile)
+            {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }

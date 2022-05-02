@@ -35,7 +35,7 @@ public class NoiseRessourcePlacer implements IResourcePlacer{
         double xMax = 0.7;
         double yMin = 0.3;
         double yMax = 0.7;
-        double scale = 0.25;
+        double scale = 0.4;
         List<Resource> res = new ArrayList<>();
         if(!selection.isEmpty()) {
             int amount = (int) ((noise.eval(v.getX()*scale, v.getY()*scale))*10);

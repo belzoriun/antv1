@@ -86,9 +86,7 @@ public class WorkerAnt extends Ant {
 
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    synchronized (t) {
-                        t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
-                    }
+                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                     if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
                         if(!holdedResources.isEmpty()){
                             anth.onInteract(this);
@@ -111,9 +109,7 @@ public class WorkerAnt extends Ant {
             .addState("tocolony", ()->{
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    synchronized (t) {
-                        t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
-                    }
+                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                     if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
                         if(holdedResources.isEmpty())
                         {

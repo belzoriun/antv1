@@ -7,6 +7,7 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
+import javafx.beans.binding.DoubleBinding;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -20,12 +21,13 @@ import java.util.List;
 public class WorldView extends Pane {
 
     public static double TILE_SIZE = 20;
-    public static double MIN_TILE_SIZE = 5;
+    public static double MIN_TILE_SIZE = 15;
     private static double MAX_TILE_SIZE = 70;
     private static final float DRAG_SPEED = 0.2f;
     private static final float ZOOM_FACTOR = 1.05f;
 
     private DisplayType displayType;
+    private TimeDisplay time;
 
     private Canvas canvas;
     private MarkerManager manager = new MarkerManager();
@@ -34,6 +36,8 @@ public class WorldView extends Pane {
 
     public WorldView()
     {
+        time = new TimeDisplay();
+        this.getChildren().add(time);
         displayType = DisplayType.DEFAULT;
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         double futureTileSize = TILE_SIZE;
@@ -43,7 +47,8 @@ public class WorldView extends Pane {
             if(wtileSize > futureTileSize) {
                 futureTileSize = wtileSize;
                 MAX_TILE_SIZE = futureTileSize * 2;
-                MIN_TILE_SIZE = futureTileSize;
+                if(futureTileSize < MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = futureTileSize;
             }
         }
         if(Map.HEIGHT*TILE_SIZE < canvas.getHeight())
@@ -53,7 +58,8 @@ public class WorldView extends Pane {
             {
                 futureTileSize = htileSize;
                 MAX_TILE_SIZE = futureTileSize*2;
-                MIN_TILE_SIZE = futureTileSize;
+                if(futureTileSize < MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = futureTileSize;
             }
         }
         TILE_SIZE = futureTileSize*1.5;
@@ -67,8 +73,9 @@ public class WorldView extends Pane {
             }
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
-            Vector newPos = new Vector(e.getSceneX() - clickPoint.getX(), e.getSceneY() - clickPoint.getY()).mult((float) (MIN_TILE_SIZE / TILE_SIZE) * DRAG_SPEED);
-            manager.translateOrigin(newPos);
+            Vector point = manager.toWorldPoint(clickPoint);
+            Vector trans = manager.toWorldPoint(new Vector(e.getSceneX(), e.getSceneY()));
+            manager.translateOrigin(new Vector(trans.getX()-point.getX(), trans.getY()-point.getY()).mult(1/TILE_SIZE));
             clickPoint = new Vector(e.getSceneX(), e.getSceneY());
         });
         canvas.setOnScroll((ScrollEvent e)->{
@@ -109,6 +116,7 @@ public class WorldView extends Pane {
 
     public void displayAll()
     {
+        time.update();
         if(manager.getOriginX() > 0)
         {
             manager.translateOrigin(new Vector(-manager.getOriginX(), 0));
@@ -185,5 +193,14 @@ public class WorldView extends Pane {
         context.restore();
     }
 
+    public void goTo(Vector position)
+    {
+        Vector wpos = manager.toWorldPoint(position);
+        Vector mid = manager.toWorldPoint(new Vector(this.widthProperty().get()/2-TILE_SIZE/2, this.heightProperty().get()/2-TILE_SIZE/2));
+        manager.translateOrigin(new Vector(wpos.getX()-mid.getX(), wpos.getY()-mid.getY()));
+    }
 
+    public void bindWidth(DoubleBinding widthProperty) {
+        canvas.widthProperty().bind(widthProperty);
+    }
 }
