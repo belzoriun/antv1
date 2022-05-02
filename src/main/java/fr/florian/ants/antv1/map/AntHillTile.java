@@ -69,11 +69,7 @@ public class AntHillTile extends Tile{
 
     @Override
     public void onWalkOn(Living l) {
-        if(l instanceof Ant a && a.getAntHillId() != this.uniqueId)
-        {
-            l.kill();
-        }
-        else if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
+        if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
         {
             a.heal();
         }

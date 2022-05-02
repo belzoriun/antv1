@@ -182,7 +182,7 @@ public class WorkerAnt extends Ant {
 
     @Override
     protected void executeAction() {
-        if(this.holdedResources.isFull())
+        if(this.holdedResources.isFull() || this.isWeak())
         {
             if(!pathCleared) {
                 pathCleared = true;
