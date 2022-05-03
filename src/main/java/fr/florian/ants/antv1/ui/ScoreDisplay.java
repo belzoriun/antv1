@@ -41,7 +41,7 @@ public class ScoreDisplay extends VBox {
         childs.sort((Node a, Node b)->{
             if(a instanceof HillScoreDisplay ha && b instanceof HillScoreDisplay hb) {
                 if (ha.getScore() == hb.getScore()) return 0;
-                return ha.getScore() > hb.getScore() ? 1 : -1;
+                return ha.getScore() > hb.getScore() ? -1 : 1;
             }
             return 0;
         });

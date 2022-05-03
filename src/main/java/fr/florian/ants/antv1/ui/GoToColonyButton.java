@@ -14,9 +14,7 @@ public class GoToColonyButton extends Button {
         super(text);
         this.pos = pos;
         this.view = view;
-        System.out.println("text");
         this.setOnMouseClicked((MouseEvent e)->{
-            System.out.println("goto");
             this.view.goTo(this.pos);
         });
     }

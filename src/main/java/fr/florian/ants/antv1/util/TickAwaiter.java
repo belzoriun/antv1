@@ -7,19 +7,24 @@ public class TickAwaiter {
 
     private boolean isFree = false;
 
-    public static void waitTick() throws TickFreeException {
+    private static TickAwaiter getInstance()
+    {
         if(instance == null)
         {
             instance = new TickAwaiter();
         }
-        if(instance.isFree)
+        return instance;
+    }
+
+    public static void waitTick() throws TickFreeException {
+        if(getInstance().isFree)
         {
             throw new TickFreeException();
         }
-        synchronized (instance)
+        synchronized (getInstance())
         {
             try {
-                instance.wait();
+                getInstance().wait();
             } catch (InterruptedException e) {
             }
         }
@@ -27,18 +32,23 @@ public class TickAwaiter {
 
     public static void free()
     {
-        instance.isFree = true;
+        getInstance().isFree = true;
         emitTick();
+    }
+
+    public static void lock()
+    {
+        getInstance().isFree = false;
     }
 
     public static void emitTick()
     {
-        if(instance == null)
-        {
-            instance = new TickAwaiter();
+        synchronized (getInstance()) {
+            getInstance().notifyAll();
         }
-        synchronized (instance) {
-            instance.notifyAll();
-        }
+    }
+
+    public static boolean isLocked() {
+        return !getInstance().isFree;
     }
 }

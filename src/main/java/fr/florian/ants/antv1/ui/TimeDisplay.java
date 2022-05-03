@@ -19,6 +19,7 @@ public class TimeDisplay extends Pane {
         text = new Label(getTime());
         text.setFont(new Font(30));
         text.setPadding(new Insets(10));
+        text.setTextFill(new Color(59/255.0, 59/255.0, 59/255.0, 0.9));
         this.getChildren().add(text);
     }
 

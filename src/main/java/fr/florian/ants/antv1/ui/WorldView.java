@@ -37,7 +37,6 @@ public class WorldView extends Pane {
     public WorldView()
     {
         time = new TimeDisplay();
-        this.getChildren().add(time);
         displayType = DisplayType.DEFAULT;
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         double futureTileSize = TILE_SIZE;
@@ -71,12 +70,18 @@ public class WorldView extends Pane {
             {
                 GameTimer.getInstance().setTickTimeDefault();
             }
+            if(e.isSecondaryButtonDown())
+            {
+                //show infos about clicked tile
+            }
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
-            Vector point = manager.toWorldPoint(clickPoint);
-            Vector trans = manager.toWorldPoint(new Vector(e.getSceneX(), e.getSceneY()));
-            manager.translateOrigin(new Vector(trans.getX()-point.getX(), trans.getY()-point.getY()).mult(1/TILE_SIZE));
-            clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+            if(e.isPrimaryButtonDown()) {
+                Vector point = manager.toWorldPoint(clickPoint);
+                Vector trans = manager.toWorldPoint(new Vector(e.getSceneX(), e.getSceneY()));
+                manager.translateOrigin(new Vector(trans.getX() - point.getX(), trans.getY() - point.getY()).mult(1 / TILE_SIZE));
+                clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+            }
         });
         canvas.setOnScroll((ScrollEvent e)->{
             if(e.isControlDown()) {
@@ -97,6 +102,7 @@ public class WorldView extends Pane {
                 manager.translateOrigin(new Vector(newPos.getX() - old.getX(), newPos.getY() - old.getY()));
             }
         });
+        this.getChildren().add(time);
     }
 
     public void toNextDisplay()
@@ -195,9 +201,9 @@ public class WorldView extends Pane {
 
     public void goTo(Vector position)
     {
-        Vector wpos = manager.toWorldPoint(position);
-        Vector mid = manager.toWorldPoint(new Vector(this.widthProperty().get()/2-TILE_SIZE/2, this.heightProperty().get()/2-TILE_SIZE/2));
-        manager.translateOrigin(new Vector(wpos.getX()-mid.getX(), wpos.getY()-mid.getY()));
+        Vector anchor = new Vector(widthProperty().get()/TILE_SIZE/2, heightProperty().get()/TILE_SIZE/2);
+        Vector pos = manager.toWorldPoint(position);
+        manager.translateOrigin(anchor.add(pos.mult(-1)));
     }
 
     public void bindWidth(DoubleBinding widthProperty) {

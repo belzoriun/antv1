@@ -2,6 +2,7 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
+import fr.florian.ants.antv1.util.TickAwaiter;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.resource.*;
 import javafx.animation.AnimationTimer;
@@ -34,6 +35,7 @@ public class Application extends javafx.application.Application {
 
     private static void initGame()
     {
+        TickAwaiter.lock();
         PheromoneManager.forceInit();
         Map.getInstance().init(0L, placer);
         System.out.println("initialized map");

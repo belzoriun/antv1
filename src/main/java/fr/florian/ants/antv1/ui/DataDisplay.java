@@ -1,16 +1,21 @@
 package fr.florian.ants.antv1.ui;
 
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
-public class DataDisplay extends GridPane {
+public class DataDisplay extends VBox {
 
     private ScoreDisplay score;
 
     public DataDisplay(WorldView view)
     {
-        setVgap(20);
+        setSpacing(20);
         score = new ScoreDisplay(view);
-        add(score, 0, 0);
+        getChildren().add(score);
+
+        ScoreGraphDisplay graph = new ScoreGraphDisplay();
+        getChildren().add(graph);
+        new Thread(graph).start();
     }
 
     public void update()
