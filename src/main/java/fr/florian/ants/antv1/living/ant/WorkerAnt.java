@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.ResourceTile;
 import fr.florian.ants.antv1.map.Tile;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.HoldedResourceList;
@@ -59,6 +60,10 @@ public class WorkerAnt extends Ant {
                         Tile next = Map.getInstance().getTile(pos);
                         if (next != null && !path.contains(pos) && !deadCells.contains(pos)) {
                             synchronized (next) {
+                                if(next instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)
+                                {
+                                    continue;
+                                }
                                 if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) > pheromoneLvl) {
                                     selection = new ArrayList<>();
                                     pheromoneLvl = next.getPheromoneLevel(uniqueAnthillId);
@@ -75,7 +80,7 @@ public class WorkerAnt extends Ant {
                         headingDirection = Direction.fromOffset(position.add(newPos.mult(-1)));
                         position = newPos;
                     } else {
-                        Direction dir = selection.get(new Random().nextInt(0, selection.size()));
+                        Direction dir = selection.get(Application.random.nextInt(0, selection.size()));
                         headingDirection = dir;
                         position = position.add(dir.getOffset());
                         path.add(position);

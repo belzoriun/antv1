@@ -16,6 +16,10 @@ public class DataDisplay extends VBox {
         ScoreGraphDisplay graph = new ScoreGraphDisplay();
         getChildren().add(graph);
         new Thread(graph).start();
+
+        AntNumberGraphDisplay ants = new AntNumberGraphDisplay();
+        getChildren().add(ants);
+        new Thread(ants).start();
     }
 
     public void update()

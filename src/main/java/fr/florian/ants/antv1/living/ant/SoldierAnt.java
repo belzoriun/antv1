@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
@@ -37,7 +38,9 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     protected void executeAction() {
         if(actionCounter <= 0) {
             headingDirection = Direction.random();
-            while (position.add(headingDirection.getOffset()).delta(initialPosition) > MAX_ANTHILL_DISTANCE || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null) {
+            while (position.add(headingDirection.getOffset()).delta(initialPosition) > MAX_ANTHILL_DISTANCE
+                    || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null
+                    || (Map.getInstance().getTile(position.add(headingDirection.getOffset())) instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)) {
                 headingDirection = Direction.random();
             }
             position = position.add(headingDirection.getOffset());

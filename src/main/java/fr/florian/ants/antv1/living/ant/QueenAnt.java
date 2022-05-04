@@ -42,22 +42,17 @@ public class QueenAnt extends Ant implements AntSignalSender {
             for (AntSubscription sub : subs) {
                 sub.emitSignal(newSig);
             }
-            synchronized (sigs) {
-                sigs.add(newSig);
-                new Thread(newSig).start();
-            }
+            sigs.add(newSig);
+            new Thread(newSig).start();
             timeOperationCounter = TICKS_PER_OPERATION;
         }
-        synchronized (sigs)
-        {
-            List<AntSignal> trash = new ArrayList<>();
-            for (AntSignal sig : sigs) {
-                if (sig.mayDissipate()) {
-                    trash.add(sig);
-                }
+        List<AntSignal> trash = new ArrayList<>();
+        for (AntSignal sig : sigs) {
+            if (sig.mayDissipate()) {
+                trash.add(sig);
             }
-            sigs.removeAll(trash);
         }
+        sigs.removeAll(trash);
         timeOperationCounter--;
     }
 
@@ -75,8 +70,6 @@ public class QueenAnt extends Ant implements AntSignalSender {
 
     @Override
     public List<AntSignal> getSignalList() {
-        synchronized (sigs) {
-            return sigs;
-        }
+        return new ArrayList<>(sigs);
     }
 }

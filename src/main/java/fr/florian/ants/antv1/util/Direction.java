@@ -1,5 +1,7 @@
 package fr.florian.ants.antv1.util;
 
+import fr.florian.ants.antv1.ui.Application;
+
 import java.util.Random;
 
 public enum Direction {
@@ -32,6 +34,6 @@ public enum Direction {
     public static Direction random()
     {
         Direction[] dirs = Direction.values();
-        return dirs[new Random().nextInt(0, dirs.length)];
+        return dirs[Application.random.nextInt(0, dirs.length)];
     }
 }

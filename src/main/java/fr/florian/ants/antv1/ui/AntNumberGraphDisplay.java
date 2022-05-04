@@ -7,7 +7,6 @@ import fr.florian.ants.antv1.util.TickAwaiter;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Pane;
@@ -15,7 +14,7 @@ import javafx.scene.paint.Color;
 
 import java.util.HashMap;
 
-public class ScoreGraphDisplay extends Pane implements Runnable{
+public class AntNumberGraphDisplay extends Pane implements Runnable{
 
     private AreaChart<Number, Number> chart;
     private NumberAxis time;
@@ -23,12 +22,12 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
     private double previousMin = 0;
     java.util.Map<Long, XYChart.Series<Number, Number>> series;
 
-    public ScoreGraphDisplay()
+    public AntNumberGraphDisplay()
     {
         series = new HashMap<>();
         time = new NumberAxis("time", 0, 1, 0.5);
         time.setAutoRanging(false);
-        score = new NumberAxis("score", 0, 100, 10);
+        score = new NumberAxis("ant number", 0, 100, 10);
         chart = new AreaChart<Number, Number>(time, score);
         getChildren().add(chart);
         chart.setMaxWidth(250);
@@ -52,7 +51,7 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
             fill.setStyle("-fx-fill: rgba(" + rgb + ", 0.15);");
             line.setStyle("-fx-stroke: rgba(" + rgb + ", 1.0);");
         }
-        chart.setTitle("Score over time");
+        chart.setTitle("Number of ants over time");
         chart.setCreateSymbols(false);
         chart.setLegendVisible(false);
     }
@@ -74,20 +73,21 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
                     time.setUpperBound(ctime);
                     time.setTickUnit(1);
                     if(Map.getInstance().getAntHills().size() > 0) {
-                        double min = Map.getInstance().getAntHills().get(0).getScore();
+                        double min = Map.getInstance().getAntsOf(Map.getInstance().getAntHills().get(0).getUniqueId()).size();
                         double max = min;
                         for (AntHillTile hill : Map.getInstance().getAntHills()) {
                             if(series.containsKey(hill.getUniqueId())) {
-                                if (hill.getScore() > max) max = hill.getScore();
-                                if (hill.getScore() < min) min = hill.getScore();
-                                series.get(hill.getUniqueId()).getData().add(new XYChart.Data<Number, Number>(ctime, hill.getScore()));
+                                int nb = Map.getInstance().getAntsOf(hill.getUniqueId()).size();
+                                if (nb > max) max = nb;
+                                if (nb < min) min = nb;
+                                series.get(hill.getUniqueId()).getData().add(new XYChart.Data<Number, Number>(ctime, nb));
                             }
                         }
                         score.setUpperBound(max + 10);
-                        if (previousMin < 300) {
+                        if (previousMin < 100) {
                             score.setLowerBound(0);
                         } else {
-                            score.setLowerBound(previousMin - 300);
+                            score.setLowerBound(previousMin - 100);
                         }
                         previousMin = min;
                     }

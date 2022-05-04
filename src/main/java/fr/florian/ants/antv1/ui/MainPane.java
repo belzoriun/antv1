@@ -27,39 +27,6 @@ public class MainPane extends BorderPane {
 
     public MainPane()
     {
-        refreshHandler = new AnimationTimer()
-        {
-            @Override
-            public void handle(long currentNanoTime)
-            {
-                synchronized (Map.getInstance()) {
-                    if(Map.getInstance().updateLivings() <= 0)
-                    {
-                        System.out.println("all ants got killed ...");
-                        menu.setEndMenu();
-                        menu.pauseGame();
-                    }
-                }
-                update();
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) { e.printStackTrace();}
-            }
-        };
-        keyHandler = evt -> {
-            if (evt.getCode().equals(KeyCode.ESCAPE)) {
-                if(GameTimer.getInstance().isPaused())
-                {
-                    menu.playGame();
-                }
-                else {
-                    menu.pauseGame();
-                }
-            }
-            if (evt.getCode().equals(KeyCode.TAB)) {
-                worldView.toNextDisplay();
-            }
-        };
     }
 
     public void exit()
@@ -113,12 +80,46 @@ public class MainPane extends BorderPane {
     }
 
     public void init() {
+        refreshHandler = new AnimationTimer()
+        {
+            @Override
+            public void handle(long currentNanoTime)
+            {
+                synchronized (Map.getInstance()) {
+                    if(Map.getInstance().updateLivings() <= 0)
+                    {
+                        System.out.println("all ants got killed ...");
+                        menu.setEndMenu();
+                        menu.pauseGame();
+                    }
+                }
+                update();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) { e.printStackTrace();}
+            }
+        };
+        keyHandler = evt -> {
+            if (evt.getCode().equals(KeyCode.ESCAPE)) {
+                if(GameTimer.getInstance().isPaused())
+                {
+                    menu.playGame();
+                }
+                else {
+                    menu.pauseGame();
+                }
+            }
+            if (evt.getCode().equals(KeyCode.TAB)) {
+                worldView.toNextDisplay();
+            }
+        };
         this.worldView = new WorldView();
         data = new DataDisplay(worldView);
         data.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         setRight(data);
         data.setPadding(new Insets(10));
         worldView.bindWidth(Application.stage.widthProperty().subtract(data.widthProperty()));
+        worldView.init();
         setCenter(worldView);
         refreshHandler.start();
         this.menu = new PauseMenu(Application.stage);

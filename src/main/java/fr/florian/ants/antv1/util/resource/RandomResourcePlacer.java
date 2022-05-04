@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.util.resource;
 
 import fr.florian.ants.antv1.map.ResourceTile;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.Vector;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class RandomResourcePlacer implements IResourcePlacer{
 
     public RandomResourcePlacer(List<Resource> factories)
     {
-        rand = new Random();
+        rand = Application.random;
         selection = new ArrayList<>();
         for(Resource resource : factories)
         {
@@ -39,7 +40,7 @@ public class RandomResourcePlacer implements IResourcePlacer{
             if(!selection.isEmpty()) {
                 int amount = rand.nextInt(0, 20);
                 for (int i = 0; i < amount; i++) {
-                    Vector pos = new Vector(new Random().nextDouble(xMin, xMax), new Random().nextDouble(yMin, yMax));
+                    Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
                     res.add(selection.get(rand.nextInt(0, selection.size())).clone(pos));
                 }
             }

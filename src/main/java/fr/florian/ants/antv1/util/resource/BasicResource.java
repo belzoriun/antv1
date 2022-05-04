@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.util.resource;
 
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
@@ -14,7 +15,7 @@ public class BasicResource extends Resource{
     private double rotation;
     public BasicResource(Vector position) {
         super(position,1, 0);
-        rotation = new Random().nextDouble(360);
+        rotation = Application.random.nextDouble(360);
     }
 
     @Override

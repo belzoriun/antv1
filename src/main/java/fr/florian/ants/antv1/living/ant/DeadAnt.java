@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.living.ant;
 
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.ImageColorer;
@@ -21,11 +22,11 @@ public class DeadAnt implements Drawable {
     {
         this.position = position;
 
-        this.position.setX(this.position.getX()+(new Random().nextDouble(-0.3, 0.3)*WorldView.TILE_SIZE));
-        this.position.setY(this.position.getY()+(new Random().nextDouble(-0.3, 0.3)*WorldView.TILE_SIZE));
+        this.position.setX(this.position.getX()+(Application.random.nextDouble(-0.3, 0.3)*WorldView.TILE_SIZE));
+        this.position.setY(this.position.getY()+(Application.random.nextDouble(-0.3, 0.3)*WorldView.TILE_SIZE));
         this.color=color;
         this.size = size;
-        this.rotation = new Random().nextDouble(360);
+        this.rotation = Application.random.nextDouble(360);
         ResourceLoader.getInstance().saveResource("dead_ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue(),
                 ImageColorer.fade(ImageColorer.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.DEAD_ANT), color)
                 , 0.6));

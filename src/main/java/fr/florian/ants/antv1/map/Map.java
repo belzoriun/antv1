@@ -1,8 +1,11 @@
 package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.DeadAnt;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.TickAwaiter;
@@ -18,10 +21,6 @@ import java.util.Random;
 
 public class Map {
 
-    public static final int WIDTH = 500;
-    public static final int HEIGHT = 500;
-    public static final int ANTHILL_COUNT = 3;
-
     private java.util.Map<Vector, Tile> tiles;
     private List<AntHillTile> antHills;
     private List<Living> livings;
@@ -36,6 +35,18 @@ public class Map {
         livings = new ArrayList<>();
         antHills = new ArrayList<>();
         deadAnts = new ArrayList<>();
+    }
+
+    public List<Ant> getAntsOf(long uniqueId) {
+        List<Ant> res = new ArrayList<>();
+        for(Living l : livings)
+        {
+            if(l instanceof Ant a && a.getAntHillId() == uniqueId)
+            {
+                res.add(a);
+            }
+        }
+        return res;
     }
 
     public <T extends Living> T spawn(T living)
@@ -66,15 +77,15 @@ public class Map {
         instance = null;
     }
 
-    public void init(long seed, IResourcePlacer placer)
+    public void init(IResourcePlacer placer)
     {
         PheromoneManager.getInstance().start();
         System.out.println("placing ant hills");
-        for(int i = 0; i<ANTHILL_COUNT; i++)
+        for(int i = 0; i< Application.options.getInt(OptionKey.ANT_HILL_COUNT); i++)
         {
-            Vector pos = new Vector(new Random().nextInt(0, WIDTH), new Random(seed).nextInt(0, HEIGHT));
+            Vector pos = new Vector(Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_WIDTH)), Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_HEIGHT)));
             while(tiles.containsKey(pos)){
-                pos = new Vector(new Random().nextInt(0, WIDTH), new Random(seed).nextInt(0, HEIGHT));
+                pos = new Vector(Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_WIDTH)), Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_HEIGHT)));
             }
             AntHillTile hill = new AntHillTile();
             addTile(pos, hill);
@@ -87,9 +98,9 @@ public class Map {
         }
 
         System.out.println("placing resources");
-        for(int x = 0; x< WIDTH; x++)
+        for(int x = 0; x< Application.options.getInt(OptionKey.MAP_WIDTH); x++)
         {
-            for(int y = 0; y<HEIGHT; y++)
+            for(int y = 0; y<Application.options.getInt(OptionKey.MAP_HEIGHT); y++)
             {
                 Vector v = new Vector(x, y);
                 if(!tiles.containsKey(v))
@@ -109,7 +120,7 @@ public class Map {
 
     public Tile getTile(Vector pos)
     {
-        if(pos.getX()<0|| pos.getX()>WIDTH||pos.getY()<0||pos.getY()>HEIGHT)
+        if(pos.getX()<0|| pos.getX()>Application.options.getInt(OptionKey.MAP_WIDTH)||pos.getY()<0||pos.getY()>Application.options.getInt(OptionKey.MAP_HEIGHT))
             return  null;
         return tiles.get(pos);
     }
@@ -123,16 +134,14 @@ public class Map {
 
     public List<AntHillTile> getAntHills()
     {
-        return antHills;
+        return new ArrayList<>(antHills);
     }
 
     public void killAll()
     {
         for(Living l : livings)
         {
-            new Thread(()-> {
-                l.kill();
-            }).start();
+            new Thread(l::kill).start();
         }
     }
 

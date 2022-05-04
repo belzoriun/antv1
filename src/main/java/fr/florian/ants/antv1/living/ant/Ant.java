@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
@@ -79,11 +80,22 @@ public abstract class Ant extends Living implements AntSignalReciever {
         {
             if(a.getStrenght() == this.getStrenght()) {
                 if (a.isWeak() == isWeak()) {
-                    float rand = new Random().nextFloat();
-                    if (rand > 0.5) {
-                        a.weaken();
-                    } else {
-                        weaken();
+                    if(isWeak())
+                    {
+                        float rand = Application.random.nextFloat();
+                        if (rand > 0.5) {
+                            a.kill();
+                        } else {
+                            kill();
+                        }
+                    }
+                    else {
+                        float rand = Application.random.nextFloat();
+                        if (rand > 0.5) {
+                            a.weaken();
+                        } else {
+                            weaken();
+                        }
                     }
                 } else if (isWeak()) {
                     kill();

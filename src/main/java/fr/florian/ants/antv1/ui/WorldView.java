@@ -5,9 +5,12 @@ import fr.florian.ants.antv1.living.ant.DeadAnt;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -36,32 +39,58 @@ public class WorldView extends Pane {
 
     public WorldView()
     {
+        this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+    }
+
+    public void init()
+    {
         time = new TimeDisplay();
         displayType = DisplayType.DEFAULT;
-        this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
         double futureTileSize = TILE_SIZE;
-        if(Map.WIDTH*TILE_SIZE < canvas.getWidth())
+        double htileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
+        if(htileSize > futureTileSize)
         {
-            double wtileSize = canvas.getWidth()/Map.WIDTH;
-            if(wtileSize > futureTileSize) {
-                futureTileSize = wtileSize;
-                MAX_TILE_SIZE = futureTileSize * 2;
-                if(futureTileSize < MIN_TILE_SIZE)
-                    MIN_TILE_SIZE = futureTileSize;
-            }
+            futureTileSize = htileSize;
+            MAX_TILE_SIZE = futureTileSize*2;
         }
-        if(Map.HEIGHT*TILE_SIZE < canvas.getHeight())
-        {
-            double htileSize = canvas.getHeight()/Map.HEIGHT;
-            if(htileSize > futureTileSize)
-            {
-                futureTileSize = htileSize;
-                MAX_TILE_SIZE = futureTileSize*2;
-                if(futureTileSize < MIN_TILE_SIZE)
-                    MIN_TILE_SIZE = futureTileSize;
+        if(htileSize > MIN_TILE_SIZE)
+            MIN_TILE_SIZE = htileSize;
+        canvas.widthProperty().addListener(new ChangeListener<Number>() {
+            double futureTileSize = TILE_SIZE;
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                double wtileSize = t1.doubleValue()/Application.options.getInt(OptionKey.MAP_WIDTH);
+                if(wtileSize > futureTileSize) {
+                    futureTileSize = wtileSize;
+                    MAX_TILE_SIZE = futureTileSize * 2;
+                }
+                if(wtileSize > MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = wtileSize;
+                if(MIN_TILE_SIZE > TILE_SIZE)
+                {
+                    TILE_SIZE = MIN_TILE_SIZE;
+                }
             }
-        }
-        TILE_SIZE = futureTileSize*1.5;
+        });
+        canvas.heightProperty().addListener(new ChangeListener<Number>() {
+            double futureTileSize = TILE_SIZE;
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                double htileSize = t1.doubleValue()/Application.options.getInt(OptionKey.MAP_HEIGHT);
+                if(htileSize > futureTileSize)
+                {
+                    futureTileSize = htileSize;
+                    MAX_TILE_SIZE = futureTileSize*2;
+                }
+                if(htileSize > MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = htileSize;
+
+                if(MIN_TILE_SIZE > TILE_SIZE)
+                {
+                    TILE_SIZE = MIN_TILE_SIZE;
+                }
+            }
+        });
         this.getChildren().add(canvas);
         canvas.setOnMousePressed((MouseEvent e)->{
             if(e.isPrimaryButtonDown()) {
@@ -131,8 +160,8 @@ public class WorldView extends Pane {
         {
             manager.translateOrigin(new Vector(0, -manager.getOriginY()));
         }
-        double diffX = canvas.getWidth() - (manager.getOriginX()*TILE_SIZE+Map.WIDTH*TILE_SIZE);
-        double diffY = canvas.getHeight() - (manager.getOriginY()*TILE_SIZE+Map.HEIGHT*TILE_SIZE);
+        double diffX = canvas.getWidth() - (manager.getOriginX()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_WIDTH)*TILE_SIZE);
+        double diffY = canvas.getHeight() - (manager.getOriginY()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_HEIGHT)*TILE_SIZE);
         if(diffX > 0)
         {
             manager.translateOrigin(new Vector(diffX/TILE_SIZE,0));
@@ -144,8 +173,8 @@ public class WorldView extends Pane {
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
         synchronized (Map.getInstance()) {
-            for (int x = 0; x < Map.WIDTH; x++) {
-                for (int y = 0; y < Map.HEIGHT; y++) {
+            for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
+                for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
                     Vector pos = new Vector(x, y);
                     Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
                     if (displayPoint.getX()  + TILE_SIZE >= 0

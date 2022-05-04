@@ -61,7 +61,8 @@ public class PauseMenu {
         stage.setResizable(false);
         Button exit = new Button("exit");
         exit.setOnAction((ActionEvent e)->{
-            Application.endGame();
+            Application.switchToMenuScreen();
+            stage.close();
         });
         continu = new Button("continue");
         continu.setOnAction((ActionEvent e)->{

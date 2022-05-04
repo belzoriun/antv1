@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.util.resource;
 
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.MainPane;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
@@ -17,7 +18,7 @@ public class ExtremelyRareResource extends Resource{
 
     public ExtremelyRareResource(Vector position) {
         super(position, 6, 0.96);
-        rotation = new Random().nextInt(360);
+        rotation = Application.random.nextInt(360);
     }
 
     @Override
