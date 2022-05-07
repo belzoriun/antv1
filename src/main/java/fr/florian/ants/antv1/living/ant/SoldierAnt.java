@@ -1,9 +1,10 @@
 package fr.florian.ants.antv1.living.ant;
 
-import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
-import fr.florian.ants.antv1.util.*;
+import fr.florian.ants.antv1.util.AntOrder;
+import fr.florian.ants.antv1.util.Direction;
+import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
@@ -15,21 +16,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Flow;
 import java.util.concurrent.ForkJoinPool;
 
+/**
+ * Class representing a commander ant
+ */
 public class SoldierAnt extends Ant implements AntSignalSender{
     private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
 
-    private List<AntSignal> sigs;
-    private List<AntSubscription> subs;
-    private Vector initialPosition;
+    private final List<AntSignal> sigs;
+    private final List<AntSubscription> subs;
+    private final Vector initialPosition;
     private int actionCounter;
 
     private static final double MAX_ANTHILL_DISTANCE = 20;
     private static final int TICKS_PER_ACTION = 3;
 
-    public SoldierAnt(long anthillId, Color color, Vector ipos) {
+    public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector ipos) {
         super(anthillId, color, ipos, 9.2, 3);
         sigs = new ArrayList<>();
         subs = new ArrayList<>();
+        q.subscribe(this);
         initialPosition = ipos;
         actionCounter = TICKS_PER_ACTION;
     }
@@ -59,7 +64,7 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     }
 
     @Override
-    protected void onOrderRecieved(AntOrder order) {
+    protected void onOrderReceived(AntOrder order) {
         AntSignal newSig = new AntSignal(this, position, order, 15, 0.3);
         for(AntSubscription sub : subs)
         {

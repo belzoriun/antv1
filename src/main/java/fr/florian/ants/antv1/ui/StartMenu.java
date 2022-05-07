@@ -1,12 +1,14 @@
 package fr.florian.ants.antv1.ui;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Class displaying the start menu
+ */
 public class StartMenu extends BorderPane {
     public StartMenu()
     {

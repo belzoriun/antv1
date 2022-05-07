@@ -8,65 +8,80 @@ import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
-import fr.florian.ants.antv1.util.signals.AntSignalReciever;
+import fr.florian.ants.antv1.util.signals.AntSignalReceiver;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
-import java.util.Random;
 import java.util.concurrent.Flow;
 
-public abstract class Ant extends Living implements AntSignalReciever {
+/**
+ * Ant class
+ * describing the general behavior of an ant
+ */
+public abstract class Ant extends Living implements AntSignalReceiver {
 
     public static final int MAX_SIZE = 10;
-    private static long CURRENT_ANT_ID = 0L;
 
-    private double size;
+    private final double size;
     protected long uniqueAnthillId;
     private boolean weak;
-    private final int strenght;
-    private long antId;
+    private final int strength;
     private AntSubscription sub;
 
     protected Direction headingDirection;
 
-    private Color color;
+    private final Color color;
 
-    public int getStrenght()
+    public int getStrength()
     {
-        return strenght;
+        return strength;
     }
 
+    /**
+     * Executes an ant action
+     */
     protected abstract void executeAction();
 
+    /**
+     *  called on each thread loop
+     */
     protected void act()
     {
+        //request orders
         if(sub != null)
         {
             sub.request(1L);
         }
-        synchronized (Map.getInstance()) {
-            Tile t = Map.getInstance().getTile(position);
-            if (t == null) {
-                return;
-            }
-            t.onWalkOn(this);
-            new FightManager(this, this.position).ajime();
+        Tile t = Map.getInstance().getTile(position);
+        if (t == null) {
+            return;
         }
+        t.onWalkOn(this);
+        new FightManager(this, this.position).Hajimeru();
         executeAction();
     }
 
+    /**
+     * Called when ant gets killed
+     */
     public void onKilled()
     {
         Tile t = Map.getInstance().getTile(position);
         if(t != null) {
             t.onAntDieOn(this);
-            Map.getInstance().addDeadAnt(new DeadAnt(position, color, size));
         }
+    }
+
+    public void setPosition(Vector pos)
+    {
+        this.position = pos;
+    }
+
+    public double getSize()
+    {
+        return size;
     }
 
     public boolean isWeak()
@@ -74,11 +89,15 @@ public abstract class Ant extends Living implements AntSignalReciever {
         return weak;
     }
 
+    /**
+     * Called when an ant gets attacked
+     * @param l the attacker
+     */
     @Override
     public void onAttackedBy(Living l) {
         if(l instanceof Ant a)
         {
-            if(a.getStrenght() == this.getStrenght()) {
+            if(a.getStrength() == this.getStrength()) {
                 if (a.isWeak() == isWeak()) {
                     if(isWeak())
                     {
@@ -103,7 +122,7 @@ public abstract class Ant extends Living implements AntSignalReciever {
                     a.kill();
                 }
             }
-            else if(a.getStrenght() < this.getStrenght())
+            else if(a.getStrength() < this.getStrength())
             {
                 if(a.isWeak())
                 {
@@ -128,17 +147,17 @@ public abstract class Ant extends Living implements AntSignalReciever {
         }
     }
 
-    public long getId()
-    {
-        return antId;
-    }
-
-
+    /**
+     * make the ant weak
+     */
     public void weaken()
     {
         this.weak = true;
     }
 
+    /**
+     * heals the ant, make it no longer weak
+     */
     public void heal()
     {
         this.weak = false;
@@ -149,20 +168,26 @@ public abstract class Ant extends Living implements AntSignalReciever {
         return uniqueAnthillId;
     }
 
-    protected abstract void onOrderRecieved(AntOrder order);
+    /**
+     * Called when an order is received
+     * @param order the recieved order
+     */
+    protected abstract void onOrderReceived(AntOrder order);
 
     protected Ant(long anthillId, Color color, Vector ipos, double size, int strenght) {
         super(ipos);
         headingDirection = Direction.UP;
-        this.strenght = strenght;
+        this.strength = strenght;
         if(size <= 0) size = 1;
         if(size > MAX_SIZE) size = MAX_SIZE;
         this.size = size;
         this.uniqueAnthillId = anthillId;
         this.color = color;
-        this.antId = CURRENT_ANT_ID++;
     }
 
+    /**
+     * draws the ant
+     */
     @Override
     public void draw(GraphicsContext context, Vector position)
     {
@@ -175,21 +200,12 @@ public abstract class Ant extends Living implements AntSignalReciever {
         Vector center = position.add(WorldView.TILE_SIZE / 2-dotSize/2);
         double rotation = 0;
         if(headingDirection != null) {
-            switch (headingDirection) {
-                case LEFT:
-                    rotation = 90;
-                    break;
-                case RIGHT:
-                    rotation = -90;
-                    break;
-                case DOWN:
-                    rotation = 180;
-                    break;
-                case UP:
-                default:
-                    rotation = 0;
-                    break;
-            }
+            rotation = switch (headingDirection) {
+                case LEFT -> 90;
+                case RIGHT -> -90;
+                case DOWN -> 180;
+                default -> 0;
+            };
         }
         WorldView.drawRotatedImage(context, i, center, rotation, dotSize);
     }
@@ -197,8 +213,6 @@ public abstract class Ant extends Living implements AntSignalReciever {
     public Color getColor() {
         return color;
     }
-
-
 
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
@@ -213,8 +227,8 @@ public abstract class Ant extends Living implements AntSignalReciever {
         AntOrder order = item.getOrder(position);
         if(order != null)
         {
-            sub.acknoledge(item);
-            onOrderRecieved(order);
+            sub.acknowledge(item);
+            onOrderReceived(order);
         }
     }
 

@@ -6,16 +6,14 @@ import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
-import java.util.Random;
-
+/**
+ * Class representing a basic resource
+ */
 public class BasicResource extends Resource{
 
-    private double rotation;
     public BasicResource(Vector position) {
         super(position,1, 0);
-        rotation = Application.random.nextDouble(360);
     }
 
     @Override

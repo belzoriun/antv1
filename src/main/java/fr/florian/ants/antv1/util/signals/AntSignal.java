@@ -4,11 +4,14 @@ import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Drawable;
-import fr.florian.ants.antv1.util.TickAwaiter;
+import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+/**
+ * Class holding an ant signal
+ */
 public class AntSignal implements Runnable, Drawable {
     private final Vector from;
     private double size;
@@ -34,6 +37,11 @@ public class AntSignal implements Runnable, Drawable {
         return from;
     }
 
+    /**
+     * Check if an ant at the given position can receive the signal
+     * @param from The ant position
+     * @return True if the ant can access it, false otherwise
+     */
     public boolean isAccessible(Vector from)
     {
         synchronized (lock) {
@@ -55,12 +63,12 @@ public class AntSignal implements Runnable, Drawable {
     public void run() {
         try {
             while (size < maxSize) {
-                TickAwaiter.waitTick();
+                TickWaiter.waitTick();
                 synchronized (lock) {
                     size += signalSpeed;
                 }
             }
-        }catch(Exception e)
+        }catch(Exception ignored)
         {
         }
     }
@@ -90,19 +98,18 @@ public class AntSignal implements Runnable, Drawable {
 
     private void drawSignalCircle(GraphicsContext context, Vector position, Color color, double size)
     {
-        double worldSize = size;
         context.setLineWidth(2);
         context.setStroke(color);
-        if(order == AntOrder.BACKTOCOLONY) {
+        if(order == AntOrder.BACK_TO_COLONY) {
             context.setLineDashes(10);
         }
-        else if(order == AntOrder.SEARCHFORFOOD)
+        else if(order == AntOrder.SEARCH_FOR_FOOD)
         {
             context.setLineDashes(0);
         }
-        context.strokeOval(position.getX() * WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2-worldSize/2
-                , position.getY()* WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2-worldSize/2
-                , worldSize
-                , worldSize);
+        context.strokeOval(position.getX() * WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2- size /2
+                , position.getY()* WorldView.TILE_SIZE+ WorldView.TILE_SIZE/2- size /2
+                , size
+                , size);
     }
 }

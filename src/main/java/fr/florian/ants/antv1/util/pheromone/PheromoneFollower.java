@@ -2,10 +2,13 @@ package fr.florian.ants.antv1.util.pheromone;
 
 import fr.florian.ants.antv1.map.Tile;
 
+/**
+ * Class used to keep track of pheromones
+ */
 public class PheromoneFollower {
-    private Class<? extends Pheromone> pheromone;
-    private long antHillId;
-    private Tile tile;
+    private final Class<? extends Pheromone> pheromone;
+    private final long antHillId;
+    private final Tile tile;
 
     public PheromoneFollower(Tile t, Pheromone pheromone, long hillId)
     {

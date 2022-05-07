@@ -1,4 +1,4 @@
-package fr.florian.ants.antv1.util.stagemachine;
+package fr.florian.ants.antv1.util.statemachine;
 
 import java.util.Objects;
 

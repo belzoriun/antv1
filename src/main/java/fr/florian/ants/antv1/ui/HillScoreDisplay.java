@@ -5,9 +5,11 @@ import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
+/**
+ * Class used to display colonies' scores
+ */
 public class HillScoreDisplay extends BorderPane {
     AntHillTile hill;
 

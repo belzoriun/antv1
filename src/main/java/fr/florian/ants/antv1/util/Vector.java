@@ -1,12 +1,10 @@
 package fr.florian.ants.antv1.util;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-
 import java.util.Objects;
 
+/**
+ * Class used as a vector / point management
+ */
 public class Vector {
     private double x;
     private double y;
@@ -42,34 +40,14 @@ public class Vector {
         return new Vector(this.x+v, this.y+v);
     }
 
-    public Vector inverse()
-    {
-        this.x *= (-1);
-        this.y *= (-1);
-        return this;
-    }
-
     public String toString()
     {
         return "("+this.x+";"+this.y+")";
     }
 
-    public Vector unit()
-    {
-        float mag = magnitude();
-        this.x/=(mag);
-        this.y/=(mag);
-        return this;
-    }
-
-    public Vector mult(double v)
+    public Vector multi(double v)
     {
         return new Vector(x*v, y*v);
-    }
-
-    public float magnitude()
-    {
-        return Math.round(Math.sqrt(Math.pow(this.x, 2)+Math.pow(this.y, 2)));
     }
 
     public Vector up()

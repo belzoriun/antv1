@@ -1,12 +1,13 @@
 package fr.florian.ants.antv1.util.pheromone;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+/**
+ * Class used as a pheromone restrictive list (base on arraylist)
+ */
 public class PheromoneSet {
-    private List<Pheromone> pheromones;
+    private final List<Pheromone> pheromones;
 
     public PheromoneSet()
     {

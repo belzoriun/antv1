@@ -1,5 +1,8 @@
 package fr.florian.ants.antv1.util.option;
 
+/**
+ * Enum listing all simulation options
+ */
 public enum OptionKey {
     MAP_WIDTH("Map width", "mapwidth"),
     ANT_HILL_COUNT("Number of ant hills", "anthillsnb"),
@@ -7,10 +10,10 @@ public enum OptionKey {
     WORKER_PER_SOLDIER("Number of worker per soldier", "workerpersoldier"),
     MAP_HEIGHT("Map width", "mapwidth");
 
-    private String name;
-    private String label;
+    private final String name;
+    private final String label;
 
-    private OptionKey(String label, String name)
+    OptionKey(String label, String name)
     {
         this.label=label;
         this.name=name;

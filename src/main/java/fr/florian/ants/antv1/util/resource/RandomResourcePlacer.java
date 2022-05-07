@@ -9,10 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Class placing resources randomly
+ */
 public class RandomResourcePlacer implements IResourcePlacer{
 
-    private Random rand;
-    private List<Resource> selection;
+    private final Random rand;
+    private final List<Resource> selection;
 
     public RandomResourcePlacer(List<Resource> factories)
     {
@@ -39,9 +42,10 @@ public class RandomResourcePlacer implements IResourcePlacer{
         if(rand.nextInt(0, 100) < 30) {
             if(!selection.isEmpty()) {
                 int amount = rand.nextInt(0, 20);
+                Resource selected = selection.get(rand.nextInt(0, selection.size()));
                 for (int i = 0; i < amount; i++) {
                     Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
-                    res.add(selection.get(rand.nextInt(0, selection.size())).clone(pos));
+                    res.add(selected.clone(pos));
                 }
             }
         }

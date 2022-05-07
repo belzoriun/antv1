@@ -6,12 +6,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Future;
 
+/**
+ * Class used as subscription media between ants
+ */
 public class AntSubscription implements Flow.Subscription {
 
-    private Flow.Subscriber<? super AntSignal> subscriber;
+    private final Flow.Subscriber<? super AntSignal> subscriber;
     private final ExecutorService executor;
     private Future<?> future; // to allow cancellation
-    private List<AntSignal> signals;
+    private final List<AntSignal> signals;
 
     private static final Object lock = new Object();
 
@@ -49,7 +52,7 @@ public class AntSubscription implements Flow.Subscription {
         });
     }
 
-    public void acknoledge(AntSignal sig)
+    public void acknowledge(AntSignal sig)
     {
         synchronized (lock) {
             signals.remove(sig);

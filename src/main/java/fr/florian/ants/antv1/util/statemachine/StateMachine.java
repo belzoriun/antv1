@@ -1,28 +1,32 @@
-package fr.florian.ants.antv1.util.stagemachine;
+package fr.florian.ants.antv1.util.statemachine;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
+/**
+ * Class representing a state machine
+ */
 public class StateMachine {
-    private Map<String, MachineStateExecutor> states;
-    private Map<String, Boolean> transitions;
-    private Map<StateTransition, String> stateLinks;
+    private final Map<String, MachineStateExecutor> states;
+    private final Map<String, Boolean> transitions;
+    private final Map<StateTransition, String> stateLinks;
     private String currentState;
 
+    /**
+     * Class used as machine builder (ensure determinism)
+     */
     public static class StateMachineBuilder
     {
-        private Map<String, MachineStateExecutor> states;
-        private Map<String, Boolean> transitions;
-        private Map<StateTransition, String> stateLinks;
-        private String currentState;
+        private final Map<String, MachineStateExecutor> states;
+        private final Map<String, Boolean> transitions;
+        private final Map<StateTransition, String> stateLinks;
 
         public StateMachineBuilder()
         {
             states = new HashMap<>();
             transitions = new HashMap<>();
             stateLinks = new HashMap<>();
-            currentState = null;
         }
 
         public StateMachineBuilder addState(String name, MachineStateExecutor executor)
@@ -81,7 +85,7 @@ public class StateMachine {
         {
             for(Map.Entry<String, Boolean> entry : transitions.entrySet())
             {
-                if(entry.getKey() == name)
+                if(Objects.equals(entry.getKey(), name))
                 {
                     entry.setValue(true);
                 }
@@ -93,11 +97,14 @@ public class StateMachine {
         }
     }
 
+    /**
+     * Check for transitions, move to next state and call its core
+     */
     public void step()
     {
         for(Map.Entry<StateTransition, String> entry : stateLinks.entrySet())
         {
-            if(entry.getKey().getState() == currentState && transitions.get(entry.getKey().getTransition()))
+            if(Objects.equals(entry.getKey().getState(), currentState) && transitions.get(entry.getKey().getTransition()))
             {
                 currentState = entry.getValue();
                 transitions.put(entry.getKey().getTransition(), false);

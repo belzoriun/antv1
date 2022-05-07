@@ -7,36 +7,39 @@ import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
-import fr.florian.ants.antv1.util.HoldedResourceList;
+import fr.florian.ants.antv1.util.HeldResourceList;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone;
 import fr.florian.ants.antv1.util.resource.Resource;
-import fr.florian.ants.antv1.util.stagemachine.StateMachine;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+
+/**
+ * Class representing a worker ant
+ */
 public class WorkerAnt extends Ant {
 
-    private final HoldedResourceList holdedResources;
+    private final HeldResourceList holdedResources;
     private List<Vector> path;
-    private List<Vector> deadCells;
-    private StateMachine stageMachine;
+    private final List<Vector> deadCells;
+    private StateMachine stateMachine;
     private boolean pathCleared;
+    private final SoldierAnt soldier;
 
-    private boolean backToColony;
-
-    public WorkerAnt(long anthillId, Color color, Vector ipos) {
+    public WorkerAnt(long anthillId, SoldierAnt soldier, Color color, Vector ipos) {
         super(anthillId, color, ipos, 8, 1);
-        holdedResources = new HoldedResourceList(5);
+        holdedResources = new HeldResourceList(5);
         path = new ArrayList<>();
         path.add(ipos);
         deadCells = new ArrayList<>();
-        backToColony = false;
+        soldier.subscribe(this);
+        this.soldier = soldier;
 
-        stageMachine = new StateMachine.StateMachineBuilder()
+        stateMachine = new StateMachine.StateMachineBuilder()
             .addState("food", ()->{
                 pathCleared = false;
                 Tile t = Map.getInstance().getTile(position);
@@ -46,7 +49,7 @@ public class WorkerAnt extends Ant {
                             if (res.resourceCount() > 0) {
                                 try {
                                     takeResource(res);
-                                } catch (Exception e) {
+                                } catch (Exception ignored) {
                                 }
                                 return;
                             }
@@ -77,12 +80,16 @@ public class WorkerAnt extends Ant {
                     if (selection.isEmpty()) {
                         deadCells.add(position);
                         Vector newPos = path.remove(path.size() - 1);
-                        headingDirection = Direction.fromOffset(position.add(newPos.mult(-1)));
-                        position = newPos;
+                        headingDirection = Direction.fromOffset(position.add(newPos.multi(-1)));
+                        synchronized (Map.getInstance().getTile(newPos)) {
+                            position = newPos;
+                        }
                     } else {
                         Direction dir = selection.get(Application.random.nextInt(0, selection.size()));
                         headingDirection = dir;
-                        position = position.add(dir.getOffset());
+                        synchronized (Map.getInstance().getTile(position.add(dir.getOffset()))) {
+                            position = position.add(dir.getOffset());
+                        }
                         path.add(position);
                     }
                 }
@@ -91,7 +98,6 @@ public class WorkerAnt extends Ant {
 
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                     if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
                         if(!holdedResources.isEmpty()){
                             anth.onInteract(this);
@@ -104,9 +110,12 @@ public class WorkerAnt extends Ant {
                                 }
                             }
                         } else {
-                            Direction h = Direction.fromOffset(path.get(path.size() - 1).add(position.mult(-1)));
-                            headingDirection = h;
-                            this.position = path.remove(path.size() - 1);
+                            headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
+                            Vector newPos = path.remove(path.size() - 1);
+                            synchronized (Map.getInstance().getTile(newPos)) {
+                                t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
+                                this.position = newPos;
+                            }
                         }
                     }
                 }
@@ -114,14 +123,13 @@ public class WorkerAnt extends Ant {
             .addState("tocolony", ()->{
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                     if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
                         if(holdedResources.isEmpty())
                         {
                             this.path = new ArrayList<>();
                             this.path.add(position);
                             this.deadCells.clear();
-                            stageMachine.setTransition("backToFood");
+                            stateMachine.setTransition("backToFood");
                         }
                         else {
                             anth.onInteract(this);
@@ -134,9 +142,12 @@ public class WorkerAnt extends Ant {
                                 }
                             }
                         } else {
-                            Direction h = Direction.fromOffset(path.get(path.size() - 1).add(position.mult(-1)));
-                            headingDirection = h;
-                            this.position = path.remove(path.size() - 1);
+                            headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
+                            Vector newPos = path.remove(path.size() - 1);
+                            synchronized (Map.getInstance().getTile(newPos)) {
+                                t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
+                                this.position = newPos;
+                            }
                         }
                     }
                 }
@@ -152,9 +163,17 @@ public class WorkerAnt extends Ant {
             .get("food");
     }
 
-    private List<Vector> clearPath(List<Vector> in)
+    public SoldierAnt getSolder()
     {
-        List<Vector> out = in;
+        return this.soldier;
+    }
+
+    /**
+     * Remove loops inside path
+     * @param in The path to clean
+     */
+    private void clearPath(List<Vector> in)
+    {
         int i = in.size()-2;
         while(i > 1)
         {
@@ -162,8 +181,8 @@ public class WorkerAnt extends Ant {
             List<Vector> trash = new ArrayList<>();
             for(int j = i-1; j>0; j--)
             {
-                trash.add(out.get(j));
-                if(out.get(i).equals(out.get(j)))
+                trash.add(in.get(j));
+                if(in.get(i).equals(in.get(j)))
                 {
                     loop = true;
                     break;
@@ -171,14 +190,13 @@ public class WorkerAnt extends Ant {
             }
             if(loop)
             {
-                out.removeAll(trash);
+                in.removeAll(trash);
             }
             else
             {
                 i--;
             }
         }
-        return out;
     }
 
     @Override
@@ -187,21 +205,21 @@ public class WorkerAnt extends Ant {
         {
             if(!pathCleared) {
                 pathCleared = true;
-                path = clearPath(path);
+                clearPath(path);
             }
-            stageMachine.setTransition("fullofresources");
+            stateMachine.setTransition("fullofresources");
         }
-        stageMachine.step();
+        stateMachine.step();
     }
 
     @Override
-    protected void onOrderRecieved(AntOrder order) {
-        if(order == AntOrder.SEARCHFORFOOD)
+    protected void onOrderReceived(AntOrder order) {
+        if(order == AntOrder.SEARCH_FOR_FOOD)
         {
-            stageMachine.setTransition("backtofood");
-        }else if(order==AntOrder.BACKTOCOLONY)
+            stateMachine.setTransition("backtofood");
+        }else if(order==AntOrder.BACK_TO_COLONY)
         {
-            stageMachine.setTransition("stayincolony");
+            stateMachine.setTransition("stayincolony");
         }
     }
 
@@ -212,13 +230,13 @@ public class WorkerAnt extends Ant {
                 try {
                     holdedResources.add(r);
                 } catch (Exception e) {
-                    System.err.println(e);
+                    System.err.println(e.getMessage());
                 }
             }
         }
     }
 
-    public HoldedResourceList getResources() {
+    public HeldResourceList getResources() {
         return this.holdedResources;
     }
 }

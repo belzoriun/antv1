@@ -4,7 +4,11 @@ import javafx.scene.image.Image;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+/**
+ * Class used to manage loaded resources
+ */
 public class ResourceLoader {
 
     private static ResourceLoader instance = null;
@@ -22,8 +26,8 @@ public class ResourceLoader {
     public static final String SEED_4 = "seed_4.png";
     public static final String SEED_5 = "seed_5.png";
 
-    private Map<String, Image> streams;
-    private ClassLoader loader;
+    private final Map<String, Image> streams;
+    private final ClassLoader loader;
 
     private ResourceLoader()
     {
@@ -61,7 +65,7 @@ public class ResourceLoader {
     {
         if(!streams.containsKey(res))
         {
-            streams.put(res, new Image(loader.getResourceAsStream(res)));
+            streams.put(res, new Image(Objects.requireNonNull(loader.getResourceAsStream(res))));
         }
         return streams.get(res);
     }

@@ -1,7 +1,8 @@
 package fr.florian.ants.antv1.util.exception;
 
-import fr.florian.ants.antv1.util.TickAwaiter;
-
+/**
+ * Exception used when the tick is awaited when it's free
+ */
 public class TickFreeException extends Exception{
     public TickFreeException()
     {

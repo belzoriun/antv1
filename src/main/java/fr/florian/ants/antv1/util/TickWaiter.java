@@ -2,16 +2,19 @@ package fr.florian.ants.antv1.util;
 
 import fr.florian.ants.antv1.util.exception.TickFreeException;
 
-public class TickAwaiter {
-    private static TickAwaiter instance = null;
+/**
+ * Class used to await ticks
+ */
+public class TickWaiter {
+    private static TickWaiter instance = null;
 
     private boolean isFree = false;
 
-    private static TickAwaiter getInstance()
+    private static TickWaiter getInstance()
     {
         if(instance == null)
         {
-            instance = new TickAwaiter();
+            instance = new TickWaiter();
         }
         return instance;
     }
@@ -25,7 +28,7 @@ public class TickAwaiter {
         {
             try {
                 getInstance().wait();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
         }
     }

@@ -2,65 +2,77 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.living.ant.DeadAnt;
+import fr.florian.ants.antv1.living.ant.QueenAnt;
+import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
+import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
-import fr.florian.ants.antv1.util.TickAwaiter;
-import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.resource.BasicResource;
+import fr.florian.ants.antv1.util.resource.DeadAnt;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * Singleton representing the world map
+ */
 public class Map {
 
-    private java.util.Map<Vector, Tile> tiles;
-    private List<AntHillTile> antHills;
-    private List<Living> livings;
-    private List<Thread> lives;
-    private List<DeadAnt> deadAnts;
+    private final java.util.Map<Vector, Tile> tiles;
+    private final List<AntHillTile> antHills;
+    private final List<Living> livings;
     private static Map instance = null;
 
     private Map()
     {
-        lives = new ArrayList<>();
         tiles = new HashMap<>();
         livings = new ArrayList<>();
         antHills = new ArrayList<>();
-        deadAnts = new ArrayList<>();
     }
 
+    /**
+     * Get all ants owned by an ant hill
+     * @param uniqueId The ant hill id
+     * @return The ants owned by the hill
+     */
     public List<Ant> getAntsOf(long uniqueId) {
         List<Ant> res = new ArrayList<>();
-        for(Living l : livings)
-        {
-            if(l instanceof Ant a && a.getAntHillId() == uniqueId)
-            {
-                res.add(a);
+        synchronized (livings) {
+            for (Living l : livings) {
+                if (l instanceof Ant a && a.getAntHillId() == uniqueId) {
+                    res.add(a);
+                }
             }
         }
         return res;
     }
 
-    public <T extends Living> T spawn(T living)
+    /**
+     * Spawn a living entity
+     * @param living The entity to be spawned
+     * @param <T> The entity type
+     */
+    public <T extends Living> void spawn(T living)
     {
-        Thread t = new Thread(living);
-        t.start();
-        lives.add(t);
-        livings.add(living);
-        return living;
+        synchronized (livings) {
+            Thread t = new Thread(living);
+            t.start();
+            if (!livings.contains(living))
+                livings.add(living);
+        }
     }
 
     public List<Living> getLivings()
     {
-        return livings;
+        return new ArrayList<>(livings);
     }
 
     public static Map getInstance()
@@ -72,11 +84,19 @@ public class Map {
         return instance;
     }
 
-    public static void anihilate()
+    /**
+     * Destroy the entire map
+     */
+    public static void annihilate()
     {
         instance = null;
     }
 
+    /**
+     * Inits the map
+     * create all tiles ant spawning ants
+     * @param placer The tile placement specifier
+     */
     public void init(IResourcePlacer placer)
     {
         PheromoneManager.getInstance().start();
@@ -113,6 +133,11 @@ public class Map {
         System.out.println("map generation done");
     }
 
+    /**
+     * Place a tile at a position
+     * @param v The position where to place the tile
+     * @param t The tile to place
+     */
     private void addTile(Vector v, Tile t)
     {
         tiles.put(v, t);
@@ -137,39 +162,52 @@ public class Map {
         return new ArrayList<>(antHills);
     }
 
+    /**
+     * Kill all living entities on the map
+     */
     public void killAll()
     {
-        for(Living l : livings)
-        {
-            new Thread(l::kill).start();
+        synchronized (livings) {
+            for (Living l : livings) {
+                new Thread(l::kill).start();
+            }
         }
     }
 
+    /**
+     * Update living entities, removing dead ones
+     * @return The amount of remaining living entities
+     */
     public int updateLivings()
     {
         List<Living> trash = new ArrayList<>();
-        for(Living l : livings)
-        {
-            if(!l.isAlive())
-            {
-                trash.add(l);
+        synchronized (livings) {
+            for (Living l : livings) {
+                if (!l.isAlive()) {
+                    trash.add(l);
+                }
             }
-        }
-        for(Living l : trash)
-        {
-            synchronized (l)
-            {
-                livings.remove(l);
+            for (Living l : trash) {
+                synchronized (l) {
+                    livings.remove(l);
+                }
             }
+            return livings.size();
         }
-        return livings.size();
     }
 
+    /**
+     * Get all living entities on a position
+     * @param position The position where to look for living entities
+     * @return A list of entities
+     */
     public List<Living> getLivingsAt(Vector position) {
         List<Living> res = new ArrayList<>();
-        for (Living l : livings) {
-            if (l.getPosition().equals(position)) {
-                res.add(l);
+        synchronized (livings) {
+            for (Living l : livings) {
+                if (l.getPosition().equals(position)) {
+                    res.add(l);
+                }
             }
         }
         return res;
@@ -189,21 +227,20 @@ public class Map {
     public void displayResources(GraphicsContext context, Vector pos, Vector displayPos) {
         Tile t = getTile(pos);
         if(t != null) {
-            if(t instanceof ResourceTile rt) {
-                for (Resource r : rt.getResources()) {
-                    r.draw(context, r.getPosition().mult(WorldView.TILE_SIZE).add(displayPos));
+            synchronized (t) {
+                if (t instanceof ResourceTile rt) {
+                    for (Resource r : rt.getResources()) {
+                        if(r instanceof BasicResource)
+                        {
+                            System.out.println(displayPos.multi(1/ WorldView.TILE_SIZE));
+                            System.out.println(r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
+                            System.out.println();
+                        }
+                        r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
+                    }
                 }
             }
         }
-    }
-
-    public void addDeadAnt(DeadAnt d) {
-        deadAnts.add(d);
-    }
-
-    public List<DeadAnt> getDeadAnts()
-    {
-        return deadAnts;
     }
 
     public Vector getTilePosition(Tile tile) {

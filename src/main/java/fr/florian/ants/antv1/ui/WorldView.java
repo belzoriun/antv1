@@ -1,7 +1,6 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.DeadAnt;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
@@ -15,36 +14,42 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 
 import java.util.List;
 
+/**
+ * Class used to display world
+ */
 public class WorldView extends Pane {
 
     public static double TILE_SIZE = 20;
     public static double MIN_TILE_SIZE = 15;
     private static double MAX_TILE_SIZE = 70;
-    private static final float DRAG_SPEED = 0.2f;
     private static final float ZOOM_FACTOR = 1.05f;
 
     private DisplayType displayType;
-    private TimeDisplay time;
+    private TileDetail detail;
 
-    private Canvas canvas;
-    private MarkerManager manager = new MarkerManager();
+    private final Canvas canvas;
+    private final MarkerManager manager = new MarkerManager();
 
     private Vector clickPoint;
 
     public WorldView()
     {
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        System.out.println(Screen.getPrimary().getBounds().getWidth() +" : "+Screen.getPrimary().getBounds().getHeight());
     }
 
+    /**
+     * Initialise the world display
+     */
     public void init()
     {
-        time = new TimeDisplay();
+        detail = new TileDetail();
         displayType = DisplayType.DEFAULT;
         double futureTileSize = TILE_SIZE;
         double htileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
@@ -55,38 +60,37 @@ public class WorldView extends Pane {
         }
         if(htileSize > MIN_TILE_SIZE)
             MIN_TILE_SIZE = htileSize;
-        canvas.widthProperty().addListener(new ChangeListener<Number>() {
+        canvas.widthProperty().addListener(new ChangeListener<>() {
             double futureTileSize = TILE_SIZE;
+
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double wtileSize = t1.doubleValue()/Application.options.getInt(OptionKey.MAP_WIDTH);
-                if(wtileSize > futureTileSize) {
+                double wtileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_WIDTH);
+                if (wtileSize > futureTileSize) {
                     futureTileSize = wtileSize;
                     MAX_TILE_SIZE = futureTileSize * 2;
                 }
-                if(wtileSize > MIN_TILE_SIZE)
+                if (wtileSize > MIN_TILE_SIZE)
                     MIN_TILE_SIZE = wtileSize;
-                if(MIN_TILE_SIZE > TILE_SIZE)
-                {
+                if (MIN_TILE_SIZE > TILE_SIZE) {
                     TILE_SIZE = MIN_TILE_SIZE;
                 }
             }
         });
-        canvas.heightProperty().addListener(new ChangeListener<Number>() {
+        canvas.heightProperty().addListener(new ChangeListener<>() {
             double futureTileSize = TILE_SIZE;
+
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double htileSize = t1.doubleValue()/Application.options.getInt(OptionKey.MAP_HEIGHT);
-                if(htileSize > futureTileSize)
-                {
+                double htileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_HEIGHT);
+                if (htileSize > futureTileSize) {
                     futureTileSize = htileSize;
-                    MAX_TILE_SIZE = futureTileSize*2;
+                    MAX_TILE_SIZE = futureTileSize * 2;
                 }
-                if(htileSize > MIN_TILE_SIZE)
+                if (htileSize > MIN_TILE_SIZE)
                     MIN_TILE_SIZE = htileSize;
 
-                if(MIN_TILE_SIZE > TILE_SIZE)
-                {
+                if (MIN_TILE_SIZE > TILE_SIZE) {
                     TILE_SIZE = MIN_TILE_SIZE;
                 }
             }
@@ -99,16 +103,18 @@ public class WorldView extends Pane {
             {
                 GameTimer.getInstance().setTickTimeDefault();
             }
-            if(e.isSecondaryButtonDown())
-            {
-                //show infos about clicked tile
+            else if(e.isSecondaryButtonDown()) {
+                Vector pos = new Vector(e.getSceneX(), e.getSceneY());
+                pos = new Vector(pos.getX()-manager.getOriginX()*TILE_SIZE, pos.getY()- manager.getOriginY()*TILE_SIZE).multi(1/TILE_SIZE);
+                pos = new Vector((int)(pos.getX()), (int)(pos.getY()));
+                detail.displayForTile(Map.getInstance().getTile(pos), pos);
             }
         });
         canvas.setOnMouseDragged((MouseEvent e)->{
             if(e.isPrimaryButtonDown()) {
                 Vector point = manager.toWorldPoint(clickPoint);
                 Vector trans = manager.toWorldPoint(new Vector(e.getSceneX(), e.getSceneY()));
-                manager.translateOrigin(new Vector(trans.getX() - point.getX(), trans.getY() - point.getY()).mult(1 / TILE_SIZE));
+                manager.translateOrigin(new Vector(trans.getX() - point.getX(), trans.getY() - point.getY()).multi(1 / TILE_SIZE));
                 clickPoint = new Vector(e.getSceneX(), e.getSceneY());
             }
         });
@@ -131,14 +137,22 @@ public class WorldView extends Pane {
                 manager.translateOrigin(new Vector(newPos.getX() - old.getX(), newPos.getY() - old.getY()));
             }
         });
-        this.getChildren().add(time);
+        detail.setTranslateX(10);
+        detail.setTranslateY(10);
+        getChildren().add(detail);
     }
 
+    /**
+     * Switch display type to next one
+     */
     public void toNextDisplay()
     {
         displayType = displayType.next();
     }
 
+    /**
+     * Apply day/night and other shaders on top of world display
+     */
     private void applyShaders()
     {
         double transition = Math.exp(6*Math.pow(GameTimer.getInstance().getDayNightTime()-1.2, 7));
@@ -149,9 +163,12 @@ public class WorldView extends Pane {
         canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
+    /**
+     * Update world display
+     */
     public void displayAll()
     {
-        time.update();
+        detail.update();
         if(manager.getOriginX() > 0)
         {
             manager.translateOrigin(new Vector(-manager.getOriginX(), 0));
@@ -172,67 +189,68 @@ public class WorldView extends Pane {
         }
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
-        synchronized (Map.getInstance()) {
-            for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
-                for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
-                    Vector pos = new Vector(x, y);
-                    Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
-                    if (displayPoint.getX()  + TILE_SIZE >= 0
-                            && displayPoint.getX()  - TILE_SIZE <= canvas.getWidth()
-                            && displayPoint.getY()  + TILE_SIZE >= 0
-                            && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
-                        drawTile(pos, displayPoint, context);
-                }
+        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
+            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
+                Vector pos = new Vector(x, y);
+                Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
+                if (displayPoint.getX()  + TILE_SIZE >= 0
+                        && displayPoint.getX()  - TILE_SIZE <= canvas.getWidth()
+                        && displayPoint.getY()  + TILE_SIZE >= 0
+                        && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
+                    drawTile(pos, displayPoint, context);
             }
-            for (DeadAnt da : Map.getInstance().getDeadAnts()) {
-                Vector pos = da.getPosition();
-                Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
-                da.draw(context, displayPoint);
-            }
-            for (Living l : Map.getInstance().getLivings()) {
-                Vector pos = l.getPosition();
-                Vector displayPoint = manager.toWorldPoint(pos).mult(TILE_SIZE);
-                if (displayPoint.getX() + TILE_SIZE >= 0
-                        && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
-                        && displayPoint.getY() + TILE_SIZE >= 0
-                        && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
-                    l.draw(context, displayPoint);
-                if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALSANDPHEROMONES)) {
-                    List<AntSignal> sigs = sender.getSignalList();
-                    synchronized (sigs) {
-                        for (AntSignal s : sigs) {
-                            if (!s.mayDissipate())
-                                s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
-                        }
-                    }
-                }
-            }
-            applyShaders();
         }
+        for (Living l : Map.getInstance().getLivings()) {
+            Vector pos = l.getPosition();
+            Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
+            if (displayPoint.getX() + TILE_SIZE >= 0
+                    && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
+                    && displayPoint.getY() + TILE_SIZE >= 0
+                    && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
+                l.draw(context, displayPoint);
+            if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
+                List<AntSignal> sigs = sender.getSignalList();
+                for (AntSignal s : sigs) {
+                    if (!s.mayDissipate())
+                        s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+                }
+            }
+        }
+        Vector pos = detail.positionForDisplay();
+        context.setStroke(Color.YELLOW);
+        context.setLineWidth(2);
+        context.setLineDashes(0);
+        context.strokeRect(pos.getX()*TILE_SIZE+manager.getOriginX()*TILE_SIZE, pos.getY()*TILE_SIZE+manager.getOriginY()*TILE_SIZE,
+                TILE_SIZE, TILE_SIZE);
+        applyShaders();
     }
 
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)
     {
         Map.getInstance().drawTile(pos, displayPos, context);
-        if(displayType == DisplayType.PHEROMONES || displayType == DisplayType.SIGNALSANDPHEROMONES)
-            Map.getInstance().drawPheromones(pos, displayPos, context);
         Map.getInstance().displayResources(context, pos, displayPos);
+        if(displayType == DisplayType.PHEROMONES || displayType == DisplayType.SIGNALS_AND_PHEROMONES)
+            Map.getInstance().drawPheromones(pos, displayPos, context);
     }
 
     public static void drawRotatedImage(GraphicsContext context, Image i, Vector position, double angle, double size)
     {
         context.save();
-        context.translate(position.getX()+size/2, position.getY()+size/2);
+        context.translate(position.getX(), position.getY());
         context.rotate(-angle);
         context.drawImage(i, -size/2, -size/2, size, size);
         context.restore();
     }
 
+    /**
+     * Place the given tile position on center of the screen
+     * @param position The tile position
+     */
     public void goTo(Vector position)
     {
         Vector anchor = new Vector(widthProperty().get()/TILE_SIZE/2, heightProperty().get()/TILE_SIZE/2);
         Vector pos = manager.toWorldPoint(position);
-        manager.translateOrigin(anchor.add(pos.mult(-1)));
+        manager.translateOrigin(anchor.add(pos.multi(-1)));
     }
 
     public void bindWidth(DoubleBinding widthProperty) {

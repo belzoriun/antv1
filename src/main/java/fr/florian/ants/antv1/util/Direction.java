@@ -2,15 +2,16 @@ package fr.florian.ants.antv1.util;
 
 import fr.florian.ants.antv1.ui.Application;
 
-import java.util.Random;
-
+/**
+ * Enum listing possible directions
+ */
 public enum Direction {
 
     UP(new Vector(0, -1)), DOWN(new Vector(0, 1)), LEFT(new Vector(-1, 0)), RIGHT(new Vector(1, 0));
 
-    private Vector offset;
+    private final Vector offset;
 
-    private Direction(Vector offset)
+    Direction(Vector offset)
     {
         this.offset = offset;
     }
@@ -31,6 +32,10 @@ public enum Direction {
         return this.offset;
     }
 
+    /**
+     * Pick a random direction from the enum
+     * @return A random direction
+     */
     public static Direction random()
     {
         Direction[] dirs = Direction.values();

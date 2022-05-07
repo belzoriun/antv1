@@ -7,23 +7,31 @@ import fr.florian.ants.antv1.living.ant.SoldierAnt;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
-import fr.florian.ants.antv1.util.ImageColorer;
+import fr.florian.ants.antv1.util.ImageColorMaker;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
+import fr.florian.ants.antv1.util.resource.Resource;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import java.util.Random;
+import java.util.HashMap;
 
+/**
+ * Class representing an ant hill
+ */
 public class AntHillTile extends Tile{
 
     private static long currentId = 0L;
 
-    private long uniqueId;
-    private Color color;
+    private final long uniqueId;
+    private final Color color;
 
     private int score;
+    private QueenAnt queen;
 
     public AntHillTile()
     {
@@ -32,28 +40,30 @@ public class AntHillTile extends Tile{
         score = 0;
         color = Color.rgb(Application.random.nextInt(0, 160), Application.random.nextInt(0, 160), Application.random.nextInt(0, 160));
         ResourceLoader.getInstance().saveResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
-                , ImageColorer.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT), color));
+                , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT), color));
         ResourceLoader.getInstance().saveResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
-                , ImageColorer.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANTHILL), color));
+                , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANTHILL), color));
     }
 
+    /**
+     * Spawn initial ants (1 queen, 5 soldiers ant 50 workers)
+     * @param pos Position where to initially spawn ants
+     */
     public void makeInitialSpawns(Vector pos)
     {
-        QueenAnt q = new QueenAnt(uniqueId, color, pos);
+        this.queen = new QueenAnt(uniqueId, color, pos);
         synchronized (Map.getInstance()) {
-            Map.getInstance().spawn(q);
+            Map.getInstance().spawn(queen);
         }
         System.out.println("spawned queen");
         for (int i = 0; i < Application.options.getInt(OptionKey.SOLDIER_PER_QUEEN); i++) {
-            SoldierAnt s = new SoldierAnt(uniqueId, color, pos);
+            SoldierAnt s = new SoldierAnt(uniqueId, queen, color, pos);
             synchronized (Map.getInstance()) {
-                q.subscribe(s);
                 Map.getInstance().spawn(s);
             }
             for (int j = 0; j < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER); j++) {
                 synchronized (Map.getInstance()) {
-                    WorkerAnt w = new WorkerAnt(uniqueId, color, pos);
-                    s.subscribe(w);
+                    WorkerAnt w = new WorkerAnt(uniqueId, s, color, pos);
                     Map.getInstance().spawn(w);
                 }
             }
@@ -83,7 +93,9 @@ public class AntHillTile extends Tile{
     public void onInteract(Ant a) {
         if(a instanceof WorkerAnt want)
         {
-            this.score += want.getResources().remove().getResourceScore();
+            Resource r = want.getResources().remove();
+            this.score += r.getResourceScore();
+            r.onDeposit(this);
         }
     }
 
@@ -95,6 +107,18 @@ public class AntHillTile extends Tile{
                 this.score += want.getResources().remove().getResourceScore();
             }
         }
+    }
+
+    @Override
+    public Node getInfoDisplay() {
+        Label score = new Label("Score : "+getScore());
+        Label id = new Label("Id : "+uniqueId);
+
+        VBox node = new VBox();
+        node.getChildren().add(id);
+        node.getChildren().add(score);
+
+        return node;
     }
 
     public int getScore()
@@ -113,5 +137,36 @@ public class AntHillTile extends Tile{
         WorldView.drawRotatedImage(context,
                 ResourceLoader.getInstance().loadResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()),
                 hpos, 0, WorldView.TILE_SIZE);
+    }
+
+    public void makeSpawn(Ant ant, boolean revive) {
+        if(ant.getAntHillId() != uniqueId)
+        {
+            score += 10;
+            return;
+        }
+        if(revive || ant instanceof SoldierAnt)
+        {
+            Map.getInstance().spawn(ant);
+            return;
+        }
+        if(ant instanceof WorkerAnt) {
+            java.util.Map<SoldierAnt, Integer> antsPerSoldier = new HashMap<>();
+            for (Ant a : Map.getInstance().getAntsOf(uniqueId)) {
+                if (a instanceof WorkerAnt wa) {
+                    if (antsPerSoldier.containsKey(wa.getSolder())) {
+                        antsPerSoldier.put(wa.getSolder(), antsPerSoldier.get(wa.getSolder()) + 1);
+                    } else {
+                        antsPerSoldier.put(wa.getSolder(), 1);
+                    }
+                }
+            }
+            for (java.util.Map.Entry<SoldierAnt, Integer> entry : antsPerSoldier.entrySet()) {
+                if (entry.getValue() < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER)) {
+                    entry.getKey().subscribe(ant);
+                }
+            }
+            Map.getInstance().spawn(ant);
+        }
     }
 }

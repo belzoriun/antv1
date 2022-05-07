@@ -1,15 +1,17 @@
 package fr.florian.ants.antv1.util.pheromone;
 
 import fr.florian.ants.antv1.map.Tile;
-import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.GameTimer;
-import fr.florian.ants.antv1.util.TickAwaiter;
+import fr.florian.ants.antv1.util.TickWaiter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class used to manage pheromones
+ */
 public class PheromoneManager extends Thread{
 
     private static PheromoneManager instance = null;
@@ -76,16 +78,14 @@ public class PheromoneManager extends Thread{
                         }
                     }
                 }
-                TickAwaiter.waitTick();
+                TickWaiter.waitTick();
                 List<PheromoneFollower> trash = new ArrayList<>();
                 for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
                     synchronized (entry.getKey().getTile()) {
                         if (entry.getKey().getTile().getPheromoneLevel(entry.getKey().getAntHillId()) <= 0) {
                             trash.add(entry.getKey());
-                            continue;
                         } else if (entry.getValue() < GameTimer.getInstance().getTickTime() * 50) {
                             managedTiles.put(entry.getKey(), entry.getValue() + GameTimer.getInstance().getTickTime());
-                            continue;
                         } else {
                             entry.getKey().getTile().removePheromone(entry.getKey().getAntHillId(), entry.getKey().getPheromone());
                             managedTiles.put(entry.getKey(), 0L);
@@ -96,7 +96,7 @@ public class PheromoneManager extends Thread{
                     managedTiles.remove(t);
                 }
             }
-        }catch(Exception e)
+        }catch(Exception ignored)
         {
         }
     }

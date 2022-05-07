@@ -2,24 +2,24 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
-import fr.florian.ants.antv1.util.TickAwaiter;
+import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.option.Options;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
-import fr.florian.ants.antv1.util.resource.*;
-import javafx.animation.AnimationTimer;
+import fr.florian.ants.antv1.util.resource.BasicResource;
+import fr.florian.ants.antv1.util.resource.ExtremelyRareResource;
+import fr.florian.ants.antv1.util.resource.NoiseResourcePlacer;
+import fr.florian.ants.antv1.util.resource.RareResource;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Main class of simulation
+ */
 public class Application extends javafx.application.Application {
 
     public static Stage stage;
@@ -29,20 +29,26 @@ public class Application extends javafx.application.Application {
 
     public static Random random;
 
+    /**
+     * Restarts the whole application
+     */
     public static void restart() {
         System.out.println("restarting ...");
         main.exit();
         initGame();
     }
 
+    /**
+     * Init the application's core
+     */
     public static void initGame()
     {
         long seed = 0L;
         random = new Random(seed);
         options = new Options();
-        TickAwaiter.lock();
+        TickWaiter.lock();
         PheromoneManager.forceInit();
-        Map.getInstance().init(new NoiseRessourcePlacer(seed, List.of(new BasicResource(null),
+        Map.getInstance().init(new NoiseResourcePlacer(seed, List.of(new BasicResource(null),
                 new RareResource(null),
                 new ExtremelyRareResource(null))));
         System.out.println("initialized map");
@@ -53,7 +59,7 @@ public class Application extends javafx.application.Application {
     }
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
         main = new MainPane();
         menu = new StartMenu();
         Scene scene = new Scene(menu);

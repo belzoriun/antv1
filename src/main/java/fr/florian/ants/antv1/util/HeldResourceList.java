@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class HoldedResourceList {
+/**
+ * Class used to keep track of ants' held resources
+ */
+public class HeldResourceList {
 
-    private List<Resource> resources;
-    private int capacity;
+    private final List<Resource> resources;
+    private final int capacity;
 
-    public HoldedResourceList(int capacity)
+    public HeldResourceList(int capacity)
     {
         this.capacity = capacity;
         resources = new ArrayList<>();

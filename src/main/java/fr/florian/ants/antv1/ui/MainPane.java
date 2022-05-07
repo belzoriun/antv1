@@ -2,8 +2,7 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
-import fr.florian.ants.antv1.util.TickAwaiter;
-import fr.florian.ants.antv1.util.pheromone.Pheromone;
+import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
@@ -13,10 +12,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Translate;
 
+/**
+ * Main display of simulation
+ */
 public class MainPane extends BorderPane {
 
     private PauseMenu menu;
@@ -29,9 +29,12 @@ public class MainPane extends BorderPane {
     {
     }
 
+    /**
+     * Closes ant shutting down simulation
+     */
     public void exit()
     {
-        TickAwaiter.free();
+        TickWaiter.free();
         System.out.print("killing ants ...");
         long time = System.currentTimeMillis();
         Map.getInstance().killAll();
@@ -50,7 +53,6 @@ public class MainPane extends BorderPane {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        this.getChildren().remove(time);
         System.out.print("Stopping timer ...");
         time = System.currentTimeMillis();
         GameTimer.getInstance().stopTime();
@@ -60,7 +62,7 @@ public class MainPane extends BorderPane {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Map.anihilate();
+        Map.annihilate();
     }
 
     private void update()
@@ -73,12 +75,18 @@ public class MainPane extends BorderPane {
         }
     }
 
+    /**
+     * Set pause menu to be the "end menu"
+     */
     public void showEnd()
     {
         menu.setEndMenu();
         menu.pauseGame();
     }
 
+    /**
+     * Init main display
+     */
     public void init() {
         refreshHandler = new AnimationTimer()
         {

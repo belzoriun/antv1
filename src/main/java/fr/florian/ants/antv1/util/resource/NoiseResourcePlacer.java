@@ -10,12 +10,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class NoiseRessourcePlacer implements IResourcePlacer{
-    private List<Resource> selection;
-    private OpenSimplexNoise noise;
-    private Random rand;
+/**
+ * Class placing resources using open simplex noise
+ */
+public class NoiseResourcePlacer implements IResourcePlacer{
+    private final List<Resource> selection;
+    private final OpenSimplexNoise noise;
+    private final Random rand;
 
-    public NoiseRessourcePlacer(long seed, List<Resource> factories)
+    public NoiseResourcePlacer(long seed, List<Resource> factories)
     {
         selection = new ArrayList<>();
         for(Resource resource : factories)
@@ -40,9 +43,10 @@ public class NoiseRessourcePlacer implements IResourcePlacer{
         List<Resource> res = new ArrayList<>();
         if(!selection.isEmpty()) {
             int amount = (int) ((noise.eval(v.getX()*scale, v.getY()*scale))*10);
+            Resource selected = selection.get(rand.nextInt(0, selection.size()));
             for (int i = 0; i < amount; i++) {
                 Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
-                res.add(selection.get(rand.nextInt(0, selection.size())).clone(pos));
+                res.add(selected.clone(pos));
             }
         }
         return new ResourceTile(res);

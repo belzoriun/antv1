@@ -5,8 +5,17 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
-public class ImageColorer {
+/**
+ * Class used to manager image coloration
+ */
+public class ImageColorMaker {
 
+    /**
+     * Color an image replacing red values by the given color, on the given image
+     * @param i The image to transform
+     * @param c The color to replace red gradients with
+     * @return The new image
+     */
     public static Image colorAntImage(Image i, Color c)
     {
         WritableImage res = new WritableImage((int) i.getWidth(), (int) i.getHeight());
@@ -40,6 +49,12 @@ public class ImageColorer {
         return res;
     }
 
+    /**
+     * Change alpha value of non fully-transparent pixels of the given image to the given value
+     * @param i The image to transform
+     * @param alpha The alpha value to put
+     * @return The new image
+     */
     public static Image fade(Image i, double alpha)
     {
         WritableImage res = new WritableImage((int) i.getWidth(), (int) i.getHeight());

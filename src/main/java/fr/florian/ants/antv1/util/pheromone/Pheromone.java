@@ -8,8 +8,11 @@ import javafx.scene.paint.Color;
 
 import java.util.Objects;
 
+/**
+ * Class representing basic pheromone behavior
+ */
 public abstract class Pheromone {
-    private Color color;
+    private final Color color;
     private int weight;
 
     protected Pheromone(Color color)

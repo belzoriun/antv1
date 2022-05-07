@@ -1,14 +1,13 @@
 package fr.florian.ants.antv1.util;
 
-import fr.florian.ants.antv1.map.Map;
-import fr.florian.ants.antv1.ui.Application;
-import javafx.application.Platform;
-
+/**
+ * Class used as a game timer follower
+ */
 public class GameTimer extends Thread{
 
     private static GameTimer instance = null;
     private long remainingTime;
-    private long totalTime;
+    private final long totalTime;
     private boolean paused;
     private long tickTime;
     private double dayNightTime;
@@ -36,7 +35,7 @@ public class GameTimer extends Thread{
                 return;
             }
             if(!paused) {
-                TickAwaiter.emitTick();
+                TickWaiter.emitTick();
                 if(transitToDay)
                 {
                     dayNightTime += 1/(double)DAY_DURATION;
