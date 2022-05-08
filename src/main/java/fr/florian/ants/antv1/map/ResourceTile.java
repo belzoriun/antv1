@@ -63,12 +63,16 @@ public class ResourceTile extends Tile {
 
     @Override
     public void onInteract(Ant a) {
-        //does nothing
-    }
-
-    public void addResource(Resource r)
-    {
-        resources.add(r);
+        if(a instanceof WorkerAnt worker) {
+            Resource r = take();
+            if (r != null) {
+                try {
+                    worker.getResources().add(r);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        }
     }
 
     @Override
@@ -84,7 +88,7 @@ public class ResourceTile extends Tile {
     @Override
     public Node getInfoDisplay() {
         synchronized (resources) {
-            Label totalResource = new Label("Total ressources : " + resources.size());
+            Label totalResource = new Label("Total resources : " + resources.size());
             VBox detail = new VBox();
             java.util.Map<Class<? extends Resource>, Integer> res = new HashMap<>();
             for (Resource r : resources) {

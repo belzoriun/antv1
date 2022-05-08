@@ -2,15 +2,7 @@ package fr.florian.ants.antv1.util.statemachine;
 
 import java.util.Objects;
 
-public class StateTransition {
-    private String state;
-    private String transition;
-
-    public StateTransition(String state,String transition)
-    {
-        this.state = state;
-        this.transition = transition;
-    }
+public record StateTransition(String state, String transition) {
 
     public String getState() {
         return state;

@@ -19,13 +19,13 @@ public class DataDisplay extends VBox {
         getChildren().add(time);
 
         score = new ScoreDisplay(view);
-        ScrollPane scrollc = new ScrollPane();
-        scrollc.setContent(score);
+        ScrollPane scrollScore = new ScrollPane();
+        scrollScore.setContent(score);
         score.setPrefWidth(Application.stage.getWidth()/5.5);
-        getChildren().add(scrollc);
+        getChildren().add(scrollScore);
 
         VBox pane = new VBox();
-        ScrollPane scrollg = new ScrollPane();
+        ScrollPane scrollGraph = new ScrollPane();
 
         ScoreGraphDisplay graph = new ScoreGraphDisplay();
         pane.getChildren().add(graph);
@@ -37,16 +37,14 @@ public class DataDisplay extends VBox {
         new Thread(ants).start();
         ants.setPrefWidth(Application.stage.getWidth()/5.5);
 
-        scrollg.setContent(pane);
-        getChildren().add(scrollg);
-        scrollc.heightProperty().addListener(e->{
-            double bonusHeight = heightProperty().get()/2-scrollc.heightProperty().get();
-            if(bonusHeight < 0) bonusHeight = 0;
-            scrollg.setMaxHeight(heightProperty().get()/2+bonusHeight);
-        });
+        scrollGraph.setContent(pane);
+        getChildren().add(scrollGraph);
+        scrollScore.heightProperty().addListener(e-> scrollGraph.setMaxHeight(heightProperty().get()/2));
         setPrefWidth(Application.stage.getWidth()/4.5);
-        scrollg.setPrefWidth(Application.stage.getWidth()/5);
-        scrollc.setPrefWidth(Application.stage.getWidth()/5);
+        scrollGraph.setPrefWidth(Application.stage.getWidth()/5);
+        scrollScore.setPrefWidth(Application.stage.getWidth()/5);
+
+        scrollScore.heightProperty().add(Application.stage.getWidth()/5);
     }
 
     public void update()

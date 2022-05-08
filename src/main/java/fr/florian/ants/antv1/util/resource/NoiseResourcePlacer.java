@@ -43,8 +43,8 @@ public class NoiseResourcePlacer implements IResourcePlacer{
         List<Resource> res = new ArrayList<>();
         if(!selection.isEmpty()) {
             int amount = (int) ((noise.eval(v.getX()*scale, v.getY()*scale))*10);
-            Resource selected = selection.get(rand.nextInt(0, selection.size()));
             for (int i = 0; i < amount; i++) {
+                Resource selected = selection.get(rand.nextInt(0, selection.size()));
                 Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
                 res.add(selected.clone(pos));
             }

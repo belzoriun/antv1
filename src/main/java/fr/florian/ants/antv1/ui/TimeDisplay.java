@@ -23,10 +23,10 @@ public class TimeDisplay extends Label {
 
     private String getTime()
     {
-        long milis = (long) (GameTimer.getInstance().getRemainingTime());
-        long s = milis/1000 % 60;
-        long m = (milis / 60000) % 60;
-        long h = (milis / (60000 * 60)) % 24;
-        return String.format("%02d:%02d:%02d.%03d", h,m,s,milis%1000);
+        long milliseconds = (long) (GameTimer.getInstance().getRemainingTime());
+        long s = milliseconds/1000 % 60;
+        long m = (milliseconds / 60000) % 60;
+        long h = (milliseconds / (60000 * 60)) % 24;
+        return String.format("%02d:%02d:%02d.%03d", h,m,s,milliseconds%1000);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class FightManager {
 
-    List<Living> fighters;
+    final List<Living> fighters;
     private final Living fighter;
 
     public FightManager(Living l, Vector position)

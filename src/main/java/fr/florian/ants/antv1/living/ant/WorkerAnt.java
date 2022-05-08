@@ -23,18 +23,18 @@ import java.util.List;
  */
 public class WorkerAnt extends Ant {
 
-    private final HeldResourceList holdedResources;
+    private final HeldResourceList heldResources;
     private List<Vector> path;
     private final List<Vector> deadCells;
     private StateMachine stateMachine;
     private boolean pathCleared;
     private final SoldierAnt soldier;
 
-    public WorkerAnt(long anthillId, SoldierAnt soldier, Color color, Vector ipos) {
-        super(anthillId, color, ipos, 8, 1);
-        holdedResources = new HeldResourceList(5);
+    public WorkerAnt(long anthillId, SoldierAnt soldier, Color color, Vector initialPosition) {
+        super(anthillId, color, initialPosition, 8, 1);
+        heldResources = new HeldResourceList(5);
         path = new ArrayList<>();
-        path.add(ipos);
+        path.add(initialPosition);
         deadCells = new ArrayList<>();
         soldier.subscribe(this);
         this.soldier = soldier;
@@ -44,15 +44,13 @@ public class WorkerAnt extends Ant {
                 pathCleared = false;
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    synchronized (t) {
-                        if (t instanceof ResourceTile res) {
-                            if (res.resourceCount() > 0) {
-                                try {
-                                    takeResource(res);
-                                } catch (Exception ignored) {
-                                }
-                                return;
+                    if (t instanceof ResourceTile res) {
+                        if (res.resourceCount() > 0) {
+                            try {
+                                takeResource(res);
+                            } catch (Exception ignored) {
                             }
+                            return;
                         }
                     }
                     Direction[] dirs = Direction.values();
@@ -62,18 +60,16 @@ public class WorkerAnt extends Ant {
                         Vector pos = this.position.add(dir.getOffset());
                         Tile next = Map.getInstance().getTile(pos);
                         if (next != null && !path.contains(pos) && !deadCells.contains(pos)) {
-                            synchronized (next) {
-                                if(next instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)
-                                {
-                                    continue;
-                                }
-                                if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) > pheromoneLvl) {
-                                    selection = new ArrayList<>();
-                                    pheromoneLvl = next.getPheromoneLevel(uniqueAnthillId);
-                                }
-                                if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) == pheromoneLvl) {
-                                    selection.add(dir);
-                                }
+                            if(next instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)
+                            {
+                                continue;
+                            }
+                            if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) > pheromoneLvl) {
+                                selection = new ArrayList<>();
+                                pheromoneLvl = next.getPheromoneLevel(uniqueAnthillId);
+                            }
+                            if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) == pheromoneLvl) {
+                                selection.add(dir);
                             }
                         }
                     }
@@ -98,9 +94,9 @@ public class WorkerAnt extends Ant {
 
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
-                        if(!holdedResources.isEmpty()){
-                            anth.onInteract(this);
+                    if (t instanceof AntHillTile antHill && antHill.getUniqueId() == this.uniqueAnthillId) {
+                        if(!heldResources.isEmpty()){
+                            antHill.onInteract(this);
                         }
                     } else {
                         if (path.isEmpty()) {
@@ -123,8 +119,8 @@ public class WorkerAnt extends Ant {
             .addState("tocolony", ()->{
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    if (t instanceof AntHillTile anth && anth.getUniqueId() == this.uniqueAnthillId) {
-                        if(holdedResources.isEmpty())
+                    if (t instanceof AntHillTile antHill && antHill.getUniqueId() == this.uniqueAnthillId) {
+                        if(heldResources.isEmpty())
                         {
                             this.path = new ArrayList<>();
                             this.path.add(position);
@@ -132,7 +128,7 @@ public class WorkerAnt extends Ant {
                             stateMachine.setTransition("backToFood");
                         }
                         else {
-                            anth.onInteract(this);
+                            antHill.onInteract(this);
                         }
                     } else {
                         if (path.isEmpty()) {
@@ -201,7 +197,7 @@ public class WorkerAnt extends Ant {
 
     @Override
     protected void executeAction() {
-        if(this.holdedResources.isFull() || this.isWeak())
+        if(this.heldResources.isFull() || this.isWeak())
         {
             if(!pathCleared) {
                 pathCleared = true;
@@ -224,19 +220,12 @@ public class WorkerAnt extends Ant {
     }
 
     private void takeResource(ResourceTile tile) {
-        if (!holdedResources.isFull()) {
-            Resource r = tile.take();
-            if (r != null) {
-                try {
-                    holdedResources.add(r);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                }
-            }
+        if (!heldResources.isFull()) {
+            tile.onInteract(this);
         }
     }
 
     public HeldResourceList getResources() {
-        return this.holdedResources;
+        return this.heldResources;
     }
 }

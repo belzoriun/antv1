@@ -15,7 +15,7 @@ import java.util.Map;
 public class PheromoneManager extends Thread{
 
     private static PheromoneManager instance = null;
-    Map<PheromoneFollower, Long> managedTiles;
+    private final Map<PheromoneFollower, Long> managedTiles;
 
     private static final Object lock = new Object();
 
@@ -66,7 +66,7 @@ public class PheromoneManager extends Thread{
                         boolean found = false;
                         for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
                             if (entry.getKey().getAntHillId() == follower.getAntHillId()
-                                    && entry.getKey().getPheromone().equals(follower.getPheromone())
+                                    && entry.getKey().getPheromone().getClass().equals(follower.getPheromone().getClass())
                                     && entry.getKey().getTile() == follower.getTile()) {
                                 entry.setValue(0L);
                                 found = true;
@@ -84,7 +84,7 @@ public class PheromoneManager extends Thread{
                     synchronized (entry.getKey().getTile()) {
                         if (entry.getKey().getTile().getPheromoneLevel(entry.getKey().getAntHillId()) <= 0) {
                             trash.add(entry.getKey());
-                        } else if (entry.getValue() < GameTimer.getInstance().getTickTime() * 50) {
+                        } else if (entry.getValue() < GameTimer.getInstance().getTickTime() * entry.getKey().getPheromone().getLifetime()) {
                             managedTiles.put(entry.getKey(), entry.getValue() + GameTimer.getInstance().getTickTime());
                         } else {
                             entry.getKey().getTile().removePheromone(entry.getKey().getAntHillId(), entry.getKey().getPheromone());

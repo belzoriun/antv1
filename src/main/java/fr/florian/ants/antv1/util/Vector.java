@@ -5,14 +5,7 @@ import java.util.Objects;
 /**
  * Class used as a vector / point management
  */
-public class Vector {
-    private double x;
-    private double y;
-
-    public Vector(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
+public record Vector(double x, double y) {
 
     public double getX() {
         return x;
@@ -22,52 +15,36 @@ public class Vector {
         return y;
     }
 
-    public void setX(double x) {
-        this.x = x;
+    public Vector add(Vector v) {
+        return new Vector(this.x + v.getX(), this.y + v.getY());
     }
 
-    public void setY(double y) {
-        this.y = y;
+    public Vector add(double v) {
+        return new Vector(this.x + v, this.y + v);
     }
 
-    public Vector add(Vector v)
-    {
-        return new Vector(this.x+v.getX(), this.y+v.getY());
+    public String toString() {
+        return "(" + this.x + ";" + this.y + ")";
     }
 
-    public Vector add(double v)
-    {
-        return new Vector(this.x+v, this.y+v);
+    public Vector multi(double v) {
+        return new Vector(x * v, y * v);
     }
 
-    public String toString()
-    {
-        return "("+this.x+";"+this.y+")";
+    public Vector up() {
+        return new Vector(this.x, this.y - 1);
     }
 
-    public Vector multi(double v)
-    {
-        return new Vector(x*v, y*v);
+    public Vector down() {
+        return new Vector(this.x, this.y + 1);
     }
 
-    public Vector up()
-    {
-        return new Vector(this.x, this.y-1);
+    public Vector left() {
+        return new Vector(this.x - 1, this.y);
     }
 
-    public Vector down()
-    {
-        return new Vector(this.x, this.y+1);
-    }
-
-    public Vector left()
-    {
-        return new Vector(this.x-1, this.y);
-    }
-
-    public Vector right()
-    {
-        return new Vector(this.x+1, this.y);
+    public Vector right() {
+        return new Vector(this.x + 1, this.y);
     }
 
     @Override
@@ -84,6 +61,18 @@ public class Vector {
     }
 
     public double delta(Vector from) {
-        return Math.sqrt(Math.pow(from.getX()-x, 2)+Math.pow(from.getY() - y, 2));
+        return Math.sqrt(Math.pow(from.getX() - x, 2) + Math.pow(from.getY() - y, 2));
+    }
+
+    public double angle(Vector vector) {
+        return Math.acos(vector.scalar(this) / (magnitude() * vector.magnitude())) * 180 / Math.PI;
+    }
+
+    public double scalar(Vector v) {
+        return v.getX() * x + v.getY() * y;
+    }
+
+    public double magnitude() {
+        return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     }
 }

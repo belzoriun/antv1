@@ -9,7 +9,7 @@ import javafx.scene.input.MouseEvent;
  */
 public class GoToColonyButton extends Button {
     private final Vector pos;
-    WorldView view;
+    private final WorldView view;
 
     public GoToColonyButton(WorldView view, Vector pos, String text)
     {

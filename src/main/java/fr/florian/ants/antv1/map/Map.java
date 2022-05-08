@@ -2,20 +2,15 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.living.ant.QueenAnt;
-import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
-import fr.florian.ants.antv1.util.resource.BasicResource;
-import fr.florian.ants.antv1.util.resource.DeadAnt;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,7 +88,7 @@ public class Map {
     }
 
     /**
-     * Inits the map
+     * Initialize the map
      * create all tiles ant spawning ants
      * @param placer The tile placement specifier
      */
@@ -188,9 +183,7 @@ public class Map {
                 }
             }
             for (Living l : trash) {
-                synchronized (l) {
-                    livings.remove(l);
-                }
+                livings.remove(l);
             }
             return livings.size();
         }
@@ -227,17 +220,9 @@ public class Map {
     public void displayResources(GraphicsContext context, Vector pos, Vector displayPos) {
         Tile t = getTile(pos);
         if(t != null) {
-            synchronized (t) {
-                if (t instanceof ResourceTile rt) {
-                    for (Resource r : rt.getResources()) {
-                        if(r instanceof BasicResource)
-                        {
-                            System.out.println(displayPos.multi(1/ WorldView.TILE_SIZE));
-                            System.out.println(r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
-                            System.out.println();
-                        }
-                        r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
-                    }
+            if (t instanceof ResourceTile rt) {
+                for (Resource r : rt.getResources()) {
+                    r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
                 }
             }
         }

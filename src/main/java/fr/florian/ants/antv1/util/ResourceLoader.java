@@ -25,6 +25,7 @@ public class ResourceLoader {
     public static final String SEED_3 = "seed_3.png";
     public static final String SEED_4 = "seed_4.png";
     public static final String SEED_5 = "seed_5.png";
+    public static final String ARROW = "arrow.png";
 
     private final Map<String, Image> streams;
     private final ClassLoader loader;
@@ -52,6 +53,7 @@ public class ResourceLoader {
             instance.loadResource(SEED_3);
             instance.loadResource(SEED_4);
             instance.loadResource(SEED_5);
+            instance.loadResource(ARROW);
         }
         return instance;
     }

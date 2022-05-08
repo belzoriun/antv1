@@ -3,6 +3,7 @@ package fr.florian.ants.antv1.util.option;
 /**
  * Enum listing all simulation options
  */
+@SuppressWarnings("SpellCheckingInspection")
 public enum OptionKey {
     MAP_WIDTH("Map width", "mapwidth"),
     ANT_HILL_COUNT("Number of ant hills", "anthillsnb"),

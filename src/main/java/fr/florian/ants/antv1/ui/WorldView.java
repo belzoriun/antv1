@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
@@ -18,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,13 +37,14 @@ public class WorldView extends Pane {
 
     private final Canvas canvas;
     private final MarkerManager manager = new MarkerManager();
+    private final java.util.Map<Long, ArrowDisplay> hillArrows;
 
     private Vector clickPoint;
 
     public WorldView()
     {
         this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-        System.out.println(Screen.getPrimary().getBounds().getWidth() +" : "+Screen.getPrimary().getBounds().getHeight());
+        hillArrows = new HashMap<>();
     }
 
     /**
@@ -52,26 +55,26 @@ public class WorldView extends Pane {
         detail = new TileDetail();
         displayType = DisplayType.DEFAULT;
         double futureTileSize = TILE_SIZE;
-        double htileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
-        if(htileSize > futureTileSize)
+        double heightTileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
+        if(heightTileSize > futureTileSize)
         {
-            futureTileSize = htileSize;
+            futureTileSize = heightTileSize;
             MAX_TILE_SIZE = futureTileSize*2;
         }
-        if(htileSize > MIN_TILE_SIZE)
-            MIN_TILE_SIZE = htileSize;
+        if(heightTileSize > MIN_TILE_SIZE)
+            MIN_TILE_SIZE = heightTileSize;
         canvas.widthProperty().addListener(new ChangeListener<>() {
             double futureTileSize = TILE_SIZE;
 
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double wtileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_WIDTH);
-                if (wtileSize > futureTileSize) {
-                    futureTileSize = wtileSize;
+                double widthTileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_WIDTH);
+                if (widthTileSize > futureTileSize) {
+                    futureTileSize = widthTileSize;
                     MAX_TILE_SIZE = futureTileSize * 2;
                 }
-                if (wtileSize > MIN_TILE_SIZE)
-                    MIN_TILE_SIZE = wtileSize;
+                if (widthTileSize > MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = widthTileSize;
                 if (MIN_TILE_SIZE > TILE_SIZE) {
                     TILE_SIZE = MIN_TILE_SIZE;
                 }
@@ -82,13 +85,13 @@ public class WorldView extends Pane {
 
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double htileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_HEIGHT);
-                if (htileSize > futureTileSize) {
-                    futureTileSize = htileSize;
+                double heightTileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_HEIGHT);
+                if (heightTileSize > futureTileSize) {
+                    futureTileSize = heightTileSize;
                     MAX_TILE_SIZE = futureTileSize * 2;
                 }
-                if (htileSize > MIN_TILE_SIZE)
-                    MIN_TILE_SIZE = htileSize;
+                if (heightTileSize > MIN_TILE_SIZE)
+                    MIN_TILE_SIZE = heightTileSize;
 
                 if (MIN_TILE_SIZE > TILE_SIZE) {
                     TILE_SIZE = MIN_TILE_SIZE;
@@ -99,6 +102,14 @@ public class WorldView extends Pane {
         canvas.setOnMousePressed((MouseEvent e)->{
             if(e.isPrimaryButtonDown()) {
                 clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+                for(AntHillTile hill : Map.getInstance().getAntHills())
+                {
+                    if(hillArrows.get(hill.getUniqueId()).inBounds(new Vector(e.getX(), e.getY())))
+                    {
+                        goTo(Map.getInstance().getTilePosition(hill));
+                        return;
+                    }
+                }
             }else if(e.isMiddleButtonDown() && e.isControlDown())
             {
                 GameTimer.getInstance().setTickTimeDefault();
@@ -140,6 +151,11 @@ public class WorldView extends Pane {
         detail.setTranslateX(10);
         detail.setTranslateY(10);
         getChildren().add(detail);
+
+        for(AntHillTile hill : Map.getInstance().getAntHills())
+        {
+            hillArrows.put(hill.getUniqueId(), new ArrowDisplay(hill, manager, canvas));
+        }
     }
 
     /**
@@ -209,8 +225,8 @@ public class WorldView extends Pane {
                     && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
                 l.draw(context, displayPoint);
             if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
-                List<AntSignal> sigs = sender.getSignalList();
-                for (AntSignal s : sigs) {
+                List<AntSignal> signals = sender.getSignalList();
+                for (AntSignal s : signals) {
                     if (!s.mayDissipate())
                         s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
                 }
@@ -223,6 +239,7 @@ public class WorldView extends Pane {
         context.strokeRect(pos.getX()*TILE_SIZE+manager.getOriginX()*TILE_SIZE, pos.getY()*TILE_SIZE+manager.getOriginY()*TILE_SIZE,
                 TILE_SIZE, TILE_SIZE);
         applyShaders();
+        drawArrows(context);
     }
 
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)
@@ -251,6 +268,14 @@ public class WorldView extends Pane {
         Vector anchor = new Vector(widthProperty().get()/TILE_SIZE/2, heightProperty().get()/TILE_SIZE/2);
         Vector pos = manager.toWorldPoint(position);
         manager.translateOrigin(anchor.add(pos.multi(-1)));
+    }
+
+    public void drawArrows(GraphicsContext context)
+    {
+        for(AntHillTile hill : Map.getInstance().getAntHills())
+        {
+            hillArrows.get(hill.getUniqueId()).update(context);
+        }
     }
 
     public void bindWidth(DoubleBinding widthProperty) {

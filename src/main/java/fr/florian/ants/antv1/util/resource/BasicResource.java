@@ -1,6 +1,5 @@
 package fr.florian.ants.antv1.util.resource;
 
-import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;

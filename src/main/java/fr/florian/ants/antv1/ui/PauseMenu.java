@@ -2,84 +2,55 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.util.GameTimer;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.layout.*;
 
 /**
  * Class representing the pause menu
  */
-public class PauseMenu extends VBox{
+public class PauseMenu extends Pane {
 
-    private final Stage stage;
-    private final Button continu;
-    private boolean isEndMenu;
+    private final Button continueBtn;
 
-    public PauseMenu(Stage owner)
+    public PauseMenu(double initialTranslateX, double initialTranslateY)
     {
+        VBox main = new VBox();
+        getChildren().add(main);
         Button restart = new Button("restart");
-        setPrefWidth(120);
-        setSpacing(5);
-        stage = new Stage();
-        Scene scene = new Scene(this);
-        stage.setScene(scene);
-        stage.setTitle("Pause menu");
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(owner);
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, evt -> {
-            if(evt.getCode() == KeyCode.ESCAPE)
-            {
-                if(GameTimer.getInstance().isPaused())
-                {
-                    playGame();
-                }
-            }
-        });
-        stage.setResizable(false);
+        main.setPrefWidth(120);
+        main.setSpacing(5);
         Button exit = new Button("exit");
-        exit.setOnAction((ActionEvent e)->{
-            Application.switchToMenuScreen();
-            stage.close();
-        });
-        continu = new Button("continue");
-        continu.setOnAction((ActionEvent e)-> playGame());
-        getChildren().add(continu);
-        getChildren().add(restart);
-        getChildren().add(exit);
-        setPadding(new Insets(10));
-        stage.setOnCloseRequest((WindowEvent)->{
-            if(isEndMenu)
-            {
-                owner.close();
-            }
-            else
-                playGame();
-        });
+        exit.setOnAction((ActionEvent e)-> Application.switchToMenuScreen());
+        continueBtn = new Button("continue");
+        continueBtn.setOnAction((ActionEvent e)-> playGame());
+        main.getChildren().add(continueBtn);
+        main.getChildren().add(restart);
+        main.getChildren().add(exit);
+        main.setPadding(new Insets(10));
         restart.setOnAction((ActionEvent e) -> {
             Application.restart();
-            continu.setDisable(false);
-            stage.hide();
+            continueBtn.setDisable(false);
         });
-        continu.setMinWidth(getPrefWidth());
-        restart.setMinWidth(getPrefWidth());
-        exit.setMinWidth(getPrefWidth());
+        continueBtn.setMinWidth(main.getPrefWidth());
+        restart.setMinWidth(main.getPrefWidth());
+        exit.setMinWidth(main.getPrefWidth());
+
+        setTranslateX(initialTranslateX);
+        setTranslateY(initialTranslateY);
+
+        this.setVisible(false);
     }
 
     public void pauseGame()
     {
-        stage.show();
+        this.setVisible(true);
         GameTimer.getInstance().pause();
     }
 
     public void playGame()
     {
-        stage.hide();
+        this.setVisible(false);
         GameTimer.getInstance().play();
     }
 
@@ -87,8 +58,6 @@ public class PauseMenu extends VBox{
      * Set this menu to "game end" mode
      */
     public void setEndMenu() {
-        continu.setDisable(true);
-        stage.setTitle("Game end");
-        isEndMenu = true;
+        continueBtn.setDisable(true);
     }
 }

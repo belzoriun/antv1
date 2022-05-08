@@ -1,9 +1,20 @@
 package fr.florian.ants.antv1.util;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Class used as a game timer follower
  */
-public class GameTimer extends Thread{
+public class GameTimer {
+
+    private static final int MIN_TICK_TIME = 5;
+
+    private final ScheduledExecutorService executor;
+    private ScheduledFuture<?> executorHandle;
+    private final Runnable core;
 
     private static GameTimer instance = null;
     private long remainingTime;
@@ -24,39 +35,38 @@ public class GameTimer extends Thread{
         paused = false;
         transitToDay = false;
         dayNightTime = 1;
-    }
-
-    public void run()
-    {
-        while(remainingTime > 0) {
-            try {
-                Thread.sleep(tickTime);
-            } catch (InterruptedException e) {
-                return;
-            }
-            if(!paused) {
+        executor = Executors.newScheduledThreadPool(1);
+        core = () -> {
+            if (!paused) {
                 TickWaiter.emitTick();
-                if(transitToDay)
-                {
-                    dayNightTime += 1/(double)DAY_DURATION;
+                if (transitToDay) {
+                    dayNightTime += 1 / (double) DAY_DURATION;
+                } else {
+                    dayNightTime -= 1 / (double) DAY_DURATION;
                 }
-                else
-                {
-                    dayNightTime -= 1/(double)DAY_DURATION;
-                }
-                if(dayNightTime<=0)
-                {
+                if (dayNightTime <= 0) {
                     dayNightTime = 0;
                     transitToDay = true;
-                }
-                else if(dayNightTime>=1)
-                {
+                } else if (dayNightTime >= 1) {
                     dayNightTime = 1;
                     transitToDay = false;
                 }
                 remainingTime -= 50;
             }
+            if(remainingTime <= 0)
+            {
+                executorHandle.cancel(false);
+            }
+        };
+    }
+
+    public void start()
+    {
+        if(executorHandle != null)
+        {
+            executorHandle.cancel(false);
         }
+        executorHandle = executor.scheduleAtFixedRate(core, 0, tickTime, TimeUnit.MILLISECONDS);
     }
 
     public boolean isDay()
@@ -116,8 +126,10 @@ public class GameTimer extends Thread{
 
     public void setTickTime(long tickTime)
     {
+        if(tickTime < MIN_TICK_TIME) tickTime = MIN_TICK_TIME;
         this.tickTime = tickTime;
-        if(this.tickTime < 1) this.tickTime = 1;
+        executorHandle.cancel(false);
+        executorHandle = executor.scheduleAtFixedRate(core, tickTime, tickTime, TimeUnit.MILLISECONDS);
     }
 
     public long getTickTime()
@@ -127,7 +139,7 @@ public class GameTimer extends Thread{
 
     public void setTickTimeDefault()
     {
-        this.tickTime = DEFAULT_TICK_TIME;
+        setTickTime(DEFAULT_TICK_TIME);
     }
 
 }

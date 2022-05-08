@@ -6,7 +6,6 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -23,7 +22,7 @@ public class AntNumberGraphDisplay extends Pane implements Runnable{
     private final NumberAxis time;
     private final NumberAxis score;
     private double previousMin = 0;
-    java.util.Map<Long, XYChart.Series<Number, Number>> series;
+    private final java.util.Map<Long, XYChart.Series<Number, Number>> series;
 
     public AntNumberGraphDisplay()
     {
@@ -61,16 +60,16 @@ public class AntNumberGraphDisplay extends Pane implements Runnable{
             while (TickWaiter.isLocked()) {
                 TickWaiter.waitTick();
                 Platform.runLater(()-> {
-                    double ctime = (GameTimer.getInstance().getTotalTime() - GameTimer.getInstance().getRemainingTime())/1000;
-                    if(ctime < 10) {
-                        time.setLowerBound(0);
+                    double time = (GameTimer.getInstance().getTotalTime() - GameTimer.getInstance().getRemainingTime())/1000;
+                    if(time < 10) {
+                        this.time.setLowerBound(0);
                     }
                     else
                     {
-                        time.setLowerBound(ctime-10);
+                        this.time.setLowerBound(time-10);
                     }
-                    time.setUpperBound(ctime);
-                    time.setTickUnit(1);
+                    this.time.setUpperBound(time);
+                    this.time.setTickUnit(1);
                     if(Map.getInstance().getAntHills().size() > 0) {
                         double min = Map.getInstance().getAntsOf(Map.getInstance().getAntHills().get(0).getUniqueId()).size();
                         double max = min;
@@ -79,7 +78,7 @@ public class AntNumberGraphDisplay extends Pane implements Runnable{
                                 int nb = Map.getInstance().getAntsOf(hill.getUniqueId()).size();
                                 if (nb > max) max = nb;
                                 if (nb < min) min = nb;
-                                series.get(hill.getUniqueId()).getData().add(new XYChart.Data<>(ctime, nb));
+                                series.get(hill.getUniqueId()).getData().add(new XYChart.Data<>(time, nb));
                             }
                         }
                         score.setUpperBound(max + 10);

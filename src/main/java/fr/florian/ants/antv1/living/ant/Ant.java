@@ -25,7 +25,7 @@ public abstract class Ant extends Living implements AntSignalReceiver {
     public static final int MAX_SIZE = 10;
 
     private final double size;
-    protected long uniqueAnthillId;
+    protected final long uniqueAnthillId;
     private boolean weak;
     private final int strength;
     private AntSubscription sub;
@@ -170,14 +170,14 @@ public abstract class Ant extends Living implements AntSignalReceiver {
 
     /**
      * Called when an order is received
-     * @param order the recieved order
+     * @param order the received order
      */
     protected abstract void onOrderReceived(AntOrder order);
 
-    protected Ant(long anthillId, Color color, Vector ipos, double size, int strenght) {
-        super(ipos);
+    protected Ant(long anthillId, Color color, Vector initialPosition, double size, int strength) {
+        super(initialPosition);
         headingDirection = Direction.UP;
-        this.strength = strenght;
+        this.strength = strength;
         if(size <= 0) size = 1;
         if(size > MAX_SIZE) size = MAX_SIZE;
         this.size = size;
@@ -197,7 +197,7 @@ public abstract class Ant extends Living implements AntSignalReceiver {
         }
         double dotSize = WorldView.TILE_SIZE / (MAX_SIZE + 1 - size);
         Image i = ResourceLoader.getInstance().loadResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue());
-        Vector center = position.add(WorldView.TILE_SIZE / 2-dotSize/2);
+        Vector center = position.add(WorldView.TILE_SIZE / 2);
         double rotation = 0;
         if(headingDirection != null) {
             rotation = switch (headingDirection) {
@@ -216,9 +216,9 @@ public abstract class Ant extends Living implements AntSignalReceiver {
 
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
-        if(subscription instanceof AntSubscription asub)
+        if(subscription instanceof AntSubscription antSubscription)
         {
-            this.sub = asub;
+            this.sub = antSubscription;
         }
     }
 

@@ -31,9 +31,9 @@ public class PheromoneSet {
         return pheromones.size()>0;
     }
 
-    public <T extends Pheromone> void remove(Class<T> pheromoneType)
+    public void remove(Pheromone pheromone)
     {
-        List<Pheromone> v = pheromones.stream().filter((Pheromone p) -> p != null && p.getClass().equals(pheromoneType)).toList();
+        List<Pheromone> v = pheromones.stream().filter((Pheromone p) -> p != null && p.getClass().equals(pheromone.getClass())).toList();
         if(!v.isEmpty())
         {
             v.get(0).remove();

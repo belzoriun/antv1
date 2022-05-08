@@ -19,15 +19,15 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class QueenAnt extends Ant implements AntSignalSender {
     private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
-    private final List<AntSignal> sigs;
+    private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
     private int timeOperationCounter;
 
     private static final int TICKS_PER_OPERATION = 50;
 
-    public QueenAnt(long anthillId, Color color, Vector ipos) {
-        super(anthillId, color, ipos, 10, 10);
-        sigs = new ArrayList<>();
+    public QueenAnt(long anthillId, Color color, Vector initialPosition) {
+        super(anthillId, color, initialPosition, 10, 10);
+        signals = new ArrayList<>();
         subs = new ArrayList<>();
         timeOperationCounter = TICKS_PER_OPERATION;
     }
@@ -44,17 +44,17 @@ public class QueenAnt extends Ant implements AntSignalSender {
             for (AntSubscription sub : subs) {
                 sub.emitSignal(newSig);
             }
-            sigs.add(newSig);
+            signals.add(newSig);
             new Thread(newSig).start();
             timeOperationCounter = TICKS_PER_OPERATION;
         }
         List<AntSignal> trash = new ArrayList<>();
-        for (AntSignal sig : sigs) {
+        for (AntSignal sig : signals) {
             if (sig.mayDissipate()) {
                 trash.add(sig);
             }
         }
-        sigs.removeAll(trash);
+        signals.removeAll(trash);
         timeOperationCounter--;
     }
 
@@ -72,6 +72,6 @@ public class QueenAnt extends Ant implements AntSignalSender {
 
     @Override
     public List<AntSignal> getSignalList() {
-        return new ArrayList<>(sigs);
+        return new ArrayList<>(signals);
     }
 }

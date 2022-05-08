@@ -22,7 +22,7 @@ import java.util.concurrent.ForkJoinPool;
 public class SoldierAnt extends Ant implements AntSignalSender{
     private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
 
-    private final List<AntSignal> sigs;
+    private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
     private final Vector initialPosition;
     private int actionCounter;
@@ -30,15 +30,16 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     private static final double MAX_ANTHILL_DISTANCE = 20;
     private static final int TICKS_PER_ACTION = 3;
 
-    public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector ipos) {
-        super(anthillId, color, ipos, 9.2, 3);
-        sigs = new ArrayList<>();
+    public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector initialPosition) {
+        super(anthillId, color, initialPosition, 9.2, 3);
+        signals = new ArrayList<>();
         subs = new ArrayList<>();
         q.subscribe(this);
-        initialPosition = ipos;
+        this.initialPosition = initialPosition;
         actionCounter = TICKS_PER_ACTION;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void executeAction() {
         if(actionCounter <= 0) {
@@ -49,14 +50,14 @@ public class SoldierAnt extends Ant implements AntSignalSender{
                 headingDirection = Direction.random();
             }
             position = position.add(headingDirection.getOffset());
-            synchronized (sigs) {
+            synchronized (signals) {
                 List<AntSignal> trash = new ArrayList<>();
-                for (AntSignal sig : sigs) {
+                for (AntSignal sig : signals) {
                     if (sig.mayDissipate()) {
                         trash.add(sig);
                     }
                 }
-                sigs.removeAll(trash);
+                signals.removeAll(trash);
             }
             actionCounter = TICKS_PER_ACTION;
         }
@@ -70,15 +71,15 @@ public class SoldierAnt extends Ant implements AntSignalSender{
         {
             sub.emitSignal(newSig);
         }
-        synchronized (sigs) {
-            sigs.add(newSig);
+        synchronized (signals) {
+            signals.add(newSig);
             new Thread(newSig).start();
         }
     }
 
     @Override
     public List<AntSignal> getSignalList() {
-        return sigs;
+        return signals;
     }
 
     @Override

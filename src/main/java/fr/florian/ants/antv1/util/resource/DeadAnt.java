@@ -20,11 +20,11 @@ import javafx.scene.paint.Color;
 public class DeadAnt extends Resource implements Drawable {
     private final Color color;
     private final double size;
-    private Ant dead;
+    private final Ant dead;
 
     public DeadAnt(Ant ant)
     {
-        super(new Vector(Application.random.nextDouble(0.3, 0.7), Application.random.nextDouble(0.3, 0.7)), 0, 0);
+        super(new Vector(Application.random.nextDouble(1), Application.random.nextDouble(1)), 0, 0);
 
         this.color=ant.getColor();
         this.size = ant.getSize();

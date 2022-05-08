@@ -19,9 +19,7 @@ public class StartMenu extends BorderPane {
             Application.initGame();
         });
         Button exit = new Button("Exit");
-        exit.setOnAction((ActionEvent e)->{
-            Application.stage.close();
-        });
+        exit.setOnAction((ActionEvent e)-> Application.stage.close());
         buttons.getChildren().add(start);
         buttons.getChildren().add(exit);
         setCenter(buttons);

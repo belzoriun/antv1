@@ -43,7 +43,7 @@ public abstract class Tile implements Drawable {
      * @param antHillId The ant hill id of the colony
      * @param pheromone The pheromone type
      */
-    public void removePheromone(long antHillId, Class<? extends Pheromone> pheromone)
+    public void removePheromone(long antHillId, Pheromone pheromone)
     {
         if(pheromones.containsKey(antHillId))
         {

@@ -6,9 +6,9 @@ import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.Vector;
 
 public abstract class Resource implements Drawable {
-    private int score;
+    private final int score;
     private double rarity;
-    private Vector position;
+    private final Vector position;
     protected final double rotation;
 
     protected Resource(Vector position, int score, double rarity)

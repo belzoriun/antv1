@@ -63,7 +63,7 @@ public class ImageColorMaker {
         {
             for(int y = 0; y<i.getHeight(); y++)
             {
-                Color base = i.getPixelReader().getColor(x, y);
+                Color base = reader.getColor(x, y);
                 if(base.getOpacity() > 0) {
                     Color c = new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
                     res.getPixelWriter().setColor(x, y, c);

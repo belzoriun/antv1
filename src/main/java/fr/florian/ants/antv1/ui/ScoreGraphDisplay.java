@@ -6,7 +6,6 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -23,7 +22,7 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
     private final NumberAxis time;
     private final NumberAxis score;
     private double previousMin = 0;
-    java.util.Map<Long, XYChart.Series<Number, Number>> series;
+    private final java.util.Map<Long, XYChart.Series<Number, Number>> series;
 
     public ScoreGraphDisplay()
     {

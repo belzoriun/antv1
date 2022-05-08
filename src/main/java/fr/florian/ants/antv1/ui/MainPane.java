@@ -13,6 +13,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 
 /**
  * Main display of simulation
@@ -56,12 +57,7 @@ public class MainPane extends BorderPane {
         System.out.print("Stopping timer ...");
         time = System.currentTimeMillis();
         GameTimer.getInstance().stopTime();
-        try {
-            GameTimer.getInstance().join();
-            System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
         Map.annihilate();
     }
 
@@ -130,7 +126,9 @@ public class MainPane extends BorderPane {
         worldView.init();
         setCenter(worldView);
         refreshHandler.start();
-        this.menu = new PauseMenu(Application.stage);
+        this.menu = new PauseMenu(Screen.getPrimary().getBounds().getWidth()/2, Screen.getPrimary().getBounds().getHeight()/2);
+        menu.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
+        worldView.getChildren().add(menu);
         Application.stage.getScene().addEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
     }
 }

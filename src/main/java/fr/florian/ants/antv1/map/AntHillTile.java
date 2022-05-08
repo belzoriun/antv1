@@ -31,7 +31,6 @@ public class AntHillTile extends Tile{
     private final Color color;
 
     private int score;
-    private QueenAnt queen;
 
     public AntHillTile()
     {
@@ -51,7 +50,7 @@ public class AntHillTile extends Tile{
      */
     public void makeInitialSpawns(Vector pos)
     {
-        this.queen = new QueenAnt(uniqueId, color, pos);
+        QueenAnt queen = new QueenAnt(uniqueId, color, pos);
         synchronized (Map.getInstance()) {
             Map.getInstance().spawn(queen);
         }
@@ -133,10 +132,12 @@ public class AntHillTile extends Tile{
                 , position.getY()
                 , WorldView.TILE_SIZE
                 , WorldView.TILE_SIZE);
-        Vector hpos = position.add(new Vector(0, -WorldView.TILE_SIZE/2));
-        WorldView.drawRotatedImage(context,
+        context.drawImage(
                 ResourceLoader.getInstance().loadResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()),
-                hpos, 0, WorldView.TILE_SIZE);
+                position.getX(),
+                position.getY()-WorldView.TILE_SIZE/2
+                , WorldView.TILE_SIZE
+                , WorldView.TILE_SIZE);
     }
 
     public void makeSpawn(Ant ant, boolean revive) {

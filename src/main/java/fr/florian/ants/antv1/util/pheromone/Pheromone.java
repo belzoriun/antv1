@@ -1,6 +1,5 @@
 package fr.florian.ants.antv1.util.pheromone;
 
-import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.GraphicsContext;
@@ -14,14 +13,19 @@ import java.util.Objects;
 public abstract class Pheromone {
     private final Color color;
     private int weight;
+    private final int lifetime;
 
-    protected Pheromone(Color color)
+    protected Pheromone(int lifetime, Color color)
     {
         this.color = color;
         weight = 0;
+        this.lifetime = lifetime;
     }
 
-    public abstract void onDetect(Ant a);
+    public int getLifetime()
+    {
+        return lifetime;
+    }
 
     public void draw(GraphicsContext context, Vector position)
     {

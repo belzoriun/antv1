@@ -1,7 +1,5 @@
 package fr.florian.ants.antv1.util;
 
-import fr.florian.ants.antv1.util.exception.TickFreeException;
-
 /**
  * Class used to await ticks
  */
@@ -19,13 +17,13 @@ public class TickWaiter {
         return instance;
     }
 
-    public static void waitTick() throws TickFreeException {
-        if(getInstance().isFree)
-        {
-            throw new TickFreeException();
-        }
+    public static void waitTick() {
         synchronized (getInstance())
         {
+            if(getInstance().isFree)
+            {
+                return;
+            }
             try {
                 getInstance().wait();
             } catch (InterruptedException ignored) {

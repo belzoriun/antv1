@@ -10,13 +10,11 @@ public enum DisplayType {
     SIGNALS_AND_PHEROMONES;
 
     public DisplayType next() {
-        switch(this)
-        {
-            case DEFAULT : return PHEROMONES;
-            case PHEROMONES : return SIGNALS;
-            case SIGNALS : return SIGNALS_AND_PHEROMONES;
-            default:
-            case SIGNALS_AND_PHEROMONES: return DEFAULT;
-        }
+        return switch (this) {
+            case DEFAULT -> PHEROMONES;
+            case PHEROMONES -> SIGNALS;
+            case SIGNALS -> SIGNALS_AND_PHEROMONES;
+            case SIGNALS_AND_PHEROMONES -> DEFAULT;
+        };
     }
 }

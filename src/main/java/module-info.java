@@ -1,4 +1,4 @@
-module fr.florian.ants.antv1 {
+module fr.florian.ants.antv {
     requires javafx.controls;
 
 
@@ -10,5 +10,6 @@ module fr.florian.ants.antv1 {
     exports fr.florian.ants.antv1.util.resource;
     exports fr.florian.ants.antv1.util.option;
     exports fr.florian.ants.antv1.util.exception;
+    exports fr.florian.ants.antv1.util.signals;
     exports fr.florian.ants.antv1.util.pheromone;
 }

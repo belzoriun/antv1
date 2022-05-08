@@ -29,6 +29,7 @@ public class ScoreDisplay extends VBox {
     public void update()
     {
         List<Node> children = new ArrayList<>(getChildren());
+        getChildren().clear();
         children.sort((Node a, Node b)->{
             if(a instanceof HillScoreDisplay ha && b instanceof HillScoreDisplay hb) {
                 if (ha.getScore() == hb.getScore()) return 0;
@@ -42,6 +43,7 @@ public class ScoreDisplay extends VBox {
                 ((HillScoreDisplay)n).setWinning();
             else
                 ((HillScoreDisplay)n).setLoosing();
+            getChildren().add(n);
         }
     }
 }
