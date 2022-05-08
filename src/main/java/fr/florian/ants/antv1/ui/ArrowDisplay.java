@@ -8,6 +8,7 @@ import fr.florian.ants.antv1.util.Vector;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class ArrowDisplay {
 
@@ -72,8 +73,25 @@ public class ArrowDisplay {
                 add = 180;
             }
 
+            double distance = position.multi(-1/WorldView.TILE_SIZE).add(manager.toWorldPoint(tilePos)).magnitude();
+
             double angle = unit.angle(vector) + add;
             WorldView.drawRotatedImage(context, i, position, angle, arrowSize);
+            context.setFill(Color.BLACK);
+            Vector textPosition = position.add(new Vector(-arrowSize/2, arrowSize));
+            if(position.getX() <= arrowSize)
+            {
+                textPosition = textPosition.add(new Vector(arrowSize/2, 0));
+            }
+            else
+            {
+                textPosition = textPosition.add(new Vector(-arrowSize/2, 0));
+            }
+            if(position.getY() > arrowSize/2)
+            {
+                textPosition = textPosition.add(new Vector(0, -arrowSize*1.5));
+            }
+            context.fillText((Math.round(distance*100)/100)+" tiles", textPosition.getX(), textPosition.getY());
             displayed = true;
         }
         else

@@ -39,12 +39,9 @@ public class DataDisplay extends VBox {
 
         scrollGraph.setContent(pane);
         getChildren().add(scrollGraph);
-        scrollScore.heightProperty().addListener(e-> scrollGraph.setMaxHeight(heightProperty().get()/2));
+        scrollScore.heightProperty().addListener(e-> scrollGraph.setPrefHeight(heightProperty().get()/2+
+                (heightProperty().get()-scrollScore.heightProperty().get()-30)));
         setPrefWidth(Application.stage.getWidth()/4.5);
-        scrollGraph.setPrefWidth(Application.stage.getWidth()/5);
-        scrollScore.setPrefWidth(Application.stage.getWidth()/5);
-
-        scrollScore.heightProperty().add(Application.stage.getWidth()/5);
     }
 
     public void update()
