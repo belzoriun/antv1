@@ -3,6 +3,7 @@ package fr.florian.ants.antv1.ui;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.option.Options;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.resource.*;
@@ -50,7 +51,7 @@ public class Application extends javafx.application.Application {
                 new ExtremelyRareResource(null),
                 new FoodResource(null))));
         System.out.println("initialized map");
-        GameTimer.init(2*60000);//2 minute
+        GameTimer.init(options.getInt(OptionKey.SIMULATION_TIME)* 60000L);//2 minute
         GameTimer.getInstance().start();
         System.out.println("initialized timer");
         main.init();

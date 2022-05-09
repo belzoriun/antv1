@@ -9,6 +9,7 @@ public enum OptionKey {
     ANT_HILL_COUNT("Number of ant hills", "anthillsnb"),
     SOLDIER_PER_QUEEN("Number of soldier per queen", "soldierperqueen"),
     WORKER_PER_SOLDIER("Number of worker per soldier", "workerpersoldier"),
+    SIMULATION_TIME("Simulation duration", "duration"),
     INFINITE_SIMULATION("Simulation is infinite", "infinitesimulation"),
     MAP_HEIGHT("Map height", "mapheight");
 

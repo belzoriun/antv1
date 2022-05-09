@@ -19,6 +19,7 @@ public class Options {
         set(OptionKey.ANT_HILL_COUNT, 3);
         set(OptionKey.SOLDIER_PER_QUEEN, 5);
         set(OptionKey.WORKER_PER_SOLDIER, 10);
+        set(OptionKey.SIMULATION_TIME, 2);
         set(OptionKey.INFINITE_SIMULATION, false);
     }
 

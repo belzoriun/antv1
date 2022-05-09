@@ -224,7 +224,8 @@ public class Map {
         if(t != null) {
             if (t instanceof ResourceTile rt) {
                 for (Resource r : rt.getResources()) {
-                    r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
+                    if(r != null)
+                        r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
                 }
             }
         }

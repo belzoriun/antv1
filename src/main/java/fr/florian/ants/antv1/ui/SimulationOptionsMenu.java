@@ -27,7 +27,10 @@ public class SimulationOptionsMenu extends BorderPane {
         addIntInput(box, OptionKey.ANT_HILL_COUNT);
         addIntInput(box, OptionKey.SOLDIER_PER_QUEEN);
         addIntInput(box, OptionKey.WORKER_PER_SOLDIER);
-        addBoolInput(box, OptionKey.INFINITE_SIMULATION);
+        TextField time = addIntInput(box, OptionKey.SIMULATION_TIME);
+        addBoolInput(box, OptionKey.INFINITE_SIMULATION).selectedProperty().addListener((observable, oldValue, newValue)->{
+            time.setDisable(newValue);
+        });
 
         Button start = new Button("Start");
         start.setOnAction(e->{
@@ -75,7 +78,7 @@ public class SimulationOptionsMenu extends BorderPane {
         box.getChildren().add(buttonPane);
     }
 
-    private void addIntInput(VBox box, OptionKey key)
+    private TextField addIntInput(VBox box, OptionKey key)
     {
         HBox field = new HBox();
         field.setSpacing(10);
@@ -91,9 +94,10 @@ public class SimulationOptionsMenu extends BorderPane {
         });
         field.getChildren().add(input);
         box.getChildren().add(field);
+        return input;
     }
 
-    private void addBoolInput(VBox box, OptionKey key)
+    private CheckBox addBoolInput(VBox box, OptionKey key)
     {
         HBox field = new HBox();
         field.setSpacing(10);
@@ -107,6 +111,7 @@ public class SimulationOptionsMenu extends BorderPane {
         });
         field.getChildren().add(input);
         box.getChildren().add(field);
+        return input;
     }
 
 }
