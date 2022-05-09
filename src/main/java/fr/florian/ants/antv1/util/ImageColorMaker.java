@@ -11,9 +11,9 @@ import javafx.scene.paint.Color;
 public class ImageColorMaker {
 
     /**
-     * Color an image replacing red values by the given color, on the given image
+     * Color an image replacing gray values by the given color, on the given image
      * @param i The image to transform
-     * @param c The color to replace red gradients with
+     * @param c The color to replace gray gradients with
      * @return The new image
      */
     public static Image colorAntImage(Image i, Color c)
@@ -24,25 +24,14 @@ public class ImageColorMaker {
         {
             for(int y = 0; y<i.getHeight(); y++)
             {
-                double redColor = Math.round(reader.getColor(x, y).getRed() * 100000.0) / 100000.0;
-                double redColorA1 = Math.round(84/255.0 * 100000.0) / 100000.0;
-                double redColorA2 = Math.round(125/255.0 * 100000.0) / 100000.0;
-                double redColorA3 = Math.round(161/255.0 * 100000.0) / 100000.0;
-                if(redColor == redColorA1)
-                {
-                    res.getPixelWriter().setColor(x, y, c.darker());
-                }
-                else if(redColor == redColorA2)
-                {
-                    res.getPixelWriter().setColor(x, y, c);
-                }
-                else if(redColor == redColorA3)
-                {
-                    res.getPixelWriter().setColor(x, y, c.brighter());
+                Color grayScale = reader.getColor(x, y);
+                if(grayScale.getRed() == grayScale.getGreen() && grayScale.getGreen() == grayScale.getBlue()) {
+                    double imageScale = grayScale.getRed();
+                    res.getPixelWriter().setColor(x, y, new Color(c.getRed()*imageScale, c.getGreen()*imageScale, c.getBlue()*imageScale, grayScale.getOpacity()));
                 }
                 else
                 {
-                    res.getPixelWriter().setColor(x, y, reader.getColor(x, y));
+                    res.getPixelWriter().setColor(x, y, grayScale);
                 }
             }
         }

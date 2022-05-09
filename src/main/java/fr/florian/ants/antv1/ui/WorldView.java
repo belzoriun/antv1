@@ -216,6 +216,18 @@ public class WorldView extends Pane {
                     drawTile(pos, displayPoint, context);
             }
         }
+        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
+            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
+                Vector pos = new Vector(x, y);
+                Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
+                if (displayPoint.getX()  + TILE_SIZE >= 0
+                        && displayPoint.getX()  - TILE_SIZE <= canvas.getWidth()
+                        && displayPoint.getY()  + TILE_SIZE >= 0
+                        && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
+                    Map.getInstance().displayResources(context, pos, displayPoint);
+            }
+        }
+
         for (Living l : Map.getInstance().getLivings()) {
             Vector pos = l.getPosition();
             Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
@@ -245,7 +257,6 @@ public class WorldView extends Pane {
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)
     {
         Map.getInstance().drawTile(pos, displayPos, context);
-        Map.getInstance().displayResources(context, pos, displayPos);
         if(displayType == DisplayType.PHEROMONES || displayType == DisplayType.SIGNALS_AND_PHEROMONES)
             Map.getInstance().drawPheromones(pos, displayPos, context);
     }

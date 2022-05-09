@@ -127,7 +127,6 @@ public class MainPane extends BorderPane {
         setCenter(worldView);
         refreshHandler.start();
         this.menu = new PauseMenu(Screen.getPrimary().getBounds().getWidth()/2, Screen.getPrimary().getBounds().getHeight()/2);
-        menu.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         worldView.getChildren().add(menu);
         Application.stage.getScene().addEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
     }
