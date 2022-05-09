@@ -1,0 +1,610 @@
+@startuml
+class fr.florian.ants.antv1.util.signals.AntSignal {
+- Vector from
+- double size
+- double maxSize
+- AntOrder order
+- double signalSpeed
+- Ant sender
+- {static} Object lock
++ Vector getSourcePosition()
++ boolean isAccessible(Vector)
++ AntOrder getOrder(Vector)
++ void run()
++ boolean mayDissipate()
++ void draw(GraphicsContext,Vector)
+- void drawSignalCircle(GraphicsContext,Vector,Color,double)
+}
+class fr.florian.ants.antv1.util.statemachine.StateMachine {
+- Map<String,MachineStateExecutor> states
+- Map<String,Boolean> transitions
+- Map<StateTransition,String> stateLinks
+- String currentState
++ void setTransition(String)
++ void step()
+}
+class fr.florian.ants.antv1.util.statemachine.StateMachine.StateMachineBuilder {
+- Map<String,MachineStateExecutor> states
+- Map<String,Boolean> transitions
+- Map<StateTransition,String> stateLinks
++ StateMachineBuilder addState(String,MachineStateExecutor)
++ StateMachineBuilder addTransition(String)
++ StateMachineBuilder addStateLink(String,String,String)
++ StateMachine get(String)
+}
+class fr.florian.ants.antv1.util.ResourceLoader {
+- {static} ResourceLoader instance
++ {static} String GRASS_RES_1
++ {static} String GRASS_RES_2
++ {static} String ANT
++ {static} String DEAD_ANT
++ {static} String SUGAR
++ {static} String ANTHILL
++ {static} String PEA
++ {static} String SEED_1
++ {static} String SEED_2
++ {static} String SEED_3
++ {static} String SEED_4
++ {static} String SEED_5
++ {static} String ARROW
++ {static} String APPLE
++ {static} String BURGER
++ {static} String CARROT
++ {static} String CHERRY
++ {static} String EGG
++ {static} String FRIES
++ {static} String HAM
++ {static} String PIZZA
++ {static} String STRAWBERRY
++ {static} String SUSHI
++ {static} String WATERMELON
+- Map<String,Image> streams
+- ClassLoader loader
++ {static} ResourceLoader getInstance()
++ void saveResource(String,Image)
++ Image loadResource(String)
+}
+class fr.florian.ants.antv1.ui.AntNumberGraphDisplay {
+- NumberAxis time
+- NumberAxis score
+- double previousMin
+- java.util.Map<Long,XYChart.Series<Number,Number>> series
++ void run()
+}
+class fr.florian.ants.antv1.util.pheromone.PheromoneManager {
+- {static} PheromoneManager instance
+- Map<PheromoneFollower,Long> managedTiles
+- {static} Object lock
+~ List<PheromoneFollower> toBeManaged
+- boolean executing
++ void stopExecution()
++ {static} void forceInit()
++ {static} PheromoneManager getInstance()
++ void start()
++ void run()
++ void manageTile(Tile,Pheromone,long)
+}
+class fr.florian.ants.antv1.living.ant.QueenAnt {
+- ExecutorService executor
+- List<AntSignal> signals
+- List<AntSubscription> subs
+- int timeOperationCounter
+- {static} int TICKS_PER_OPERATION
+# void executeAction()
+- void makeSpawnNewAnt()
+# void onOrderReceived(AntOrder)
++ void subscribe(Flow.Subscriber<? super AntSignal>)
++ List<AntSignal> getSignalList()
+}
+interface fr.florian.ants.antv1.util.statemachine.MachineStateExecutor {
+~ void call()
+}
+abstract class fr.florian.ants.antv1.living.Living {
+- boolean alive
+# Vector position
++ Vector getPosition()
+# {abstract}void act()
++ void run()
++ void kill()
++ {abstract}void onKilled()
++ void attack(Living)
+# {abstract}void onAttackedBy(Living)
++ boolean isAlive()
++ void revive()
+}
+abstract class fr.florian.ants.antv1.util.pheromone.Pheromone {
+- Color color
+- int weight
+- int lifetime
++ int getLifetime()
++ void draw(GraphicsContext,Vector)
++ int getWeight()
++ void remove()
++ void add()
++ boolean equals(Object)
+}
+class fr.florian.ants.antv1.ui.MainPane {
+- PauseMenu menu
+- WorldView worldView
+- AnimationTimer refreshHandler
+- EventHandler<KeyEvent> keyHandler
+- DataDisplay data
++ void exit()
+- void update()
++ void showEnd()
++ void init()
+}
+class fr.florian.ants.antv1.map.AntHillTile {
+- {static} long currentId
+- int foodHeld
+- long uniqueId
+- Color color
+- int score
++ void addFood()
++ boolean consumeFood(int)
++ void makeInitialSpawns(Vector)
++ long getUniqueId()
++ Color getColor()
++ void onWalkOn(Living)
++ void onInteract(Ant)
++ void onAntDieOn(Ant)
++ Node getInfoDisplay()
++ int getScore()
++ void draw(GraphicsContext,Vector)
++ void makeSpawn(Ant,boolean)
+}
+class fr.florian.ants.antv1.ui.WorldView {
++ {static} double TILE_SIZE
++ {static} double MIN_TILE_SIZE
+- {static} double MAX_TILE_SIZE
+- {static} float ZOOM_FACTOR
+- DisplayType displayType
+- TileDetail detail
+- Canvas canvas
+- MarkerManager manager
+- java.util.Map<Long,ArrowDisplay> hillArrows
+- Vector clickPoint
++ void init()
++ void toNextDisplay()
+- void applyShaders()
++ void displayAll()
++ void drawTile(Vector,Vector,GraphicsContext)
++ {static} void drawRotatedImage(GraphicsContext,Image,Vector,double,double)
++ void goTo(Vector)
++ void drawArrows(GraphicsContext)
++ void bindWidth(DoubleBinding)
+}
+enum fr.florian.ants.antv1.ui.DisplayType {
++  DEFAULT
++  PHEROMONES
++  SIGNALS
++  SIGNALS_AND_PHEROMONES
++ DisplayType next()
+}
+interface fr.florian.ants.antv1.util.signals.AntSignalSender {
+~ List<AntSignal> getSignalList()
+}
+class fr.florian.ants.antv1.ui.PauseMenu {
+- Button continueBtn
+- Vector clickPoint
++ void pauseGame()
++ void playGame()
++ void setEndMenu()
+}
+enum fr.florian.ants.antv1.util.Direction {
++  UP
++  DOWN
++  LEFT
++  RIGHT
+- Vector offset
++ {static} Direction fromOffset(Vector)
++ Vector getOffset()
++ {static} Direction random()
+}
+class fr.florian.ants.antv1.util.resource.DeadAnt {
+- Color color
+- double size
+- Ant dead
++ void onDeposit(AntHillTile)
++ void draw(GraphicsContext,Vector)
++ Resource clone(Vector)
+}
+class fr.florian.ants.antv1.util.resource.FoodResource {
+- int foodType
++ void onDeposit(AntHillTile)
++ void draw(GraphicsContext,Vector)
++ Resource clone(Vector)
+}
+class fr.florian.ants.antv1.util.FightManager {
+~ List<Living> fighters
+- Living fighter
++ void Hajimeru()
+}
+class fr.florian.ants.antv1.ui.ScoreGraphDisplay {
+- NumberAxis time
+- NumberAxis score
+- double previousMin
+- java.util.Map<Long,XYChart.Series<Number,Number>> series
++ void run()
+}
+class fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone {
+}
+class fr.florian.ants.antv1.util.resource.ExtremelyRareResource {
++ void draw(GraphicsContext,Vector)
++ Resource clone(Vector)
+}
+class fr.florian.ants.antv1.util.HeldResourceList {
+- List<Resource> resources
+- int capacity
++ void add(Resource)
++ Resource remove()
++ boolean isFull()
++ boolean isEmpty()
++ Collection<? extends Resource> getAll()
+}
+enum fr.florian.ants.antv1.util.option.OptionKey {
++  MAP_WIDTH
++  ANT_HILL_COUNT
++  SOLDIER_PER_QUEEN
++  WORKER_PER_SOLDIER
++  MAP_HEIGHT
+- String name
+- String label
++ String getLabel()
++ String getName()
+}
+class fr.florian.ants.antv1.map.ResourceTile {
+- List<Resource> resources
++ List<Resource> getResources()
++ int resourceCount()
++ Resource take()
++ void onWalkOn(Living)
++ void onInteract(Ant)
++ void onAntDieOn(Ant)
++ Node getInfoDisplay()
++ void draw(GraphicsContext,Vector)
+}
+class fr.florian.ants.antv1.ui.TimeDisplay {
++ void update()
+- String getTime()
+}
+class fr.florian.ants.antv1.living.ant.SoldierAnt {
+- ExecutorService executor
+- List<AntSignal> signals
+- List<AntSubscription> subs
+- Vector initialPosition
+- int actionCounter
+- {static} double MAX_ANTHILL_DISTANCE
+- {static} int TICKS_PER_ACTION
+# void executeAction()
+# void onOrderReceived(AntOrder)
++ List<AntSignal> getSignalList()
++ void subscribe(Flow.Subscriber<? super AntSignal>)
+}
+class fr.florian.ants.antv1.util.resource.RareResource {
+- int seedType
++ void draw(GraphicsContext,Vector)
++ Resource clone(Vector)
+}
+class fr.florian.ants.antv1.util.ImageColorMaker {
++ {static} Image colorAntImage(Image,Color)
++ {static} Image fade(Image,double)
+}
+class fr.florian.ants.antv1.util.pheromone.PheromoneFollower {
+- Pheromone pheromone
+- long antHillId
+- Tile tile
++ Pheromone getPheromone()
++ Tile getTile()
++ long getAntHillId()
+}
+class fr.florian.ants.antv1.ui.TileDetail {
+- Label title
+- HBox pheromones
+- Label position
+- HBox ants
+- TitledPane detail
+- Tile tile
+- Vector tilePos
++ Vector positionForDisplay()
++ void displayForTile(Tile,Vector)
++ void update()
+}
+class fr.florian.ants.antv1.util.signals.AntSubscription {
+- Flow.Subscriber<? super AntSignal> subscriber
+- ExecutorService executor
+- Future<?> future
+- List<AntSignal> signals
+- {static} Object lock
++ void emitSignal(AntSignal)
++ void request(long)
++ void acknowledge(AntSignal)
++ void cancel()
+}
+class fr.florian.ants.antv1.util.exception.TickFreeException {
+}
+class fr.florian.ants.antv1.util.option.Options {
+- Map<String,String> options
++ void set(OptionKey,int)
++ int getInt(OptionKey)
+}
+class fr.florian.ants.antv1.ui.Application {
++ {static} Stage stage
+- {static} MainPane main
+- {static} StartMenu menu
++ {static} Options options
++ {static} Random random
++ {static} void restart()
++ {static} void initGame()
++ void start(Stage)
++ {static} void switchToGameScreen()
++ {static} void switchToMenuScreen()
++ {static} void endGame()
++ {static} void showEndMenu()
++ {static} void main(String[])
+}
+class fr.florian.ants.antv1.util.OpenSimplexNoise {
+- {static} double STRETCH_CONSTANT_2D
+- {static} double SQUISH_CONSTANT_2D
+- {static} int P_SIZE
+- {static} int P_MASK
+- short[] perm
+- Grad2[] permGrad2
+- {static} double N2
+- {static} Grad2[] GRADIENTS_2D
++ double eval(double,double)
+- double extrapolate(int,int,double,double)
+- {static} int fastFloor(double)
+}
+class fr.florian.ants.antv1.util.OpenSimplexNoise.Grad2 {
+~ double dx
+}
+class fr.florian.ants.antv1.ui.StartMenu {
+}
+abstract class fr.florian.ants.antv1.living.ant.Ant {
++ {static} int MAX_SIZE
+- double size
+# long uniqueAnthillId
+- boolean weak
+- int strength
+- AntSubscription sub
+# Direction headingDirection
+- Color color
++ int getStrength()
+# {abstract}void executeAction()
+# void act()
++ void onKilled()
++ void setPosition(Vector)
++ double getSize()
++ boolean isWeak()
++ void onAttackedBy(Living)
++ void weaken()
++ void heal()
++ long getAntHillId()
+# {abstract}void onOrderReceived(AntOrder)
++ void draw(GraphicsContext,Vector)
++ Color getColor()
++ void onSubscribe(Flow.Subscription)
++ void onNext(AntSignal)
++ void onError(Throwable)
++ void onComplete()
+}
+interface fr.florian.ants.antv1.util.resource.IResourcePlacer {
+~ ResourceTile placeTile(Vector)
+}
+abstract class fr.florian.ants.antv1.util.resource.Resource {
+- int score
+- double rarity
+- Vector position
+# double rotation
++ int getResourceScore()
++ double getRarity()
++ {abstract}Resource clone(Vector)
++ Vector getPosition()
++ void onDeposit(AntHillTile)
+}
+class fr.florian.ants.antv1.ui.ScoreDisplay {
++ void update()
+}
+class fr.florian.ants.antv1.util.resource.RandomResourcePlacer {
+- Random rand
+- List<Resource> selection
++ ResourceTile placeTile(Vector)
+}
+interface fr.florian.ants.antv1.util.signals.AntSignalReceiver {
+}
+class fr.florian.ants.antv1.util.GameTimer {
+- {static} int MIN_TICK_TIME
+- ScheduledExecutorService executor
+- ScheduledFuture<?> executorHandle
+- Runnable core
+- {static} GameTimer instance
+- long remainingTime
+- long totalTime
+- boolean paused
+- long tickTime
+- double dayNightTime
+- boolean transitToDay
+- {static} long DEFAULT_TICK_TIME
+- {static} int DAY_DURATION
++ void start()
++ boolean isDay()
++ double getDayNightTime()
++ void stopTime()
++ {static} void init(long)
++ {static} GameTimer getInstance()
++ double getRemainingTimeFraction()
++ double getTotalTime()
++ double getRemainingTime()
++ boolean isPaused()
++ void pause()
++ void play()
++ void setTickTime(long)
++ long getTickTime()
++ void setTickTimeDefault()
+}
+class fr.florian.ants.antv1.util.resource.BasicResource {
++ void draw(GraphicsContext,Vector)
++ Resource clone(Vector)
+}
+class fr.florian.ants.antv1.ui.DataDisplay {
+- ScoreDisplay score
+- TimeDisplay time
++ void update()
+}
+abstract class fr.florian.ants.antv1.map.Tile {
+- java.util.Map<Long,PheromoneSet> pheromones
++ void placePheromone(long,Pheromone)
++ void removePheromone(long,Pheromone)
++ int getPheromoneLevel(long)
++ int getPheromoneLevel(long,Class<? extends Pheromone>)
++ List<Pheromone> getAllPheromones()
++ {abstract}void onWalkOn(Living)
++ {abstract}void onInteract(Ant)
++ {abstract}void onAntDieOn(Ant)
++ {abstract}Node getInfoDisplay()
+}
+class fr.florian.ants.antv1.ui.ArrowDisplay {
+- AntHillTile hill
+- MarkerManager manager
+- Canvas canvas
+- double arrowSize
+- Vector position
+- boolean displayed
++ boolean inBounds(Vector)
++ void update(GraphicsContext)
+}
+class fr.florian.ants.antv1.ui.HillScoreDisplay {
+- AntHillTile hill
++ void setWinning()
++ void setLoosing()
++ int getScore()
+}
+class fr.florian.ants.antv1.ui.MarkerManager {
+- Vector origin
++ void translateOrigin(Vector)
++ double getOriginX()
++ double getOriginY()
++ Vector toWorldPoint(Vector)
+}
+class fr.florian.ants.antv1.util.resource.NoiseResourcePlacer {
+- List<Resource> selection
+- OpenSimplexNoise noise
+- Random rand
++ ResourceTile placeTile(Vector)
+}
+class fr.florian.ants.antv1.map.Map {
+- java.util.Map<Vector,Tile> tiles
+- List<AntHillTile> antHills
+- List<Living> livings
+- {static} Map instance
++ List<Ant> getAntsOf(long)
++ void spawn(T)
++ List<Living> getLivings()
++ {static} Map getInstance()
++ {static} void annihilate()
++ void init(IResourcePlacer)
+- void addTile(Vector,Tile)
++ Tile getTile(Vector)
++ void drawTile(Vector,Vector,GraphicsContext)
++ List<AntHillTile> getAntHills()
++ void killAll()
++ int updateLivings()
++ List<Living> getLivingsAt(Vector)
++ void drawPheromones(Vector,Vector,GraphicsContext)
++ void displayResources(GraphicsContext,Vector,Vector)
++ Vector getTilePosition(Tile)
+}
+class fr.florian.ants.antv1.living.ant.WorkerAnt {
+- HeldResourceList heldResources
+- List<Vector> path
+- List<Vector> deadCells
+- StateMachine stateMachine
+- boolean pathCleared
+- SoldierAnt soldier
++ SoldierAnt getSolder()
+- void clearPath(List<Vector>)
+# void executeAction()
+# void onOrderReceived(AntOrder)
+- void takeResource(ResourceTile)
++ HeldResourceList getResources()
+}
+class fr.florian.ants.antv1.util.pheromone.PheromoneSet {
+- List<Pheromone> pheromones
++ void add(Pheromone)
++ boolean hasPheromones()
++ void remove(Pheromone)
++ int getTotalLevel()
++ int getTotalLevel(Class<T>)
++ List<Pheromone> getAllPheromones()
+}
+class fr.florian.ants.antv1.util.TickWaiter {
+- {static} TickWaiter instance
+- boolean isFree
+- {static} TickWaiter getInstance()
++ {static} void waitTick()
++ {static} void free()
++ {static} void lock()
++ {static} void emitTick()
++ {static} boolean isLocked()
+}
+class fr.florian.ants.antv1.ui.GoToColonyButton {
+- Vector pos
+- WorldView view
+}
+enum fr.florian.ants.antv1.util.AntOrder {
++  SEARCH_FOR_FOOD
++  BACK_TO_COLONY
+}
+interface fr.florian.ants.antv1.util.Drawable {
+~ void draw(GraphicsContext,Vector)
+}
+
+
+fr.florian.ants.antv1.util.signals.Runnable <|.. fr.florian.ants.antv1.util.signals.AntSignal
+fr.florian.ants.antv1.util.Drawable <|.. fr.florian.ants.antv1.util.signals.AntSignal
+fr.florian.ants.antv1.util.statemachine.StateMachine +.. fr.florian.ants.antv1.util.statemachine.StateMachine.StateMachineBuilder
+fr.florian.ants.antv1.ui.Runnable <|.. fr.florian.ants.antv1.ui.AntNumberGraphDisplay
+javafx.scene.layout.Pane <|-- fr.florian.ants.antv1.ui.AntNumberGraphDisplay
+fr.florian.ants.antv1.util.pheromone.Thread <|-- fr.florian.ants.antv1.util.pheromone.PheromoneManager
+fr.florian.ants.antv1.util.signals.AntSignalSender <|.. fr.florian.ants.antv1.living.ant.QueenAnt
+fr.florian.ants.antv1.living.ant.Ant <|-- fr.florian.ants.antv1.living.ant.QueenAnt
+fr.florian.ants.antv1.living.Runnable <|.. fr.florian.ants.antv1.living.Living
+fr.florian.ants.antv1.util.Drawable <|.. fr.florian.ants.antv1.living.Living
+javafx.scene.layout.BorderPane <|-- fr.florian.ants.antv1.ui.MainPane
+fr.florian.ants.antv1.map.Tile <|-- fr.florian.ants.antv1.map.AntHillTile
+fr.florian.ants.antv1.ui.Pane <|-- fr.florian.ants.antv1.ui.WorldView
+fr.florian.ants.antv1.util.signals.Publisher <|-- fr.florian.ants.antv1.util.signals.AntSignalSender
+fr.florian.ants.antv1.ui.BorderPane <|-- fr.florian.ants.antv1.ui.PauseMenu
+fr.florian.ants.antv1.util.Drawable <|.. fr.florian.ants.antv1.util.resource.DeadAnt
+fr.florian.ants.antv1.util.resource.Resource <|-- fr.florian.ants.antv1.util.resource.DeadAnt
+fr.florian.ants.antv1.util.resource.Resource <|-- fr.florian.ants.antv1.util.resource.FoodResource
+fr.florian.ants.antv1.ui.Runnable <|.. fr.florian.ants.antv1.ui.ScoreGraphDisplay
+javafx.scene.layout.Pane <|-- fr.florian.ants.antv1.ui.ScoreGraphDisplay
+fr.florian.ants.antv1.util.pheromone.Pheromone <|-- fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone
+fr.florian.ants.antv1.util.resource.Resource <|-- fr.florian.ants.antv1.util.resource.ExtremelyRareResource
+fr.florian.ants.antv1.map.Tile <|-- fr.florian.ants.antv1.map.ResourceTile
+javafx.scene.control.Label <|-- fr.florian.ants.antv1.ui.TimeDisplay
+fr.florian.ants.antv1.util.signals.AntSignalSender <|.. fr.florian.ants.antv1.living.ant.SoldierAnt
+fr.florian.ants.antv1.living.ant.Ant <|-- fr.florian.ants.antv1.living.ant.SoldierAnt
+fr.florian.ants.antv1.util.resource.Resource <|-- fr.florian.ants.antv1.util.resource.RareResource
+fr.florian.ants.antv1.ui.VBox <|-- fr.florian.ants.antv1.ui.TileDetail
+fr.florian.ants.antv1.util.signals.Subscription <|.. fr.florian.ants.antv1.util.signals.AntSubscription
+fr.florian.ants.antv1.util.exception.Exception <|-- fr.florian.ants.antv1.util.exception.TickFreeException
+fr.florian.ants.antv1.ui.Application <|-- fr.florian.ants.antv1.ui.Application
+fr.florian.ants.antv1.util.OpenSimplexNoise +.. fr.florian.ants.antv1.util.OpenSimplexNoise.Grad2
+javafx.scene.layout.BorderPane <|-- fr.florian.ants.antv1.ui.StartMenu
+fr.florian.ants.antv1.util.signals.AntSignalReceiver <|.. fr.florian.ants.antv1.living.ant.Ant
+fr.florian.ants.antv1.living.Living <|-- fr.florian.ants.antv1.living.ant.Ant
+fr.florian.ants.antv1.util.Drawable <|.. fr.florian.ants.antv1.util.resource.Resource
+javafx.scene.layout.VBox <|-- fr.florian.ants.antv1.ui.ScoreDisplay
+fr.florian.ants.antv1.util.resource.IResourcePlacer <|.. fr.florian.ants.antv1.util.resource.RandomResourcePlacer
+fr.florian.ants.antv1.util.signals.Subscriber <|-- fr.florian.ants.antv1.util.signals.AntSignalReceiver
+fr.florian.ants.antv1.util.resource.Resource <|-- fr.florian.ants.antv1.util.resource.BasicResource
+javafx.scene.layout.VBox <|-- fr.florian.ants.antv1.ui.DataDisplay
+fr.florian.ants.antv1.util.Drawable <|.. fr.florian.ants.antv1.map.Tile
+javafx.scene.layout.BorderPane <|-- fr.florian.ants.antv1.ui.HillScoreDisplay
+fr.florian.ants.antv1.util.resource.IResourcePlacer <|.. fr.florian.ants.antv1.util.resource.NoiseResourcePlacer
+fr.florian.ants.antv1.living.ant.Ant <|-- fr.florian.ants.antv1.living.ant.WorkerAnt
+javafx.scene.control.Button <|-- fr.florian.ants.antv1.ui.GoToColonyButton
+@enduml
