@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -63,6 +64,10 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
                 TickWaiter.waitTick();
                 Platform.runLater(()-> {
                     double time = (GameTimer.getInstance().getTotalTime() - GameTimer.getInstance().getRemainingTime())/1000;
+                    if(Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
+                    {
+                        time = GameTimer.getInstance().getRemainingTime()/1000;
+                    }
                     if(time < 10) {
                         this.time.setLowerBound(0);
                     }

@@ -230,17 +230,20 @@ public class WorldView extends Pane {
 
         for (Living l : Map.getInstance().getLivings()) {
             Vector pos = l.getPosition();
-            Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
-            if (displayPoint.getX() + TILE_SIZE >= 0
-                    && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
-                    && displayPoint.getY() + TILE_SIZE >= 0
-                    && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
-                l.draw(context, displayPoint);
-            if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
-                List<AntSignal> signals = sender.getSignalList();
-                for (AntSignal s : signals) {
-                    if (!s.mayDissipate())
-                        s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+            if(pos != null)
+            {
+                Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
+                if (displayPoint.getX() + TILE_SIZE >= 0
+                        && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
+                        && displayPoint.getY() + TILE_SIZE >= 0
+                        && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
+                    l.draw(context, displayPoint);
+                if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
+                    List<AntSignal> signals = sender.getSignalList();
+                    for (AntSignal s : signals) {
+                        if (!s.mayDissipate())
+                            s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
+                    }
                 }
             }
         }

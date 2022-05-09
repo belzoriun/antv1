@@ -112,6 +112,8 @@ public class Map {
             antHills.add(hill);
         }
 
+        System.out.println(Application.options.getInt(OptionKey.MAP_WIDTH));
+        System.out.println(Application.options.getInt(OptionKey.MAP_HEIGHT));
         System.out.println("placing resources");
         for(int x = 0; x< Application.options.getInt(OptionKey.MAP_WIDTH); x++)
         {

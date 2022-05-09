@@ -22,6 +22,7 @@ public class Application extends javafx.application.Application {
     public static Stage stage;
     private static MainPane main;
     private static StartMenu menu;
+    private static SimulationOptionsMenu optionMenu;
     public static Options options;
 
     public static Random random;
@@ -32,7 +33,7 @@ public class Application extends javafx.application.Application {
     public static void restart() {
         System.out.println("restarting ...");
         main.exit();
-        initGame();
+        switchToOptionScreen();
     }
 
     /**
@@ -42,7 +43,6 @@ public class Application extends javafx.application.Application {
     {
         long seed = 0L;
         random = new Random(seed);
-        options = new Options();
         TickWaiter.lock();
         PheromoneManager.forceInit();
         Map.getInstance().init(new NoiseResourcePlacer(seed, List.of(new BasicResource(null),
@@ -58,8 +58,10 @@ public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) {
+        options = new Options();
         main = new MainPane();
         menu = new StartMenu();
+        optionMenu = new SimulationOptionsMenu();
         Scene scene = new Scene(menu);
         stage.setScene(scene);
         Application.stage = stage;
@@ -78,8 +80,14 @@ public class Application extends javafx.application.Application {
 
     public static void switchToMenuScreen()
     {
-        main.exit();
+        if(stage.getScene().getRoot() == main)
+            main.exit();
         stage.getScene().setRoot(menu);
+    }
+
+    public static void switchToOptionScreen()
+    {
+        stage.getScene().setRoot(optionMenu);
     }
 
     public static void endGame()

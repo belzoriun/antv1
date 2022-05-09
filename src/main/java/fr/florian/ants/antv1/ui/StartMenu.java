@@ -15,8 +15,7 @@ public class StartMenu extends BorderPane {
         VBox buttons = new VBox();
         Button start = new Button("Start simulation");
         start.setOnAction((ActionEvent e)->{
-            Application.switchToGameScreen();
-            Application.initGame();
+            Application.switchToOptionScreen();
         });
         Button exit = new Button("Exit");
         exit.setOnAction((ActionEvent e)-> Application.stage.close());

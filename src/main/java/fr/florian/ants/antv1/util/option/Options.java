@@ -19,6 +19,7 @@ public class Options {
         set(OptionKey.ANT_HILL_COUNT, 3);
         set(OptionKey.SOLDIER_PER_QUEEN, 5);
         set(OptionKey.WORKER_PER_SOLDIER, 10);
+        set(OptionKey.INFINITE_SIMULATION, false);
     }
 
     public void set(OptionKey name, int value)
@@ -26,8 +27,18 @@ public class Options {
         options.put(name.getName(), value+"");
     }
 
+    public void set(OptionKey name, boolean value)
+    {
+        options.put(name.getName(), String.valueOf(value));
+    }
+
     public int getInt(OptionKey name)
     {
         return Integer.parseInt(options.get(name.getName()));
+    }
+
+    public boolean getBoolean(OptionKey name)
+    {
+        return options.get(name.getName()).equals("true");
     }
 }

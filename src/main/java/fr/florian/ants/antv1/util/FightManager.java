@@ -13,9 +13,11 @@ public class FightManager {
 
     final List<Living> fighters;
     private final Living fighter;
+    private final Vector position;
 
     public FightManager(Living l, Vector position)
     {
+        this.position = position;
         this.fighters = Map.getInstance().getLivingsAt(position);
         fighter = l;
     }
@@ -25,7 +27,7 @@ public class FightManager {
      */
     public void Hajimeru()
     {
-        synchronized (fighter) {
+        synchronized (Map.getInstance().getTile(position)) {
             for (Living opponent : fighters) {
                 if (opponent != fighter) {
                     if ((fighter instanceof Ant f && opponent instanceof Ant o && f.getAntHillId() != o.getAntHillId())

@@ -9,7 +9,8 @@ public enum OptionKey {
     ANT_HILL_COUNT("Number of ant hills", "anthillsnb"),
     SOLDIER_PER_QUEEN("Number of soldier per queen", "soldierperqueen"),
     WORKER_PER_SOLDIER("Number of worker per soldier", "workerpersoldier"),
-    MAP_HEIGHT("Map width", "mapwidth");
+    INFINITE_SIMULATION("Simulation is infinite", "infinitesimulation"),
+    MAP_HEIGHT("Map height", "mapheight");
 
     private final String name;
     private final String label;

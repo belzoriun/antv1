@@ -1,5 +1,8 @@
 package fr.florian.ants.antv1.util;
 
+import fr.florian.ants.antv1.ui.Application;
+import fr.florian.ants.antv1.util.option.OptionKey;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -30,7 +33,7 @@ public class GameTimer {
     private GameTimer(long totalTime)
     {
         tickTime = DEFAULT_TICK_TIME;
-        remainingTime = totalTime;
+        remainingTime = Application.options.getBoolean(OptionKey.INFINITE_SIMULATION) ? 0 : totalTime;
         this.totalTime=totalTime;
         paused = false;
         transitToDay = false;
@@ -51,7 +54,7 @@ public class GameTimer {
                     dayNightTime = 1;
                     transitToDay = false;
                 }
-                remainingTime -= 50;
+                remainingTime += (Application.options.getBoolean(OptionKey.INFINITE_SIMULATION) ? 1 : -1) * 50;
             }
             if(remainingTime <= 0)
             {

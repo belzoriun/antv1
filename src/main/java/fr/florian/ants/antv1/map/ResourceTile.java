@@ -68,8 +68,7 @@ public class ResourceTile extends Tile {
             if (r != null) {
                 try {
                     worker.getResources().add(r);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                } catch (Exception ignore) {
                 }
             }
         }
