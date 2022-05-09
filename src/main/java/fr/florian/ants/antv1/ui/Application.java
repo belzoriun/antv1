@@ -5,10 +5,7 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.option.Options;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
-import fr.florian.ants.antv1.util.resource.BasicResource;
-import fr.florian.ants.antv1.util.resource.ExtremelyRareResource;
-import fr.florian.ants.antv1.util.resource.NoiseResourcePlacer;
-import fr.florian.ants.antv1.util.resource.RareResource;
+import fr.florian.ants.antv1.util.resource.*;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
@@ -50,7 +47,8 @@ public class Application extends javafx.application.Application {
         PheromoneManager.forceInit();
         Map.getInstance().init(new NoiseResourcePlacer(seed, List.of(new BasicResource(null),
                 new RareResource(null),
-                new ExtremelyRareResource(null))));
+                new ExtremelyRareResource(null),
+                new FoodResource(null))));
         System.out.println("initialized map");
         GameTimer.init(2*60000);//2 minute
         GameTimer.getInstance().start();

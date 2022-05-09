@@ -26,6 +26,17 @@ public class ResourceLoader {
     public static final String SEED_4 = "seed_4.png";
     public static final String SEED_5 = "seed_5.png";
     public static final String ARROW = "arrow.png";
+    public static final String APPLE = "apple.png";
+    public static final String BURGER = "burger.png";
+    public static final String CARROT = "carrot.png";
+    public static final String CHERRY = "cherry.png";
+    public static final String EGG = "egg.png";
+    public static final String FRIES = "fries.png";
+    public static final String HAM = "ham.png";
+    public static final String PIZZA = "pizza.png";
+    public static final String STRAWBERRY = "strawberry.png";
+    public static final String SUSHI = "sushi.png";
+    public static final String WATERMELON = "watermelon.png";
 
     private final Map<String, Image> streams;
     private final ClassLoader loader;
@@ -54,6 +65,17 @@ public class ResourceLoader {
             instance.loadResource(SEED_4);
             instance.loadResource(SEED_5);
             instance.loadResource(ARROW);
+            instance.loadResource(APPLE);
+            instance.loadResource(BURGER);
+            instance.loadResource(CARROT);
+            instance.loadResource(CHERRY);
+            instance.loadResource(EGG);
+            instance.loadResource(FRIES);
+            instance.loadResource(HAM);
+            instance.loadResource(PIZZA);
+            instance.loadResource(STRAWBERRY);
+            instance.loadResource(SUSHI);
+            instance.loadResource(WATERMELON);
         }
         return instance;
     }

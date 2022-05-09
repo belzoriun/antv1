@@ -27,6 +27,8 @@ public class AntHillTile extends Tile{
 
     private static long currentId = 0L;
 
+    private int foodHeld;
+
     private final long uniqueId;
     private final Color color;
 
@@ -34,6 +36,7 @@ public class AntHillTile extends Tile{
 
     public AntHillTile()
     {
+        foodHeld = 0;
         this.uniqueId = currentId;
         currentId+= 1L;
         score = 0;
@@ -42,6 +45,18 @@ public class AntHillTile extends Tile{
                 , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT), color));
         ResourceLoader.getInstance().saveResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
                 , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANTHILL), color));
+    }
+
+    public void addFood()
+    {
+        foodHeld++;
+    }
+
+    public boolean consumeFood(int amount)
+    {
+        if(amount > foodHeld) return false;
+        foodHeld -= amount;
+        return true;
     }
 
     /**
@@ -112,10 +127,12 @@ public class AntHillTile extends Tile{
     public Node getInfoDisplay() {
         Label score = new Label("Score : "+getScore());
         Label id = new Label("Id : "+uniqueId);
+        Label food = new Label("Food : "+foodHeld);
 
         VBox node = new VBox();
         node.getChildren().add(id);
         node.getChildren().add(score);
+        node.getChildren().add(food);
 
         return node;
     }
