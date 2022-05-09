@@ -1,0 +1,12 @@
+module:fr.florian.ants.antv
+fr.florian.ants.antv1.living
+fr.florian.ants.antv1.living.ant
+fr.florian.ants.antv1.map
+fr.florian.ants.antv1.ui
+fr.florian.ants.antv1.util
+fr.florian.ants.antv1.util.exception
+fr.florian.ants.antv1.util.option
+fr.florian.ants.antv1.util.pheromone
+fr.florian.ants.antv1.util.resource
+fr.florian.ants.antv1.util.signals
+fr.florian.ants.antv1.util.statemachine
