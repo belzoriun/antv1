@@ -11,6 +11,8 @@ import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ public class QueenAnt extends Ant implements AntSignalSender {
     protected void executeAction() {
         if(timeOperationCounter <= 0) {
             AntOrder order = AntOrder.SEARCH_FOR_FOOD;
-            if(GameTimer.getInstance().getRemainingTimeFraction()<=0.3)
+            if(GameTimer.getInstance().getRemainingTime()<=30000 && !Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
             {
                 order = AntOrder.BACK_TO_COLONY;
             }
@@ -77,10 +79,10 @@ public class QueenAnt extends Ant implements AntSignalSender {
             if (a instanceof SoldierAnt s) {
                 companies.put(s, 0);
             } else if (a instanceof WorkerAnt w) {
-                if (companies.containsKey(w.getSolder())) {
-                    companies.put(w.getSolder(), companies.get(w.getSolder()) + 1);
+                if (companies.containsKey(w.getSoldier())) {
+                    companies.put(w.getSoldier(), companies.get(w.getSoldier()) + 1);
                 } else {
-                    companies.put(w.getSolder(), 0);
+                    companies.put(w.getSoldier(), 0);
                 }
             }
         }
@@ -125,5 +127,10 @@ public class QueenAnt extends Ant implements AntSignalSender {
     @Override
     public List<AntSignal> getSignalList() {
         return new ArrayList<>(signals);
+    }
+
+    @Override
+    public Node getDetailDisplay() {
+        return new Label("Sending signal in "+(TICKS_PER_OPERATION-timeOperationCounter)+" ticks");
     }
 }

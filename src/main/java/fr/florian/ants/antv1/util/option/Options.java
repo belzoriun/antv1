@@ -1,7 +1,9 @@
 package fr.florian.ants.antv1.util.option;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class used to manage options (parsing / saving / access)
@@ -9,6 +11,7 @@ import java.util.Map;
 public class Options {
 
     private final Map<String, String> options;
+    private final InputStream file;
 
     public Options()
     {
@@ -21,6 +24,33 @@ public class Options {
         set(OptionKey.WORKER_PER_SOLDIER, 10);
         set(OptionKey.SIMULATION_TIME, 2);
         set(OptionKey.INFINITE_SIMULATION, false);
+        file = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("options.txt"));
+    }
+
+    public void load()
+    {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(file)))
+        {
+            String line = reader.readLine();
+            while(line != null) {
+                options.put(line.split(":")[0].trim(), line.split(":")[1].trim());
+                line = reader.readLine();
+            }
+        } catch (IOException ignore) {
+        }
+    }
+
+    public void save()
+    {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(this.getClass().getClassLoader().getResource("options.txt").getFile())))
+        {
+            for(Map.Entry<String, String> entry : options.entrySet())
+            {
+                writer.write(entry.getKey()+" : "+entry.getValue()+"\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void set(OptionKey name, int value)

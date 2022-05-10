@@ -99,6 +99,10 @@ public class GameTimer {
 
     public double getRemainingTimeFraction()
     {
+        if(Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
+        {
+            return 1;
+        }
         return remainingTime/(double)totalTime;
     }
 

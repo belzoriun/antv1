@@ -7,6 +7,7 @@ import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.geometry.Insets;
+import javafx.scene.DepthTest;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
@@ -37,6 +38,8 @@ public class TileDetail extends VBox {
         this.ants = new HBox();
         ants.setSpacing(10);
         detail = new TitledPane();
+        detail.setCollapsible(false);
+
         detail.setText("Detail");
 
         getChildren().add(title);

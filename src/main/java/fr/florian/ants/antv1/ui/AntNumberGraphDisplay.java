@@ -93,6 +93,10 @@ public class AntNumberGraphDisplay extends Pane implements Runnable{
                             score.setLowerBound(previousMin - 100);
                         }
                         previousMin = min;
+                        if(max-previousMin > 10000)
+                        {
+                            previousMin = max-10000;
+                        }
                     }
                 });
             }

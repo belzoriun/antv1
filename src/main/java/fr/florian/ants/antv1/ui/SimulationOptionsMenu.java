@@ -15,8 +15,9 @@ public class SimulationOptionsMenu extends BorderPane {
 
     private static final int WARN_NB_ANTS = 1000;
 
-    public SimulationOptionsMenu()
+    public void init()
     {
+        getChildren().clear();
         VBox box = new VBox();
         box.setAlignment(Pos.CENTER);
         box.setSpacing(20);
@@ -28,6 +29,7 @@ public class SimulationOptionsMenu extends BorderPane {
         addIntInput(box, OptionKey.SOLDIER_PER_QUEEN);
         addIntInput(box, OptionKey.WORKER_PER_SOLDIER);
         TextField time = addIntInput(box, OptionKey.SIMULATION_TIME);
+        time.setDisable(Application.options.getBoolean(OptionKey.INFINITE_SIMULATION));
         addBoolInput(box, OptionKey.INFINITE_SIMULATION).selectedProperty().addListener((observable, oldValue, newValue)->{
             time.setDisable(newValue);
         });
@@ -65,9 +67,11 @@ public class SimulationOptionsMenu extends BorderPane {
                 Application.switchToGameScreen();
                 Application.initGame();
             }
+            Application.options.save();
         });
         Button back = new Button("Back");
         back.setOnAction(e->{
+            Application.options.save();
             Application.switchToMenuScreen();
         });
         HBox buttonPane = new HBox();
@@ -88,9 +92,11 @@ public class SimulationOptionsMenu extends BorderPane {
         input.setText(Application.options.getInt(key)+"");
         input.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                input.setText(newValue.replaceAll("[^\\d]", ""));
+                newValue = newValue.replaceAll("[^\\d]", "");
+                input.setText(newValue);
             }
-            Application.options.set(key, Integer.parseInt(input.getText()));
+            if(!newValue.isEmpty())
+                Application.options.set(key, Integer.parseInt(newValue));
         });
         field.getChildren().add(input);
         box.getChildren().add(field);

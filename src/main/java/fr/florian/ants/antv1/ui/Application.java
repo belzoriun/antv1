@@ -88,6 +88,8 @@ public class Application extends javafx.application.Application {
 
     public static void switchToOptionScreen()
     {
+        options.load();
+        optionMenu.init();
         stage.getScene().setRoot(optionMenu);
     }
 

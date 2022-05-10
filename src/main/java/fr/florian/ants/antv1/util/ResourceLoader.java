@@ -44,7 +44,7 @@ public class ResourceLoader {
     private ResourceLoader()
     {
         streams = new HashMap<>();
-        loader = this.getClass().getClassLoader();
+        loader = ResourceLoader.class.getClassLoader();
     }
 
     public static ResourceLoader getInstance()
@@ -89,7 +89,7 @@ public class ResourceLoader {
     {
         if(!streams.containsKey(res))
         {
-            streams.put(res, new Image(Objects.requireNonNull(loader.getResourceAsStream(res))));
+            streams.put(res, new Image(loader.getResourceAsStream(res)));
         }
         return streams.get(res);
     }

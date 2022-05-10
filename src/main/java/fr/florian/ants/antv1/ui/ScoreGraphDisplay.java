@@ -94,6 +94,10 @@ public class ScoreGraphDisplay extends Pane implements Runnable{
                             score.setLowerBound(previousMin - 300);
                         }
                         previousMin = min;
+                        if(max-previousMin > 10000)
+                        {
+                            previousMin = max-10000;
+                        }
                     }
                 });
             }

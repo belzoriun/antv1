@@ -31,9 +31,11 @@ public class WorldView extends Pane {
     public static double MIN_TILE_SIZE = 15;
     private static double MAX_TILE_SIZE = 70;
     private static final float ZOOM_FACTOR = 1.05f;
+    private static Living followed;
 
     private DisplayType displayType;
     private TileDetail detail;
+    private LivingDetailDisplay livingDetail;
 
     private final Canvas canvas;
     private final MarkerManager manager = new MarkerManager();
@@ -53,6 +55,7 @@ public class WorldView extends Pane {
     public void init()
     {
         detail = new TileDetail();
+        livingDetail = new LivingDetailDisplay();
         displayType = DisplayType.DEFAULT;
         double futureTileSize = TILE_SIZE;
         double heightTileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
@@ -115,6 +118,7 @@ public class WorldView extends Pane {
                 GameTimer.getInstance().setTickTimeDefault();
             }
             else if(e.isSecondaryButtonDown()) {
+                followed = null;
                 Vector pos = new Vector(e.getSceneX(), e.getSceneY());
                 pos = new Vector(pos.getX()-manager.getOriginX()*TILE_SIZE, pos.getY()- manager.getOriginY()*TILE_SIZE).multi(1/TILE_SIZE);
                 pos = new Vector((int)(pos.getX()), (int)(pos.getY()));
@@ -127,6 +131,7 @@ public class WorldView extends Pane {
                 Vector trans = manager.toWorldPoint(new Vector(e.getSceneX(), e.getSceneY()));
                 manager.translateOrigin(new Vector(trans.getX() - point.getX(), trans.getY() - point.getY()).multi(1 / TILE_SIZE));
                 clickPoint = new Vector(e.getSceneX(), e.getSceneY());
+                followed = null;
             }
         });
         canvas.setOnScroll((ScrollEvent e)->{
@@ -151,6 +156,10 @@ public class WorldView extends Pane {
         detail.setTranslateX(10);
         detail.setTranslateY(10);
         getChildren().add(detail);
+        getChildren().add(livingDetail);
+        livingDetail.setVisible(false);
+        livingDetail.setTranslateX(250);
+        livingDetail.setTranslateY(10);
 
         for(AntHillTile hill : Map.getInstance().getAntHills())
         {
@@ -184,7 +193,25 @@ public class WorldView extends Pane {
      */
     public void displayAll()
     {
+        if(followed != null && !followed.isAlive())
+        {
+            followed = null;
+        }
         detail.update();
+        if(followed != null)
+        {
+            livingDetail.displayFor(followed);
+            livingDetail.setVisible(true);
+            livingDetail.update();
+        }
+        else
+        {
+            livingDetail.setVisible(false);
+        }
+        if(followed != null && followed.getPosition() != null)
+        {
+            goTo(followed.getPosition());
+        }
         if(manager.getOriginX() > 0)
         {
             manager.translateOrigin(new Vector(-manager.getOriginX(), 0));
@@ -236,8 +263,14 @@ public class WorldView extends Pane {
                 if (displayPoint.getX() + TILE_SIZE >= 0
                         && displayPoint.getX() - TILE_SIZE <= canvas.getWidth()
                         && displayPoint.getY() + TILE_SIZE >= 0
-                        && displayPoint.getY() - TILE_SIZE <= canvas.getHeight())
+                        && displayPoint.getY() - TILE_SIZE <= canvas.getHeight()) {
                     l.draw(context, displayPoint);
+                    if(l.equals(followed))
+                    {
+                        context.setFill(Color.YELLOW);
+                        context.strokeOval(displayPoint.getX()+TILE_SIZE/4, displayPoint.getY()+TILE_SIZE/4, TILE_SIZE/2, TILE_SIZE/2);
+                    }
+                }
                 if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
                     List<AntSignal> signals = sender.getSignalList();
                     for (AntSignal s : signals) {
@@ -282,6 +315,11 @@ public class WorldView extends Pane {
         Vector anchor = new Vector(widthProperty().get()/TILE_SIZE/2, heightProperty().get()/TILE_SIZE/2);
         Vector pos = manager.toWorldPoint(position);
         manager.translateOrigin(anchor.add(pos.multi(-1)));
+    }
+
+    public static void follow(Living l)
+    {
+        followed = l;
     }
 
     public void drawArrows(GraphicsContext context)

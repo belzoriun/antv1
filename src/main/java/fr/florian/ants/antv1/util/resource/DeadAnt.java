@@ -36,9 +36,12 @@ public class DeadAnt extends Resource implements Drawable {
 
     @Override
     public void onDeposit(AntHillTile tile){
-        dead.revive();
-        dead.setPosition(Map.getInstance().getTilePosition(tile));
-        tile.makeSpawn(dead, true);
+        Vector pos = Map.getInstance().getTilePosition(tile);
+        if(pos != null) {
+            dead.revive();
+            dead.setPosition(pos);
+            tile.makeSpawn(dead, true);
+        }
     }
 
     @Override

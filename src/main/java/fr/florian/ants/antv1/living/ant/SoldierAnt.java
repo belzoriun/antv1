@@ -8,6 +8,8 @@ import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -87,5 +89,10 @@ public class SoldierAnt extends Ant implements AntSignalSender{
         AntSubscription sub = new AntSubscription(subscriber, executor);
         subs.add(sub);
         subscriber.onSubscribe(sub);
+    }
+
+    @Override
+    public Node getDetailDisplay() {
+        return new Label("This ant is purely random (for now)");
     }
 }

@@ -30,9 +30,17 @@ public abstract class Ant extends Living implements AntSignalReceiver {
     private final int strength;
     private AntSubscription sub;
 
-    protected Direction headingDirection;
-
     private final Color color;
+
+    protected Ant(long anthillId, Color color, Vector initialPosition, double size, int strength) {
+        super(initialPosition);
+        this.strength = strength;
+        if(size <= 0) size = 1;
+        if(size > MAX_SIZE) size = MAX_SIZE;
+        this.size = size;
+        this.uniqueAnthillId = anthillId;
+        this.color = color;
+    }
 
     public int getStrength()
     {
@@ -173,17 +181,6 @@ public abstract class Ant extends Living implements AntSignalReceiver {
      * @param order the received order
      */
     protected abstract void onOrderReceived(AntOrder order);
-
-    protected Ant(long anthillId, Color color, Vector initialPosition, double size, int strength) {
-        super(initialPosition);
-        headingDirection = Direction.UP;
-        this.strength = strength;
-        if(size <= 0) size = 1;
-        if(size > MAX_SIZE) size = MAX_SIZE;
-        this.size = size;
-        this.uniqueAnthillId = anthillId;
-        this.color = color;
-    }
 
     /**
      * draws the ant

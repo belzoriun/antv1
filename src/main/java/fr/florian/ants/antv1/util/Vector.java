@@ -67,6 +67,13 @@ public record Vector(double x, double y) {
     public double angle(Vector vector) {
         return Math.acos(vector.scalar(this) / (magnitude() * vector.magnitude())) * 180 / Math.PI;
     }
+    public double angle(Vector vector, boolean rad) {
+        if(!rad)
+        {
+            return angle(vector);
+        }
+        return Math.acos(vector.scalar(this) / (magnitude() * vector.magnitude()));
+    }
 
     public double scalar(Vector v) {
         return v.getX() * x + v.getY() * y;

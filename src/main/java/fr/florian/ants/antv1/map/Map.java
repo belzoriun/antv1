@@ -143,7 +143,7 @@ public class Map {
     public Tile getTile(Vector pos)
     {
         if(pos.getX()<0|| pos.getX()>Application.options.getInt(OptionKey.MAP_WIDTH)||pos.getY()<0||pos.getY()>Application.options.getInt(OptionKey.MAP_HEIGHT))
-            return  null;
+            return null;
         return tiles.get(pos);
     }
 
@@ -185,6 +185,7 @@ public class Map {
                 }
             }
             for (Living l : trash) {
+
                 livings.remove(l);
             }
             return livings.size();
@@ -200,7 +201,7 @@ public class Map {
         List<Living> res = new ArrayList<>();
         synchronized (livings) {
             for (Living l : livings) {
-                if (l.getPosition().equals(position)) {
+                if (l != null && l.getPosition() != null && l.getPosition().equals(position)) {
                     res.add(l);
                 }
             }

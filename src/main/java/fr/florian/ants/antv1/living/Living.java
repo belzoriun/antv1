@@ -1,8 +1,10 @@
 package fr.florian.ants.antv1.living;
 
+import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
+import javafx.scene.Node;
 
 /**
  * The class representing a living entity
@@ -11,9 +13,11 @@ public abstract class Living implements Runnable, Drawable {
 
     private boolean alive;
     protected Vector position;
+    protected Direction headingDirection;
 
     protected Living(Vector pos)
     {
+        headingDirection = Direction.UP;
         this.alive= true;
         position = pos;
     }
@@ -72,4 +76,5 @@ public abstract class Living implements Runnable, Drawable {
     {
         alive = true;
     }
+    public abstract Node getDetailDisplay();
 }

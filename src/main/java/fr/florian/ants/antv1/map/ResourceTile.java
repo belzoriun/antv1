@@ -10,13 +10,15 @@ import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class representing a resource spot (can be empty)
@@ -24,10 +26,13 @@ import java.util.Map;
 public class ResourceTile extends Tile {
 
     private final List<Resource> resources;
+    private VBox detailNode;
+    private java.util.Map<Living, Button> followBottons;
 
     public ResourceTile(List<Resource> resources)
     {
         this.resources = resources;
+        followBottons = new HashMap<>();
     }
 
     public List<Resource> getResources()
@@ -97,17 +102,95 @@ public class ResourceTile extends Tile {
                     res.put(r.getClass(), 1);
                 }
             }
-            for(Map.Entry<Class<? extends Resource>, Integer> entry : res.entrySet())
+            for(java.util.Map.Entry<Class<? extends Resource>, Integer> entry : res.entrySet())
             {
                 if(entry.getValue() > 0) {
                     Label l = new Label(entry.getKey().getSimpleName() + " : " + entry.getValue());
                     detail.getChildren().add(l);
                 }
             }
-            VBox node = new VBox();
-            node.getChildren().add(totalResource);
-            node.getChildren().add(detail);
-            return node;
+            if(detailNode == null) {
+
+                detailNode=new VBox();
+                VBox antsPane = new VBox();
+                List<Living> ants = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
+                for (Living ant : ants) {
+                    HBox box = new HBox();
+                    Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
+                    box.getChildren().add(l);
+                    if (!followBottons.containsKey(ant)) {
+                        Button b = new Button("Follow");
+                        b.setOnAction(e -> {
+                            WorldView.follow(ant);
+                        });
+                        followBottons.put(ant, b);
+                    }
+                    box.getChildren().add(followBottons.get(ant));
+                    antsPane.getChildren().add(box);
+                }
+
+                detailNode.getChildren().add(totalResource);
+                detailNode.getChildren().add(detail);
+                ScrollPane antScroll = new ScrollPane();
+                antScroll.setContent(antsPane);
+                antScroll.setMaxHeight(200);
+                detailNode.getChildren().add(antScroll);
+            }
+            else
+            {
+                detailNode.getChildren().get(2).setVisible(true);
+                detailNode.getChildren().set(0, totalResource);
+                detailNode.getChildren().set(1, detail);
+                VBox pane = (VBox) ((ScrollPane)detailNode.getChildren().get(2)).getContent();
+
+                List<Living> ants = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
+                if(ants.isEmpty())
+                {
+                    pane.getChildren().clear();
+                    detailNode.getChildren().get(2).setVisible(false);
+                }
+                for (Living ant : ants) {
+                    boolean found = false;
+                    List<Node> trash = new ArrayList<>();
+                    for(Node node : pane.getChildren())
+                    {
+                        HBox box = (HBox)node;
+                        for(java.util.Map.Entry<Living, Button> entry : followBottons.entrySet()) {
+                            if (entry.getValue().equals(box.getChildren().get(1))) {
+                                found = true;
+                                if (!ant.isAlive()) {
+                                    trash.add(node);
+                                } else {
+                                    ((Label) box.getChildren().get(0)).setText(ant.getClass().getSimpleName() + " " + ant.getPosition());
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    if(!found)
+                    {
+                        HBox box = new HBox();
+                        Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
+                        box.getChildren().add(l);
+                        if (!followBottons.containsKey(ant)) {
+                            Button b = new Button("Follow");
+                            b.setOnAction(e -> {
+                                WorldView.follow(ant);
+                            });
+                            followBottons.put(ant, b);
+                        }
+                        box.getChildren().add(followBottons.get(ant));
+                        pane.getChildren().add(box);
+                    }
+                    for(Node n:trash)
+                    {
+                        pane.getChildren().remove(n);
+                    }
+                }
+
+            }
+
+            return detailNode;
         }
     }
 

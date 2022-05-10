@@ -1,0 +1,7 @@
+mapwidth : 50
+mapheiht : 50
+anthillsnb : 3
+soldierperqueen : 5
+workerpersoldier : 10
+duration : 2
+infinitesimulation : false
