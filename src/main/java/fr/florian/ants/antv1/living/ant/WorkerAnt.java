@@ -10,6 +10,8 @@ import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.HeldResourceList;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone;
+import fr.florian.ants.antv1.util.resource.DeadAnt;
+import fr.florian.ants.antv1.util.resource.Resource;
 import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -51,6 +53,13 @@ public class WorkerAnt extends Ant {
                             takeResource(res);
                             return;
                         }
+                        else
+                        {
+                            if(!heldResources.getAll().stream().filter(r->r instanceof DeadAnt).toList().isEmpty())
+                            {
+                                stateMachine.setTransition("fullofresources");
+                            }
+                        }
                     }
                     Direction[] dirs = Direction.values();
                     List<Direction> selection = new ArrayList<>();
@@ -62,6 +71,12 @@ public class WorkerAnt extends Ant {
                             if(next instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)
                             {
                                 continue;
+                            }
+                            if(next instanceof ResourceTile rt && !rt.getResources().isEmpty())
+                            {
+                                selection.clear();
+                                selection.add(dir);
+                                break;
                             }
                             if (next.getPheromoneLevel(uniqueAnthillId, FoodSourcePheromone.class) > pheromoneLvl) {
                                 selection = new ArrayList<>();
