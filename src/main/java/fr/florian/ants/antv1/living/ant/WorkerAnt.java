@@ -13,6 +13,7 @@ import fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone;
 import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -28,7 +29,6 @@ public class WorkerAnt extends Ant {
     private final HeldResourceList heldResources;
     private List<Vector> path;
     private final List<Vector> deadCells;
-    private StateMachine stateMachine;
     private boolean pathCleared;
     private final SoldierAnt soldier;
 
@@ -41,7 +41,7 @@ public class WorkerAnt extends Ant {
         soldier.subscribe(this);
         this.soldier = soldier;
 
-        stateMachine = new StateMachine.StateMachineBuilder()
+        initCore(new StateMachine.StateMachineBuilder()
             .addState("food", ()->{
                 pathCleared = false;
                 Tile t = Map.getInstance().getTile(position);
@@ -74,10 +74,14 @@ public class WorkerAnt extends Ant {
                     }
                     if (selection.isEmpty()) {
                         deadCells.add(position);
-                        Vector newPos = path.remove(path.size() - 1);
-                        headingDirection = Direction.fromOffset(position.add(newPos.multi(-1)));
-                        synchronized (Map.getInstance().getTile(position)) {
-                            position = newPos;
+                        path.remove(path.size() - 1);
+                        if(!path.isEmpty())
+                        {
+                            Vector newPos = path.get(path.size()-1);
+                            headingDirection = Direction.fromOffset(position.add(newPos.multi(-1)));
+                            synchronized (Map.getInstance().getTile(position)) {
+                                position = newPos;
+                            }
                         }
                     } else {
                         Direction dir = selection.get(Application.random.nextInt(0, selection.size()));
@@ -106,16 +110,23 @@ public class WorkerAnt extends Ant {
                             }
                         } else {
                             headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
-                            Vector newPos = path.remove(path.size() - 1);
-                            synchronized (Map.getInstance().getTile(position)) {
-                                t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
-                                this.position = newPos;
+                            path.remove(path.size() - 1);
+                            if(!path.isEmpty()) {
+                                Vector newPos = path.get(path.size() - 1);
+                                synchronized (Map.getInstance().getTile(position)) {
+                                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
+                                    this.position = newPos;
+                                }
                             }
                         }
                     }
                 }
             })
             .addState("tocolony", ()->{
+                if(!pathCleared) {
+                    pathCleared = true;
+                    clearPath(path);
+                }
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
                     if (t instanceof AntHillTile antHill && antHill.getUniqueId() == this.uniqueAnthillId) {
@@ -124,21 +135,23 @@ public class WorkerAnt extends Ant {
                             this.path.clear();
                             this.path.add(position);
                             this.deadCells.clear();
-                            stateMachine.setTransition("backToFood");
+                            stateMachine.setTransition("backtofood");
                         }
                         else {
                             antHill.onInteract(this);
                         }
                     } else {
+                        path.remove(path.size() - 1);
                         if (path.isEmpty()) {
                             if (t instanceof ResourceTile rt) {
                                 while (!getResources().isEmpty()) {
-                                    rt.getResources().add(getResources().remove());
+                                    rt.placeResource(getResources().remove());
                                 }
                             }
+                            stateMachine.setTransition("backToFood");
                         } else {
                             headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
-                            Vector newPos = path.remove(path.size() - 1);
+                            Vector newPos =path.get(path.size() - 1) ;
                             synchronized (Map.getInstance().getTile(position)) {
                                 t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                                 this.position = newPos;
@@ -155,17 +168,17 @@ public class WorkerAnt extends Ant {
             .addStateLink("tocolony", "stayincolony", "stayincolony")
             .addStateLink("food", "stayincolony", "stayincolony")
             .addStateLink("stayincolony", "food", "backtofood")
-            .get("food");
+            .get("food"));
     }
 
-    public SoldierAnt getSoldier()
+    public final SoldierAnt getSoldier()
     {
         return this.soldier;
     }
 
     public List<Vector> getPath()
     {
-        return path;
+        return new ArrayList<>(path);
     }
 
     /**
@@ -174,27 +187,46 @@ public class WorkerAnt extends Ant {
      */
     private void clearPath(List<Vector> in)
     {
-        int i = in.size()-2;
-        while(i > 1)
+        int i = in.size()-1;
+        while(i >= 1)
         {
-            boolean loop = false;
             List<Vector> trash = new ArrayList<>();
-            for(int j = i-1; j>0; j--)
+            List<List<Vector>> tests = new ArrayList<>();
+            for(int j = i-1; j>=0; j--)
             {
-                trash.add(in.get(j));
-                if(in.get(i).equals(in.get(j)))
+                if((in.get(j).left().equals(in.get(i)) ||
+                        in.get(j).right().equals(in.get(i)) ||
+                        in.get(j).up().equals(in.get(i)) ||
+                        in.get(j).down().equals(in.get(i))) && j+1 != i)
                 {
-                    loop = true;
-                    break;
+                    List<Vector> trashTest = new ArrayList<>();
+                    for(int s = j+1; s<=i-1; s++)
+                    {
+                        trashTest.add(in.get(s));
+                    }
+                    if(!trashTest.isEmpty()) {
+                        tests.add(trashTest);
+                    }
                 }
             }
-            if(loop)
+            for(List<Vector> test : tests)
+            {
+                if(test.size() > trash.size())
+                {
+                    trash = test;
+                }
+            }
+            if(!trash.isEmpty())
             {
                 in.removeAll(trash);
             }
             else
             {
                 i--;
+            }
+            if(i > in.size()-2)
+            {
+                i = in.size()-1;
             }
         }
     }
@@ -203,10 +235,6 @@ public class WorkerAnt extends Ant {
     protected void executeAction() {
         if(this.heldResources.isFull() || this.isWeak())
         {
-            if(!pathCleared) {
-                pathCleared = true;
-                clearPath(path);
-            }
             stateMachine.setTransition("fullofresources");
         }
         stateMachine.step();
@@ -236,13 +264,8 @@ public class WorkerAnt extends Ant {
     @Override
     public Node getDetailDisplay() {
         VBox box = new VBox();
-        box.setSpacing(5);
-        Label currentState = new Label("current state : "+stateMachine.getCurrentState());
-        box.getChildren().add(currentState);
-
-        box.getChildren().add(stateMachine.getAsCanvas());
-
-
+        box.getChildren().add(new Label("Held resource amount : "+heldResources.size()));
+        box.getChildren().add(new ImageView(stateMachine.getAsImage()));
         return box;
     }
 }

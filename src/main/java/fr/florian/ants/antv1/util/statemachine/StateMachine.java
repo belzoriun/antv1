@@ -1,8 +1,11 @@
 package fr.florian.ants.antv1.util.statemachine;
 
 import fr.florian.ants.antv1.util.Vector;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 import java.util.*;
@@ -15,6 +18,9 @@ public class StateMachine {
     private final Map<String, Boolean> transitions;
     private final Map<StateTransition, String> stateLinks;
     private String currentState;
+
+    private String lastState;
+    private String lastTransition;
 
     public String getCurrentState() {
         return currentState;
@@ -106,6 +112,7 @@ public class StateMachine {
 
     public void setTransition(String name)
     {
+        lastTransition = name;
         if(transitions.containsKey(name))
         {
             for(Map.Entry<String, Boolean> entry : transitions.entrySet())
@@ -127,6 +134,7 @@ public class StateMachine {
      */
     public void step()
     {
+        lastState = currentState;
         for(Map.Entry<StateTransition, String> entry : stateLinks.entrySet())
         {
             if(Objects.equals(entry.getKey().getState(), currentState) && transitions.get(entry.getKey().getTransition()))
@@ -139,7 +147,7 @@ public class StateMachine {
         states.get(currentState).call();
     }
 
-    public Canvas getAsCanvas()
+    public Image getAsImage()
     {
         double circleSize = 60;
         int circleByLine;
@@ -163,13 +171,14 @@ public class StateMachine {
         for(String state : getStates())
         {
             context.setFill(Color.BLACK);
+            context.setStroke(Color.BLACK);
             if(Objects.equals(getCurrentState(), state))
             {
-                context.setStroke(Color.YELLOW);
+                context.setFill(Color.YELLOWGREEN);
             }
-            else
+            if(lastState == state)
             {
-                context.setStroke(Color.BLACK);
+                context.setStroke(Color.GREEN);
             }
             int yindex = getStates().indexOf(state)/circleByLine;
             int xindex = getStates().indexOf(state)%circleByLine;
@@ -179,7 +188,13 @@ public class StateMachine {
 
             context.strokeOval(x, y, circleSize, circleSize);
 
-            context.fillText(state, x+5, y+circleSize/2+5, circleSize-10);
+            double textX = x+5;
+            double v = circleSize / 2 - (state.length() * 6.5) / 2.0;
+            if(v >= 0)
+            {
+                textX += v;
+            }
+            context.fillText(state, textX, y+circleSize/2+5, circleSize-10);
 
             statePositions.put(state, new fr.florian.ants.antv1.util.Vector(x+circleSize/2, y+circleSize/2));
         }
@@ -190,10 +205,10 @@ public class StateMachine {
             {
                 context.setStroke(Color.BLACK);
                 context.setFill(Color.BLACK);
-                if(isTransitionSatisfied(transition))
+                if(transition == lastTransition)
                 {
-                    context.setStroke(Color.YELLOW);
-                    context.setFill(Color.YELLOW);
+                    context.setStroke(Color.GREEN);
+                    context.setFill(Color.GREEN);
                 }
                 String toward = getStateToward(entry.getKey(), transition);
                 if(toward == null)
@@ -202,19 +217,19 @@ public class StateMachine {
                 }
                 fr.florian.ants.antv1.util.Vector towardPos = statePositions.get(toward);
                 fr.florian.ants.antv1.util.Vector v = entry.getValue().add(towardPos.multi(-1));
-                double angle = v.angle(new Vector(1, 0), true);
-                if(entry.getValue().getY() < towardPos.getY())
+                double angle =v.angle(new Vector(1, 0), true);
+                if(towardPos.getY() > entry.getValue().getY())
                 {
-                    angle -= Math.PI/2;
+                    angle = Math.PI*2-angle;
                 }
                 double aoff = Math.PI/20;
                 double xoff1 = Math.cos(angle+aoff)*circleSize/2;
                 double yoff1 = Math.sin(angle+aoff)*circleSize/2;
-                double xoff2 = Math.cos(angle-aoff)*circleSize/2;
-                double yoff2 = Math.sin(angle-aoff)*circleSize/2;
+                double xoff2 = Math.cos(angle+Math.PI-aoff)*circleSize/2;
+                double yoff2 = Math.sin(angle+Math.PI-aoff)*circleSize/2;
 
                 context.strokeLine(entry.getValue().getX()-xoff1, entry.getValue().getY()-yoff1,
-                        towardPos.getX()+xoff2, towardPos.getY()+yoff2);
+                        towardPos.getX()-xoff2, towardPos.getY()-yoff2);
 
                 double arrowSize = 10;
                 double arroffx = Math.cos(angle+Math.PI-Math.PI/6)*arrowSize;
@@ -223,15 +238,15 @@ public class StateMachine {
                 double arroffx1 = Math.cos(angle+Math.PI+Math.PI/6)*arrowSize;
                 double arroffy1 = Math.sin(angle+Math.PI+Math.PI/6)*arrowSize;
 
-                Vector left = new Vector(towardPos.getX()+xoff2-arroffx, towardPos.getY()+yoff2-arroffy);
-                Vector right = new Vector(towardPos.getX()+xoff2-arroffx1, towardPos.getY()+yoff2-arroffy1);
-                context.fillPolygon(new double[]{towardPos.getX()+xoff2, left.getX(), right.getX(), towardPos.getX()+xoff2},
-                        new double[]{towardPos.getY()+yoff2, left.getY(), right.getY(), towardPos.getY()+yoff2}, 4);
+                Vector left = new Vector(towardPos.getX()-xoff2-arroffx, towardPos.getY()-yoff2-arroffy);
+                Vector right = new Vector(towardPos.getX()-xoff2-arroffx1, towardPos.getY()-yoff2-arroffy1);
+                context.fillPolygon(new double[]{towardPos.getX()-xoff2, left.getX(), right.getX(), towardPos.getX()-xoff2},
+                        new double[]{towardPos.getY()-yoff2, left.getY(), right.getY(), towardPos.getY()-yoff2}, 4);
 
                 int textLength = transition.length();
                 double textAngle = angle*180/Math.PI;
-                double medX = (towardPos.getX()+xoff2+entry.getValue().getX()-xoff1)/2;
-                double medY = (towardPos.getY()+yoff2+entry.getValue().getY()-yoff1)/2;
+                double medX = (towardPos.getX()-xoff2+entry.getValue().getX()-xoff1)/2;
+                double medY = (towardPos.getY()-yoff2+entry.getValue().getY()-yoff1)/2;
                 context.save();
                 if(entry.getValue().getY() < towardPos.getY()) {
                     context.translate(medX, medY);
@@ -242,9 +257,9 @@ public class StateMachine {
                 }
 
                 double offset = -10;
-                if(textAngle > 90 && textAngle < 360)
+                if(textAngle > 90 && (towardPos.getY() < entry.getValue().getY() || towardPos.getX() > entry.getValue().getX()))
                 {
-                    textAngle-=180;
+                    textAngle -= 180;
                     offset = 10;
                 }
                 context.rotate(textAngle);
@@ -255,6 +270,8 @@ public class StateMachine {
         }
 
         context.restore();
-        return canvas;
+        WritableImage image = new WritableImage((int) canvas.getWidth()+1, (int) canvas.getHeight()+1);
+        canvas.snapshot(new SnapshotParameters(), image);
+        return image;
     }
 }

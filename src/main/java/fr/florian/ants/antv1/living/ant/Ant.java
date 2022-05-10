@@ -10,6 +10,7 @@ import fr.florian.ants.antv1.util.*;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalReceiver;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;

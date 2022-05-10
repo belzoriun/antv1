@@ -36,16 +36,23 @@ public class AntHillTile extends Tile{
     private int foodHeld;
     private VBox detailNode;
 
+    private VBox ants;
+    private Label scoreLbl;
+    private Label id;
+    private Label food;
+
     private final long uniqueId;
     private final Color color;
 
-    private java.util.Map<Ant, Button> followBottons;
+    private java.util.Map<Ant, HBox> followBottons;
 
     private int score;
 
     public AntHillTile()
     {
         followBottons = new HashMap<>();
+        detailNode = new VBox();
+
         foodHeld = 0;
         this.uniqueId = currentId;
         currentId+= 1L;
@@ -55,6 +62,20 @@ public class AntHillTile extends Tile{
                 , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANT), color));
         ResourceLoader.getInstance().saveResource("anthill"+color.getRed()+":"+color.getGreen()+":"+color.getBlue()
                 , ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.ANTHILL), color));
+
+        scoreLbl = new Label("Score : " + getScore());
+        id = new Label("Id : " + uniqueId);
+        food = new Label("Food : " + foodHeld);
+        ants = new VBox();
+
+        ScrollPane scroll = new ScrollPane();
+        scroll.setContent(ants);
+        scroll.setMaxHeight(200);
+        scroll.setPrefWidth(200);
+        detailNode.getChildren().add(scoreLbl);
+        detailNode.getChildren().add(id);
+        detailNode.getChildren().add(food);
+        detailNode.getChildren().add(scroll);
     }
 
     public void addFood()
@@ -135,84 +156,55 @@ public class AntHillTile extends Tile{
 
     @Override
     public Node getInfoDisplay() {
-        Label score = new Label("Score : " + getScore());
-        Label id = new Label("Id : " + uniqueId);
-        Label food = new Label("Food : " + foodHeld);
-        if(detailNode == null) {
 
-            VBox antsPane = new VBox();
-            List<Ant> ants = Map.getInstance().getAntsOf(uniqueId);
-            for (Ant ant : ants) {
+        scoreLbl.setText("Score : " + getScore());
+        id.setText("Id : " + uniqueId);
+        food.setText("Food : " + foodHeld);
+
+        List<Ant> antsList = Map.getInstance().getAntsOf(uniqueId);
+
+
+        List<Node> trash = new ArrayList<>();
+        List<Ant> trashAnt = new ArrayList<>();
+        for(java.util.Map.Entry<Ant, HBox> entry : followBottons.entrySet()) {
+            if (!entry.getKey().isAlive() && !antsList.contains(entry.getKey())) {
+                trash.add(entry.getValue());
+                trashAnt.add(entry.getKey());
+                break;
+            }
+        }
+
+        for (Ant ant : antsList) {
+            for(java.util.Map.Entry<Ant, HBox> entry : followBottons.entrySet()) {
+                if (entry.getKey().equals(ant)) {
+                    if (!ant.isAlive()) {
+                        trash.add(entry.getValue());
+                        trashAnt.add(entry.getKey());
+                    }
+                    else {
+                        ((Label) entry.getValue().getChildren().get(0)).setText(ant.getClass().getSimpleName() + " " + ant.getPosition());
+                    }
+                    break;
+                }
+            }
+            if (!followBottons.containsKey(ant)) {
                 HBox box = new HBox();
                 Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
                 box.getChildren().add(l);
-                if (!followBottons.containsKey(ant)) {
-                    Button b = new Button("Follow");
-                    b.setOnAction(e -> {
-                        WorldView.follow(ant);
-                    });
-                    followBottons.put(ant, b);
-                }
-                box.getChildren().add(followBottons.get(ant));
-                antsPane.getChildren().add(box);
+                Button b = new Button("Follow");
+                b.setOnAction(e -> {
+                    WorldView.follow(ant);
+                });
+                box.getChildren().add(b);
+                ants.getChildren().add(box);
+                followBottons.put(ant, box);
             }
-
-            detailNode = new VBox();
-            detailNode.getChildren().add(id);
-            detailNode.getChildren().add(score);
-            detailNode.getChildren().add(food);
-            ScrollPane antScroll = new ScrollPane();
-            antScroll.setContent(antsPane);
-            antScroll.setMaxHeight(200);
-            detailNode.getChildren().add(antScroll);
         }
-        else
-        {
-            detailNode.getChildren().set(0, id);
-            detailNode.getChildren().set(1, score);
-            detailNode.getChildren().set(2, food);
-            VBox pane = (VBox) ((ScrollPane)detailNode.getChildren().get(3)).getContent();
-
-            List<Ant> ants = Map.getInstance().getAntsOf(uniqueId);
-            for (Ant ant : ants) {
-                boolean found = false;
-                List<Node> trash = new ArrayList<>();
-                for(Node node : pane.getChildren())
-                {
-                    HBox box = (HBox)node;
-                    for(java.util.Map.Entry<Ant, Button> entry : followBottons.entrySet()) {
-                        if (entry.getValue().equals(box.getChildren().get(1)) && entry.getKey().equals(ant)) {
-                            found = true;
-                            if (!ant.isAlive()) {
-                                trash.add(node);
-                            } else {
-                                ((Label) box.getChildren().get(0)).setText(ant.getClass().getSimpleName() + " " + ant.getPosition());
-                            }
-                            break;
-                        }
-                    }
-                }
-                for(Node n:trash)
-                {
-                    pane.getChildren().remove(n);
-                }
-                if(!found)
-                {
-                    HBox box = new HBox();
-                    Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
-                    box.getChildren().add(l);
-                    if (!followBottons.containsKey(ant)) {
-                        Button b = new Button("Follow");
-                        b.setOnAction(e -> {
-                            WorldView.follow(ant);
-                        });
-                        followBottons.put(ant, b);
-                    }
-                    box.getChildren().add(followBottons.get(ant));
-                    pane.getChildren().add(box);
-                }
-            }
-
+        for(Node n:trash) {
+            ants.getChildren().remove(n);
+        }
+        for(Ant n:trashAnt) {
+            followBottons.remove(n);
         }
 
         return detailNode;

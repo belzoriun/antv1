@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.Node;
 
 /**
@@ -14,12 +15,21 @@ public abstract class Living implements Runnable, Drawable {
     private boolean alive;
     protected Vector position;
     protected Direction headingDirection;
+    protected StateMachine stateMachine;
 
     protected Living(Vector pos)
     {
         headingDirection = Direction.UP;
         this.alive= true;
         position = pos;
+        stateMachine = new StateMachine.StateMachineBuilder()
+                .addState("idle", ()->{})
+                .get("idle");
+    }
+
+    protected void initCore(StateMachine machine)
+    {
+        this.stateMachine = machine;
     }
 
     public Vector getPosition()

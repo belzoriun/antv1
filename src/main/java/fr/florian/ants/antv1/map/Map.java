@@ -142,7 +142,11 @@ public class Map {
 
     public Tile getTile(Vector pos)
     {
-        if(pos.getX()<0|| pos.getX()>Application.options.getInt(OptionKey.MAP_WIDTH)||pos.getY()<0||pos.getY()>Application.options.getInt(OptionKey.MAP_HEIGHT))
+        if(pos == null)
+        {
+            return null;
+        }
+        if(pos.getX()<0|| pos.getX()>=Application.options.getInt(OptionKey.MAP_WIDTH)||pos.getY()<0||pos.getY()>=Application.options.getInt(OptionKey.MAP_HEIGHT))
             return null;
         return tiles.get(pos);
     }

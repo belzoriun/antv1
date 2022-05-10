@@ -202,4 +202,8 @@ public class ResourceTile extends Tile {
                 , WorldView.TILE_SIZE
                 , WorldView.TILE_SIZE);
     }
+
+    public void placeResource(Resource remove) {
+        resources.add(remove);
+    }
 }

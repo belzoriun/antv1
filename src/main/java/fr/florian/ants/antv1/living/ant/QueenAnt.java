@@ -11,8 +11,11 @@ import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -38,28 +41,43 @@ public class QueenAnt extends Ant implements AntSignalSender {
         signals = new ArrayList<>();
         subs = new ArrayList<>();
         timeOperationCounter = TICKS_PER_OPERATION;
+        initCore(new StateMachine.StateMachineBuilder()
+                .addState("idle", ()->{})
+                .addState("sendsignal", ()->{
+                    AntOrder order = AntOrder.SEARCH_FOR_FOOD;
+                    if(GameTimer.getInstance().getRemainingTime()<=30000 && !Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
+                    {
+                        order = AntOrder.BACK_TO_COLONY;
+                    }
+                    AntSignal newSig = new AntSignal(this, position, order, 30, 0.3);
+                    for (AntSubscription sub : subs) {
+                        sub.emitSignal(newSig);
+                    }
+                    signals.add(newSig);
+                    new Thread(newSig).start();
+                    stateMachine.setTransition("spawn");
+                })
+                .addState("spawnants", ()->{
+                    if(Application.random.nextDouble() < 0.25)
+                    {
+                        makeSpawnNewAnt();
+                    }
+                    stateMachine.setTransition("idle");
+                })
+                .addTransition("send")
+                .addTransition("spawn")
+                .addTransition("idle")
+                .addStateLink("idle", "sendsignal", "send")
+                .addStateLink("sendsignal", "spawnants", "spawn")
+                .addStateLink("spawnants", "idle", "idle")
+                .get("idle"));
     }
 
     @Override
     protected void executeAction() {
         if(timeOperationCounter <= 0) {
-            AntOrder order = AntOrder.SEARCH_FOR_FOOD;
-            if(GameTimer.getInstance().getRemainingTime()<=30000 && !Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
-            {
-                order = AntOrder.BACK_TO_COLONY;
-            }
-            AntSignal newSig = new AntSignal(this, position, order, 30, 0.3);
-            for (AntSubscription sub : subs) {
-                sub.emitSignal(newSig);
-            }
-            signals.add(newSig);
-            new Thread(newSig).start();
 
-            if(Application.random.nextDouble() < 0.25)
-            {
-                makeSpawnNewAnt();
-            }
-
+            stateMachine.setTransition("send");
             timeOperationCounter = TICKS_PER_OPERATION;
         }
         List<AntSignal> trash = new ArrayList<>();
@@ -68,6 +86,7 @@ public class QueenAnt extends Ant implements AntSignalSender {
                 trash.add(sig);
             }
         }
+        stateMachine.step();
         signals.removeAll(trash);
         timeOperationCounter--;
     }
@@ -131,6 +150,9 @@ public class QueenAnt extends Ant implements AntSignalSender {
 
     @Override
     public Node getDetailDisplay() {
-        return new Label("Sending signal in "+(TICKS_PER_OPERATION-timeOperationCounter)+" ticks");
+        VBox box = new VBox();
+        box.getChildren().add(new Label("Sending signal in "+(timeOperationCounter)+" ticks"));
+        box.getChildren().add(new ImageView(stateMachine.getAsImage()));
+        return box;
     }
 }

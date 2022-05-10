@@ -42,4 +42,8 @@ public class HeldResourceList {
     public Collection<? extends Resource> getAll() {
         return resources;
     }
+
+    public int size() {
+        return resources.size();
+    }
 }

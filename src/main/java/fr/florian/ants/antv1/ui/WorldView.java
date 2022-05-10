@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
@@ -269,6 +270,9 @@ public class WorldView extends Pane {
                     {
                         context.setFill(Color.YELLOW);
                         context.strokeOval(displayPoint.getX()+TILE_SIZE/4, displayPoint.getY()+TILE_SIZE/4, TILE_SIZE/2, TILE_SIZE/2);
+                        if(l instanceof WorkerAnt w) {
+                            drawPath(context, w.getPath());
+                        }
                     }
                 }
                 if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
@@ -288,6 +292,17 @@ public class WorldView extends Pane {
                 TILE_SIZE, TILE_SIZE);
         applyShaders();
         drawArrows(context);
+    }
+
+    private void drawPath(GraphicsContext context, List<Vector> path) {
+        for(int i = 1; i<path.size(); i++)
+        {
+            Vector start = manager.toWorldPoint(path.get(i-1)).multi(TILE_SIZE).add(TILE_SIZE/2);
+            Vector end = manager.toWorldPoint(path.get(i)).multi(TILE_SIZE).add(TILE_SIZE/2);
+            context.fillOval(start.getX()-TILE_SIZE/16, start.getY()-TILE_SIZE/16, TILE_SIZE/8, TILE_SIZE/8);
+            context.fillOval(end.getX()-TILE_SIZE/16, end.getY()-TILE_SIZE/16, TILE_SIZE/8, TILE_SIZE/8);
+            context.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
+        }
     }
 
     public void drawTile(Vector pos, Vector displayPos, GraphicsContext context)
