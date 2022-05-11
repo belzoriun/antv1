@@ -57,7 +57,6 @@ public abstract class Living implements Runnable, Drawable {
                     kill(Living.GOD);
                     break;
                 }
-                new FightManager(this, this.position).Hajimeru();
                 String nextTransition = getNextAction();
                 if(nextTransition != null && !nextTransition.isEmpty())
                     stateMachine.setTransition(nextTransition);
@@ -67,11 +66,11 @@ public abstract class Living implements Runnable, Drawable {
                 {
                     return;
                 }
+                new FightManager(this, this.position).Hajimeru();
                 cur.onWalkOn(this);
             }
         }catch(Exception ignored)
         {
-            ignored.printStackTrace();
         }
     }
 
