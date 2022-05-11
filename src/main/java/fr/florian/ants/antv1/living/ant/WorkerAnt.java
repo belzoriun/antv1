@@ -280,6 +280,7 @@ public class WorkerAnt extends Ant {
     public Node getDetailDisplay() {
         VBox box = new VBox();
         box.getChildren().add(new Label("Held resource amount : "+heldResources.size()));
+        box.getChildren().add(new Label("Weak : "+(isWeak() ? "yes" : "no")));
         box.getChildren().add(new ImageView(stateMachine.getAsImage()));
         return box;
     }

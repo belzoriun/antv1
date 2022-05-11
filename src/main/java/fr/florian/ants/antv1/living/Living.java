@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.living;
 
+import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.TickWaiter;
@@ -45,6 +46,7 @@ public abstract class Living implements Runnable, Drawable {
             while (this.alive) {
                 TickWaiter.waitTick();
                 act();
+                Map.getInstance().getTile(position).onWalkOn(this);
             }
         }catch(Exception ignored)
         {
