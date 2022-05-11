@@ -269,6 +269,8 @@ public class WorldView extends Pane {
                     if(l.equals(followed))
                     {
                         context.setFill(Color.YELLOW);
+                        context.setStroke(Color.YELLOW);
+                        context.setLineDashes(0);
                         context.strokeOval(displayPoint.getX()+TILE_SIZE/4, displayPoint.getY()+TILE_SIZE/4, TILE_SIZE/2, TILE_SIZE/2);
                         if(l instanceof WorkerAnt w) {
                             drawPath(context, w.getPath());

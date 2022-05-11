@@ -1,6 +1,8 @@
 package fr.florian.ants.antv1.util.resource;
 
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.ant.QueenAnt;
+import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.ui.Application;
@@ -43,9 +45,19 @@ public class DeadAnt extends Resource implements Drawable {
     public void onDeposit(AntHillTile tile){
         Vector pos = Map.getInstance().getTilePosition(tile);
         if(pos != null) {
-            dead.revive();
-            dead.setPosition(pos);
-            tile.makeSpawn(dead, true);
+            if(dead.getAntHillId() == tile.getUniqueId()) {
+                dead.revive();
+                dead.setPosition(pos);
+                tile.makeSpawn(dead, true);
+            }
+            else
+            {
+                QueenAnt ant = (QueenAnt) Map.getInstance().getLivingsAt(pos).stream().filter(l->l instanceof QueenAnt).toList().get(0);
+                if(ant != null)
+                {
+                    ant.makeSpawnNewAnt(1, 1, false);
+                }
+            }
         }
     }
 

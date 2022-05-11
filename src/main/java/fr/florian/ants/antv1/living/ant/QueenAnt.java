@@ -60,7 +60,7 @@ public class QueenAnt extends Ant implements AntSignalSender {
                 .addState("spawnants", ()->{
                     if(Application.random.nextDouble() < 0.25)
                     {
-                        makeSpawnNewAnt();
+                        makeSpawnNewAnt(5, 15, true);
                     }
                     stateMachine.setTransition("idle");
                 })
@@ -91,8 +91,8 @@ public class QueenAnt extends Ant implements AntSignalSender {
         timeOperationCounter--;
     }
 
-    private void makeSpawnNewAnt() {
-        int amount = Application.random.nextInt(10, 20);
+    public void makeSpawnNewAnt(int min, int max, boolean foodRequired) {
+        int amount = Application.random.nextInt(min, max);
         java.util.Map<SoldierAnt, Integer> companies = new HashMap<>();
         for (Ant a : Map.getInstance().getAntsOf(getAntHillId())) {
             if (a instanceof SoldierAnt s) {
@@ -118,11 +118,11 @@ public class QueenAnt extends Ant implements AntSignalSender {
             synchronized ((AntHillTile) Map.getInstance().getTile(position)) {
 
                 AntHillTile hill = (AntHillTile) Map.getInstance().getTile(position);
-                if (soldier != null && hill.consumeFood(1)) {
+                if (soldier != null && (!foodRequired || hill.consumeFood(1))) {
                     Ant ant = new WorkerAnt(getAntHillId(), soldier, getColor(), position);
                     Map.getInstance().spawn(ant);
                     companies.put(soldier, companies.get(soldier)+1);
-                } else if (soldier == null && hill.consumeFood(3)) {
+                } else if (soldier == null && (!foodRequired || hill.consumeFood(3))) {
                     SoldierAnt s = new SoldierAnt(getAntHillId(), this, getColor(), position);
                     Map.getInstance().spawn(s);
                     companies.put(s, 0);
