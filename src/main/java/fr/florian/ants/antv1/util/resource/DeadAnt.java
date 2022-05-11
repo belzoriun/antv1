@@ -34,6 +34,11 @@ public class DeadAnt extends Resource implements Drawable {
                         ImageColorMaker.colorAntImage(ResourceLoader.getInstance().loadResource(ResourceLoader.DEAD_ANT), color), 0.6));
     }
 
+    public boolean isOf(long id)
+    {
+        return dead.getAntHillId() == id;
+    }
+
     @Override
     public void onDeposit(AntHillTile tile){
         Vector pos = Map.getInstance().getTilePosition(tile);

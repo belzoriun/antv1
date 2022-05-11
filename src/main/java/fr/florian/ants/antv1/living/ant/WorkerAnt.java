@@ -55,7 +55,7 @@ public class WorkerAnt extends Ant {
                         }
                         else
                         {
-                            if(!heldResources.getAll().stream().filter(r->r instanceof DeadAnt).toList().isEmpty())
+                            if(!heldResources.getAll().stream().filter(r->r instanceof DeadAnt da && da.isOf(getAntHillId())).toList().isEmpty())
                             {
                                 stateMachine.setTransition("fullofresources");
                             }
