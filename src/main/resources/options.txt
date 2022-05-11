@@ -1,5 +1,5 @@
-mapwidth : 50
-mapheiht : 50
+mapwidth : 10
+mapheiht : 10
 anthillsnb : 3
 soldierperqueen : 5
 workerpersoldier : 10

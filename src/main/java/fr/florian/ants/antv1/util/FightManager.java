@@ -27,11 +27,20 @@ public class FightManager {
      */
     public void Hajimeru()
     {
+        if(position == null || Map.getInstance().getTile(position) == null)
+        {
+            return;
+        }
         synchronized (Map.getInstance().getTile(position)) {
             for (Living opponent : fighters) {
-                if (opponent != fighter) {
-                    if ((fighter instanceof Ant f && opponent instanceof Ant o && f.getAntHillId() != o.getAntHillId())
-                            || fighter instanceof Ant && !(opponent instanceof Ant)) {
+                if (opponent != fighter && opponent.isAlive()) {
+                    if (fighter instanceof Ant f && opponent instanceof Ant o) {
+                        if(f.getAntHillId() != o.getAntHillId()) {
+                            fighter.attack(opponent);
+                        }
+                    }
+                    else
+                    {
                         fighter.attack(opponent);
                     }
                 }

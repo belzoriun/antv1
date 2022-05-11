@@ -98,18 +98,18 @@ public class AntHillTile extends Tile{
     {
         QueenAnt queen = new QueenAnt(uniqueId, color, pos);
         synchronized (Map.getInstance()) {
-            Map.getInstance().spawn(queen);
+            Map.getInstance().spawn(queen, false);
         }
         System.out.println("spawned queen");
         for (int i = 0; i < Application.options.getInt(OptionKey.SOLDIER_PER_QUEEN); i++) {
             SoldierAnt s = new SoldierAnt(uniqueId, queen, color, pos);
             synchronized (Map.getInstance()) {
-                Map.getInstance().spawn(s);
+                Map.getInstance().spawn(s, false);
             }
             for (int j = 0; j < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER); j++) {
                 synchronized (Map.getInstance()) {
                     WorkerAnt w = new WorkerAnt(uniqueId, s, color, pos);
-                    Map.getInstance().spawn(w);
+                    Map.getInstance().spawn(w, false);
                 }
             }
         }
@@ -130,7 +130,7 @@ public class AntHillTile extends Tile{
     public void onWalkOn(Living l) {
         if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
         {
-            a.heal();
+            a.heal(10);
         }
     }
 
@@ -238,7 +238,7 @@ public class AntHillTile extends Tile{
         }
         if(revive || ant instanceof SoldierAnt)
         {
-            Map.getInstance().spawn(ant);
+            Map.getInstance().spawn(ant, revive);
             return;
         }
         if(ant instanceof WorkerAnt) {
@@ -257,7 +257,7 @@ public class AntHillTile extends Tile{
                     entry.getKey().subscribe(ant);
                 }
             }
-            Map.getInstance().spawn(ant);
+            Map.getInstance().spawn(ant, false);
         }
     }
 }

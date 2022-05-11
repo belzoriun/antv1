@@ -26,12 +26,27 @@ import java.util.List;
 public class ResourceTile extends Tile {
 
     private final List<Resource> resources;
+
+    private java.util.Map<Living, HBox> followBottons;
+    private VBox livings;
+    private VBox resourceList;
     private VBox detailNode;
-    private java.util.Map<Living, Button> followBottons;
+    private Label totalResources;
 
     public ResourceTile(List<Resource> resources)
     {
         this.resources = resources;
+        livings = new VBox();
+        totalResources = new Label();
+        resourceList = new VBox();
+        detailNode = new VBox();
+        ScrollPane scroll = new ScrollPane();
+        scroll.setContent(livings);
+        scroll.setMaxHeight(200);
+        scroll.setPrefWidth(200);
+        detailNode.getChildren().add(totalResources);
+        detailNode.getChildren().add(resourceList);
+        detailNode.getChildren().add(scroll);
         followBottons = new HashMap<>();
     }
 
@@ -92,102 +107,68 @@ public class ResourceTile extends Tile {
     @Override
     public Node getInfoDisplay() {
         synchronized (resources) {
-            Label totalResource = new Label("Total resources : " + resources.size());
-            VBox detail = new VBox();
-            java.util.Map<Class<? extends Resource>, Integer> res = new HashMap<>();
-            for (Resource r : resources) {
-                if (res.containsKey(r.getClass())) {
-                    res.put(r.getClass(), res.get(r.getClass()) + 1);
-                } else {
-                    res.put(r.getClass(), 1);
-                }
-            }
-            for(java.util.Map.Entry<Class<? extends Resource>, Integer> entry : res.entrySet())
+            totalResources.setText("Total resources : " + resources.size());
+            resourceList.getChildren().clear();
+            java.util.Map<Class<? extends Resource>, Integer> resourceMap = new HashMap<>();
+            for(Resource r : resources)
             {
-                if(entry.getValue() > 0) {
-                    Label l = new Label(entry.getKey().getSimpleName() + " : " + entry.getValue());
-                    detail.getChildren().add(l);
-                }
-            }
-            if(detailNode == null) {
-
-                detailNode=new VBox();
-                VBox antsPane = new VBox();
-                List<Living> ants = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
-                for (Living ant : ants) {
-                    HBox box = new HBox();
-                    Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
-                    box.getChildren().add(l);
-                    if (!followBottons.containsKey(ant)) {
-                        Button b = new Button("Follow");
-                        b.setOnAction(e -> {
-                            WorldView.follow(ant);
-                        });
-                        followBottons.put(ant, b);
-                    }
-                    box.getChildren().add(followBottons.get(ant));
-                    antsPane.getChildren().add(box);
-                }
-
-                detailNode.getChildren().add(totalResource);
-                detailNode.getChildren().add(detail);
-                ScrollPane antScroll = new ScrollPane();
-                antScroll.setContent(antsPane);
-                antScroll.setMaxHeight(200);
-                detailNode.getChildren().add(antScroll);
-            }
-            else
-            {
-                detailNode.getChildren().get(2).setVisible(true);
-                detailNode.getChildren().set(0, totalResource);
-                detailNode.getChildren().set(1, detail);
-                VBox pane = (VBox) ((ScrollPane)detailNode.getChildren().get(2)).getContent();
-
-                List<Living> ants = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
-                if(ants.isEmpty())
+                if(resourceMap.containsKey(r.getClass()))
                 {
-                    pane.getChildren().clear();
-                    detailNode.getChildren().get(2).setVisible(false);
+                    resourceMap.put(r.getClass(), resourceMap.get(r.getClass())+1);
                 }
-                for (Living ant : ants) {
-                    boolean found = false;
-                    List<Node> trash = new ArrayList<>();
-                    for(Node node : pane.getChildren())
-                    {
-                        HBox box = (HBox)node;
-                        for(java.util.Map.Entry<Living, Button> entry : followBottons.entrySet()) {
-                            if (entry.getValue().equals(box.getChildren().get(1))) {
-                                found = true;
-                                if (!ant.isAlive()) {
-                                    trash.add(node);
-                                } else {
-                                    ((Label) box.getChildren().get(0)).setText(ant.getClass().getSimpleName() + " " + ant.getPosition());
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    if(!found)
-                    {
-                        HBox box = new HBox();
-                        Label l = new Label(ant.getClass().getSimpleName() + " " + ant.getPosition());
-                        box.getChildren().add(l);
-                        if (!followBottons.containsKey(ant)) {
-                            Button b = new Button("Follow");
-                            b.setOnAction(e -> {
-                                WorldView.follow(ant);
-                            });
-                            followBottons.put(ant, b);
-                        }
-                        box.getChildren().add(followBottons.get(ant));
-                        pane.getChildren().add(box);
-                    }
-                    for(Node n:trash)
-                    {
-                        pane.getChildren().remove(n);
-                    }
+                else
+                {
+                    resourceMap.put(r.getClass(), 1);
                 }
+            }
+            for(java.util.Map.Entry<Class<? extends Resource>, Integer> entry : resourceMap.entrySet())
+            {
+                resourceList.getChildren().add(new Label(entry.getKey().getSimpleName()+" : "+entry.getValue()));
+            }
 
+            List<Living> livingList = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
+
+            List<Node> trash = new ArrayList<>();
+            List<Living> trashLiving = new ArrayList<>();
+            for(java.util.Map.Entry<Living, HBox> entry : followBottons.entrySet()) {
+                if (!livingList.contains(entry.getKey())) {
+                    trash.add(entry.getValue());
+                    trashLiving.add(entry.getKey());
+                    break;
+                }
+            }
+
+            for (Living liv : livingList) {
+                for(java.util.Map.Entry<Living, HBox> entry : followBottons.entrySet()) {
+                    if (entry.getKey().equals(liv)) {
+                        if (!liv.isAlive()) {
+                            trash.add(entry.getValue());
+                            trashLiving.add(entry.getKey());
+                        }
+                        else {
+                            ((Label) entry.getValue().getChildren().get(0)).setText(liv.getClass().getSimpleName() + " " + liv.getPosition());
+                        }
+                        break;
+                    }
+                }
+                if (!followBottons.containsKey(liv)) {
+                    HBox box = new HBox();
+                    Label l = new Label(liv.getClass().getSimpleName() + " " + liv.getPosition());
+                    box.getChildren().add(l);
+                    Button b = new Button("Follow");
+                    b.setOnAction(e -> {
+                        WorldView.follow(liv);
+                    });
+                    box.getChildren().add(b);
+                    livings.getChildren().add(box);
+                    followBottons.put(liv, box);
+                }
+            }
+            for(Node n:trash) {
+                livings.getChildren().remove(n);
+            }
+            for(Living n:trashLiving) {
+                followBottons.remove(n);
             }
 
             return detailNode;

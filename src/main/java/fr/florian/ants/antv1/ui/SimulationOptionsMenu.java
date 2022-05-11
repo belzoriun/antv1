@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.ui;
 
+import fr.florian.ants.antv1.map.Chunk;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -46,7 +47,7 @@ public class SimulationOptionsMenu extends BorderPane {
                     Application.initGame();
                 }
             }
-            else if(Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH) > 1000000) {
+            else if(Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH) > 1000000/Chunk.CHUNK_SIZE) {
                 alert.setContentText("Warning : the size of the map may be too high. This could cause generation issues, generate simulation anyway ?");
                 Optional<ButtonType> button = alert.showAndWait();
                 if (button.get() == ButtonType.OK) {

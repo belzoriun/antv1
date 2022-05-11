@@ -3,6 +3,7 @@ package fr.florian.ants.antv1.ui;
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.map.AntHillTile;
+import fr.florian.ants.antv1.map.Chunk;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
@@ -59,7 +60,7 @@ public class WorldView extends Pane {
         livingDetail = new LivingDetailDisplay();
         displayType = DisplayType.DEFAULT;
         double futureTileSize = TILE_SIZE;
-        double heightTileSize = Screen.getPrimary().getBounds().getHeight()/Application.options.getInt(OptionKey.MAP_HEIGHT);
+        double heightTileSize = Screen.getPrimary().getBounds().getHeight()/(Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE);
         if(heightTileSize > futureTileSize)
         {
             futureTileSize = heightTileSize;
@@ -72,7 +73,7 @@ public class WorldView extends Pane {
 
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double widthTileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_WIDTH);
+                double widthTileSize = t1.doubleValue() / (Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE);
                 if (widthTileSize > futureTileSize) {
                     futureTileSize = widthTileSize;
                     MAX_TILE_SIZE = futureTileSize * 2;
@@ -89,7 +90,7 @@ public class WorldView extends Pane {
 
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                double heightTileSize = t1.doubleValue() / Application.options.getInt(OptionKey.MAP_HEIGHT);
+                double heightTileSize = t1.doubleValue() / (Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE);
                 if (heightTileSize > futureTileSize) {
                     futureTileSize = heightTileSize;
                     MAX_TILE_SIZE = futureTileSize * 2;
@@ -221,8 +222,8 @@ public class WorldView extends Pane {
         {
             manager.translateOrigin(new Vector(0, -manager.getOriginY()));
         }
-        double diffX = canvas.getWidth() - (manager.getOriginX()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_WIDTH)*TILE_SIZE);
-        double diffY = canvas.getHeight() - (manager.getOriginY()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_HEIGHT)*TILE_SIZE);
+        double diffX = canvas.getWidth() - (manager.getOriginX()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_WIDTH)*Chunk.CHUNK_SIZE*TILE_SIZE);
+        double diffY = canvas.getHeight() - (manager.getOriginY()*TILE_SIZE+Application.options.getInt(OptionKey.MAP_HEIGHT)*Chunk.CHUNK_SIZE*TILE_SIZE);
         if(diffX > 0)
         {
             manager.translateOrigin(new Vector(diffX/TILE_SIZE,0));
@@ -233,8 +234,8 @@ public class WorldView extends Pane {
         }
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
-        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
-            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
+        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE; x++) {
+            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE; y++) {
                 Vector pos = new Vector(x, y);
                 Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
                 if (displayPoint.getX()  + TILE_SIZE >= 0
@@ -244,8 +245,8 @@ public class WorldView extends Pane {
                     drawTile(pos, displayPoint, context);
             }
         }
-        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH); x++) {
-            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT); y++) {
+        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE; x++) {
+            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE; y++) {
                 Vector pos = new Vector(x, y);
                 Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
                 if (displayPoint.getX()  + TILE_SIZE >= 0

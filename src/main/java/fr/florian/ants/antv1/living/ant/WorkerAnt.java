@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.living.ant;
 
+import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.ResourceTile;
@@ -33,9 +34,11 @@ public class WorkerAnt extends Ant {
     private final List<Vector> deadCells;
     private boolean pathCleared;
     private final SoldierAnt soldier;
+    private String nextStep;
 
     public WorkerAnt(long anthillId, SoldierAnt soldier, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 8, 1);
+        super(anthillId, color, initialPosition, 8, 5, 1);
+        nextStep = "";
         heldResources = new HeldResourceList(5);
         path = new ArrayList<>();
         path.add(initialPosition);
@@ -57,7 +60,7 @@ public class WorkerAnt extends Ant {
                         {
                             if(!heldResources.getAll().stream().filter(r->r instanceof DeadAnt da && da.isOf(getAntHillId())).toList().isEmpty())
                             {
-                                stateMachine.setTransition("fullofresources");
+                                nextStep = "fullofresources";
                             }
                         }
                     }
@@ -89,9 +92,9 @@ public class WorkerAnt extends Ant {
                     }
                     if (selection.isEmpty()) {
                         deadCells.add(position);
-                        path.remove(path.size() - 1);
-                        if(!path.isEmpty())
+                        if(path.size()>1)
                         {
+                            path.remove(path.size() - 1);
                             Vector newPos = path.get(path.size()-1);
                             headingDirection = Direction.fromOffset(position.add(newPos.multi(-1)));
                             synchronized (Map.getInstance().getTile(position)) {
@@ -124,10 +127,10 @@ public class WorkerAnt extends Ant {
                                 }
                             }
                         } else {
-                            headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
                             path.remove(path.size() - 1);
                             if(!path.isEmpty()) {
                                 Vector newPos = path.get(path.size() - 1);
+                                headingDirection = Direction.fromOffset(newPos.add(position.multi(-1)));
                                 synchronized (Map.getInstance().getTile(position)) {
                                     t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
                                     this.position = newPos;
@@ -147,29 +150,35 @@ public class WorkerAnt extends Ant {
                     if (t instanceof AntHillTile antHill && antHill.getUniqueId() == this.uniqueAnthillId) {
                         if(heldResources.isEmpty())
                         {
-                            this.path.clear();
-                            this.path.add(position);
+                            resetPath();
                             this.deadCells.clear();
-                            stateMachine.setTransition("backtofood");
+                            nextStep = "backtofood";
                         }
                         else {
                             antHill.onInteract(this);
                         }
                     } else {
-                        path.remove(path.size() - 1);
                         if (path.isEmpty()) {
                             if (t instanceof ResourceTile rt) {
                                 while (!getResources().isEmpty()) {
                                     rt.placeResource(getResources().remove());
                                 }
                             }
-                            stateMachine.setTransition("backToFood");
+                            nextStep = "backToFood";
                         } else {
-                            headingDirection = Direction.fromOffset(path.get(path.size() - 1).add(position.multi(-1)));
-                            Vector newPos =path.get(path.size() - 1) ;
-                            synchronized (Map.getInstance().getTile(position)) {
-                                t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
-                                this.position = newPos;
+                            try {
+                                path.remove(path.size() - 1);
+                            }catch(IndexOutOfBoundsException e)
+                            {
+                                System.out.println(path);
+                            }
+                            if(!path.isEmpty()) {
+                                Vector newPos = path.get(path.size() - 1);
+                                headingDirection = Direction.fromOffset(newPos.add(position.multi(-1)));
+                                synchronized (Map.getInstance().getTile(position)) {
+                                    t.placePheromone(uniqueAnthillId, new FoodSourcePheromone(this.getColor()));
+                                    this.position = newPos;
+                                }
                             }
                         }
                     }
@@ -202,8 +211,8 @@ public class WorkerAnt extends Ant {
      */
     private void clearPath(List<Vector> in)
     {
-        int i = in.size()-1;
-        while(i >= 1)
+        int i = in.size()-2;
+        while(i >= 2)
         {
             List<Vector> trash = new ArrayList<>();
             List<List<Vector>> tests = new ArrayList<>();
@@ -233,7 +242,10 @@ public class WorkerAnt extends Ant {
             }
             if(!trash.isEmpty())
             {
-                in.removeAll(trash);
+                for(Vector rem : trash)
+                {
+                    in.remove(rem);
+                }
             }
             else
             {
@@ -241,28 +253,28 @@ public class WorkerAnt extends Ant {
             }
             if(i > in.size()-2)
             {
-                i = in.size()-1;
+                i = in.size()-2;
             }
         }
     }
 
     @Override
-    protected void executeAction() {
-        if(this.heldResources.isFull() || this.isWeak())
+    protected String executeAction() {
+        if(this.heldResources.isFull() || this.lifePoints <= 2)
         {
-            stateMachine.setTransition("fullofresources");
+            nextStep = "fullofresources";
         }
-        stateMachine.step();
+        return nextStep;
     }
 
     @Override
     protected void onOrderReceived(AntOrder order) {
         if(order == AntOrder.SEARCH_FOR_FOOD)
         {
-            stateMachine.setTransition("backtofood");
+            nextStep = "backtofood";
         }else if(order==AntOrder.BACK_TO_COLONY)
         {
-            stateMachine.setTransition("stayincolony");
+            nextStep = "stayincolony";
         }
     }
 
@@ -277,11 +289,23 @@ public class WorkerAnt extends Ant {
     }
 
     @Override
+    protected void onAttackedBy(Living l) {
+        nextStep = "fullofresources";
+    }
+
+    @Override
     public Node getDetailDisplay() {
         VBox box = new VBox();
         box.getChildren().add(new Label("Held resource amount : "+heldResources.size()));
-        box.getChildren().add(new Label("Weak : "+(isWeak() ? "yes" : "no")));
-        box.getChildren().add(new ImageView(stateMachine.getAsImage()));
+        box.getChildren().add(new Label("Life : "+(lifePoints/maxLifePoints*100)+"%"));
+        box.getChildren().add(new Label("On ant hill : "+(Map.getInstance().getTile(position) instanceof AntHillTile ah && ah.getUniqueId() == getAntHillId())));
+        box.getChildren().add(new Label("Next step : "+nextStep));
+        box.getChildren().add(new ImageView(getStateMachineDisplay()));
         return box;
+    }
+
+    public void resetPath() {
+        path.clear();
+        this.path.add(position);
     }
 }

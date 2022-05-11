@@ -78,7 +78,7 @@ public class PheromoneManager extends Thread{
                         }
                     }
                 }
-                TickWaiter.waitTick();
+                TickWaiter.waitTick(this);
                 List<PheromoneFollower> trash = new ArrayList<>();
                 for (Map.Entry<PheromoneFollower, Long> entry : managedTiles.entrySet()) {
                     synchronized (entry.getKey().getTile()) {

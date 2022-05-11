@@ -48,6 +48,10 @@ public class DeadAnt extends Resource implements Drawable {
             if(dead.getAntHillId() == tile.getUniqueId()) {
                 dead.revive();
                 dead.setPosition(pos);
+                if(dead instanceof WorkerAnt wa)
+                {
+                    wa.resetPath();
+                }
                 tile.makeSpawn(dead, true);
             }
             else

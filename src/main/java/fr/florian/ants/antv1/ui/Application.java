@@ -25,6 +25,7 @@ public class Application extends javafx.application.Application {
     private static StartMenu menu;
     private static SimulationOptionsMenu optionMenu;
     public static Options options;
+    public static long seed = 0L;
 
     public static Random random;
 
@@ -42,7 +43,6 @@ public class Application extends javafx.application.Application {
      */
     public static void initGame()
     {
-        long seed = 0L;
         random = new Random(seed);
         TickWaiter.lock();
         PheromoneManager.forceInit();

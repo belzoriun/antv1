@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.living.ant;
 
+import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.ui.Application;
@@ -33,12 +34,14 @@ public class QueenAnt extends Ant implements AntSignalSender {
     private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
     private int timeOperationCounter;
+    private String nextStep;
 
     private static final int TICKS_PER_OPERATION = 50;
 
     public QueenAnt(long anthillId, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 10, 10);
+        super(anthillId, color, initialPosition, 10, 200, 10);
         signals = new ArrayList<>();
+        nextStep = "";
         subs = new ArrayList<>();
         timeOperationCounter = TICKS_PER_OPERATION;
         initCore(new StateMachine.StateMachineBuilder()
@@ -55,14 +58,14 @@ public class QueenAnt extends Ant implements AntSignalSender {
                     }
                     signals.add(newSig);
                     new Thread(newSig).start();
-                    stateMachine.setTransition("spawn");
+                    nextStep = "spawn";
                 })
                 .addState("spawnants", ()->{
                     if(Application.random.nextDouble() < 0.25)
                     {
                         makeSpawnNewAnt(5, 15, true);
                     }
-                    stateMachine.setTransition("idle");
+                    nextStep = "idle";
                 })
                 .addTransition("send")
                 .addTransition("spawn")
@@ -74,10 +77,10 @@ public class QueenAnt extends Ant implements AntSignalSender {
     }
 
     @Override
-    protected void executeAction() {
+    protected String executeAction() {
         if(timeOperationCounter <= 0) {
 
-            stateMachine.setTransition("send");
+            nextStep = "send";
             timeOperationCounter = TICKS_PER_OPERATION;
         }
         List<AntSignal> trash = new ArrayList<>();
@@ -86,13 +89,13 @@ public class QueenAnt extends Ant implements AntSignalSender {
                 trash.add(sig);
             }
         }
-        stateMachine.step();
         signals.removeAll(trash);
         timeOperationCounter--;
+        return nextStep;
     }
 
     public void makeSpawnNewAnt(int min, int max, boolean foodRequired) {
-        int amount = Application.random.nextInt(min, max);
+        int amount = Application.random.nextInt(min, max+1);
         java.util.Map<SoldierAnt, Integer> companies = new HashMap<>();
         for (Ant a : Map.getInstance().getAntsOf(getAntHillId())) {
             if (a instanceof SoldierAnt s) {
@@ -120,11 +123,11 @@ public class QueenAnt extends Ant implements AntSignalSender {
                 AntHillTile hill = (AntHillTile) Map.getInstance().getTile(position);
                 if (soldier != null && (!foodRequired || hill.consumeFood(1))) {
                     Ant ant = new WorkerAnt(getAntHillId(), soldier, getColor(), position);
-                    Map.getInstance().spawn(ant);
+                    Map.getInstance().spawn(ant, false);
                     companies.put(soldier, companies.get(soldier)+1);
                 } else if (soldier == null && (!foodRequired || hill.consumeFood(3))) {
                     SoldierAnt s = new SoldierAnt(getAntHillId(), this, getColor(), position);
-                    Map.getInstance().spawn(s);
+                    Map.getInstance().spawn(s, false);
                     companies.put(s, 0);
                 }
             }
@@ -149,10 +152,15 @@ public class QueenAnt extends Ant implements AntSignalSender {
     }
 
     @Override
+    protected void onAttackedBy(Living l) {
+
+    }
+
+    @Override
     public Node getDetailDisplay() {
         VBox box = new VBox();
         box.getChildren().add(new Label("Sending signal in "+(timeOperationCounter)+" ticks"));
-        box.getChildren().add(new ImageView(stateMachine.getAsImage()));
+        box.getChildren().add(new ImageView(getStateMachineDisplay()));
         return box;
     }
 }

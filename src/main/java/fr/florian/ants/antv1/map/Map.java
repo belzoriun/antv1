@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
+import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
@@ -21,14 +22,16 @@ import java.util.List;
  */
 public class Map {
 
-    private final java.util.Map<Vector, Tile> tiles;
+    private final java.util.Map<Vector, Chunk> chunks;
     private final List<AntHillTile> antHills;
     private final List<Living> livings;
+    private final java.util.Map<Living, Thread> cores;
     private static Map instance = null;
 
     private Map()
     {
-        tiles = new HashMap<>();
+        chunks = new HashMap<>();
+        cores = new HashMap<>();
         livings = new ArrayList<>();
         antHills = new ArrayList<>();
     }
@@ -55,13 +58,17 @@ public class Map {
      * @param living The entity to be spawned
      * @param <T> The entity type
      */
-    public <T extends Living> void spawn(T living)
+    public <T extends Living> void spawn(T living, boolean revive)
     {
         synchronized (livings) {
-            Thread t = new Thread(living);
-            t.start();
-            if (!livings.contains(living))
+            if(!revive) {
+                Thread t = new Thread(living);
+                t.start();
+                cores.put(living, t);
+            }
+            if (!livings.contains(living)) {
                 livings.add(living);
+            }
         }
     }
 
@@ -95,38 +102,31 @@ public class Map {
     public void init(IResourcePlacer placer)
     {
         PheromoneManager.getInstance().start();
-        System.out.println("placing ant hills");
-        for(int i = 0; i< Application.options.getInt(OptionKey.ANT_HILL_COUNT); i++)
-        {
-            Vector pos = new Vector(Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_WIDTH)), Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_HEIGHT)));
-            while(tiles.containsKey(pos)){
-                pos = new Vector(Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_WIDTH)), Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_HEIGHT)));
-            }
-            AntHillTile hill = new AntHillTile();
-            addTile(pos, hill);
-            addTile(pos.up(), placer.placeTile(pos.up()));
-            addTile(pos.down(), placer.placeTile(pos.down()));
-            addTile(pos.left(), placer.placeTile(pos.left()));
-            addTile(pos.right(), placer.placeTile(pos.right()));
-            hill.makeInitialSpawns(pos);
-            antHills.add(hill);
-        }
 
-        System.out.println(Application.options.getInt(OptionKey.MAP_WIDTH));
-        System.out.println(Application.options.getInt(OptionKey.MAP_HEIGHT));
         System.out.println("placing resources");
         for(int x = 0; x< Application.options.getInt(OptionKey.MAP_WIDTH); x++)
         {
             for(int y = 0; y<Application.options.getInt(OptionKey.MAP_HEIGHT); y++)
             {
                 Vector v = new Vector(x, y);
-                if(!tiles.containsKey(v))
+                if(!chunks.containsKey(v))
                 {
-                    addTile(v, placer.placeTile(v));
+                    addChunk(v, new Chunk(v, placer));
                 }
             }
         }
 
+        System.out.println("placing ant hills");
+        for(int i = 0; i< Application.options.getInt(OptionKey.ANT_HILL_COUNT); i++)
+        {
+            Vector pos = new Vector(Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_WIDTH)*Chunk.CHUNK_SIZE),
+                    Application.random.nextInt(0, Application.options.getInt(OptionKey.MAP_HEIGHT)*Chunk.CHUNK_SIZE));
+            Vector chunkPos = pos.multi(1.0/Chunk.CHUNK_SIZE);
+            AntHillTile hill = new AntHillTile();
+            chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())).setTile(Chunk.reduceToChunkPos(pos), hill);
+            hill.makeInitialSpawns(pos);
+            antHills.add(hill);
+        }
         System.out.println("map generation done");
     }
 
@@ -135,9 +135,9 @@ public class Map {
      * @param v The position where to place the tile
      * @param t The tile to place
      */
-    private void addTile(Vector v, Tile t)
+    private void addChunk(Vector v, Chunk t)
     {
-        tiles.put(v, t);
+        chunks.put(v, t);
     }
 
     public Tile getTile(Vector pos)
@@ -146,15 +146,18 @@ public class Map {
         {
             return null;
         }
-        if(pos.getX()<0|| pos.getX()>=Application.options.getInt(OptionKey.MAP_WIDTH)||pos.getY()<0||pos.getY()>=Application.options.getInt(OptionKey.MAP_HEIGHT))
+        if(pos.getX()<0|| pos.getX()>=Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE||pos.getY()<0||pos.getY()>=Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE)
             return null;
-        return tiles.get(pos);
+        Vector chunkPos = pos.multi(1.0/Chunk.CHUNK_SIZE);
+        return chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())).getTile(Chunk.reduceToChunkPos(pos));
     }
 
     public void drawTile(Vector vector, Vector displayPos, GraphicsContext graphicsContext2D) {
-        if(tiles.get(vector) != null)
+        Vector chunkPos = vector.multi(1.0/Chunk.CHUNK_SIZE);
+        Tile t = chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())).getTile(Chunk.reduceToChunkPos(vector));
+        if(t != null)
         {
-            tiles.get(vector).draw(graphicsContext2D, displayPos);
+            t.draw(graphicsContext2D, displayPos);
         }
     }
 
@@ -170,7 +173,9 @@ public class Map {
     {
         synchronized (livings) {
             for (Living l : livings) {
-                new Thread(l::kill).start();
+                new Thread(()->{
+                    l.kill(Living.GOD);
+                }).start();
             }
         }
     }
@@ -189,7 +194,6 @@ public class Map {
                 }
             }
             for (Living l : trash) {
-
                 livings.remove(l);
             }
             return livings.size();
@@ -237,11 +241,12 @@ public class Map {
     }
 
     public Vector getTilePosition(Tile tile) {
-        for(java.util.Map.Entry<Vector, Tile> entry : tiles.entrySet())
+        for(java.util.Map.Entry<Vector, Chunk> entry : chunks.entrySet())
         {
-            if(entry.getValue() == tile)
+            Vector tilePos = entry.getValue().getTilePos(tile);
+            if(tilePos != null)
             {
-                return entry.getKey();
+                return tilePos.add(entry.getKey().multi(Chunk.CHUNK_SIZE));
             }
         }
         return null;

@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.util.GameTimer;
+import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -20,6 +21,7 @@ public class PauseMenu extends BorderPane {
 
     private final Button continueBtn;
     private Vector clickPoint;
+    private Button step;
 
     public PauseMenu(double initialTranslateX, double initialTranslateY)
     {
@@ -33,6 +35,7 @@ public class PauseMenu extends BorderPane {
         VBox main = new VBox();
         this.setCenter(main);
         Button restart = new Button("restart");
+        step = new Button("step simulation");
         main.setPrefWidth(120);
         main.setSpacing(5);
         setPadding(new Insets(10));
@@ -41,12 +44,16 @@ public class PauseMenu extends BorderPane {
         continueBtn = new Button("continue");
         continueBtn.setOnAction((ActionEvent e)-> playGame());
         main.getChildren().add(continueBtn);
+        main.getChildren().add(step);
         main.getChildren().add(restart);
         main.getChildren().add(exit);
         setPrefWidth(130);
         restart.setOnAction((ActionEvent e) -> {
             Application.restart();
             continueBtn.setDisable(false);
+        });
+        step.setOnAction(e->{
+            TickWaiter.emitTick();
         });
         continueBtn.setMinWidth(main.getPrefWidth());
         restart.setMinWidth(main.getPrefWidth());
@@ -97,6 +104,7 @@ public class PauseMenu extends BorderPane {
      * Set this menu to "game end" mode
      */
     public void setEndMenu() {
-        continueBtn.setDisable(true);
+        continueBtn.setVisible(false);
+        step.setVisible(false);
     }
 }

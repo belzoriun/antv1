@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.living.ant;
 
+import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.AntOrder;
@@ -10,6 +11,7 @@ import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     private static final int TICKS_PER_ACTION = 3;
 
     public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 9.2, 3);
+        super(anthillId, color, initialPosition, 9.2, 10, 3);
         signals = new ArrayList<>();
         subs = new ArrayList<>();
         q.subscribe(this);
@@ -43,7 +45,7 @@ public class SoldierAnt extends Ant implements AntSignalSender{
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    protected void executeAction() {
+    protected String executeAction() {
         if(actionCounter <= 0) {
             headingDirection = Direction.random();
             while (position.add(headingDirection.getOffset()).delta(initialPosition) > MAX_ANTHILL_DISTANCE
@@ -64,6 +66,7 @@ public class SoldierAnt extends Ant implements AntSignalSender{
             actionCounter = TICKS_PER_ACTION;
         }
         actionCounter --;
+        return "";
     }
 
     @Override
@@ -92,7 +95,15 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     }
 
     @Override
+    protected void onAttackedBy(Living l) {
+
+    }
+
+    @Override
     public Node getDetailDisplay() {
-        return new Label("This ant is purely random (for now)");
+        VBox box = new VBox();
+        box.getChildren().add(new Label("Life : "+(lifePoints/maxLifePoints*100)+"%"));
+        box.getChildren().add(new Label("This ant is purely random (for now)"));
+        return box;
     }
 }

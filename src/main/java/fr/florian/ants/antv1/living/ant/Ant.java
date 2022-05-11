@@ -27,15 +27,12 @@ public abstract class Ant extends Living implements AntSignalReceiver {
 
     private final double size;
     protected final long uniqueAnthillId;
-    private boolean weak;
-    private final int strength;
     private AntSubscription sub;
 
     private final Color color;
 
-    protected Ant(long anthillId, Color color, Vector initialPosition, double size, int strength) {
-        super(initialPosition);
-        this.strength = strength;
+    protected Ant(long anthillId, Color color, Vector initialPosition, double size, double lifePoints, int strength) {
+        super(initialPosition, lifePoints, strength);
         if(size <= 0) size = 1;
         if(size > MAX_SIZE) size = MAX_SIZE;
         this.size = size;
@@ -43,45 +40,36 @@ public abstract class Ant extends Living implements AntSignalReceiver {
         this.color = color;
     }
 
-    public int getStrength()
-    {
-        return strength;
-    }
-
     /**
      * Executes an ant action
      */
-    protected abstract void executeAction();
+    protected abstract String executeAction();
 
     /**
      *  called on each thread loop
      */
-    protected void act()
+    protected String getNextAction()
     {
         //request orders
         if(sub != null)
         {
             sub.request(1L);
         }
-        Tile t = Map.getInstance().getTile(position);
-        if (t == null) {
-            return;
-        }
-        t.onWalkOn(this);
-        new FightManager(this, this.position).Hajimeru();
-        executeAction();
+        return executeAction();
     }
 
     /**
      * Called when ant gets killed
      */
-    public void onKilled()
+    public void onKilled(Living killer)
     {
         Tile t = Map.getInstance().getTile(position);
         if(t != null) {
             t.onAntDieOn(this);
         }
     }
+
+    public void onGettingKilledBy(Living killer){}
 
     public void setPosition(Vector pos)
     {
@@ -91,85 +79,6 @@ public abstract class Ant extends Living implements AntSignalReceiver {
     public double getSize()
     {
         return size;
-    }
-
-    public boolean isWeak()
-    {
-        return weak;
-    }
-
-    /**
-     * Called when an ant gets attacked
-     * @param l the attacker
-     */
-    @Override
-    public void onAttackedBy(Living l) {
-        if(l instanceof Ant a)
-        {
-            if(a.getStrength() == this.getStrength()) {
-                if (a.isWeak() == isWeak()) {
-                    if(isWeak())
-                    {
-                        float rand = Application.random.nextFloat();
-                        if (rand > 0.5) {
-                            a.kill();
-                        } else {
-                            kill();
-                        }
-                    }
-                    else {
-                        float rand = Application.random.nextFloat();
-                        if (rand > 0.5) {
-                            a.weaken();
-                        } else {
-                            weaken();
-                        }
-                    }
-                } else if (isWeak()) {
-                    kill();
-                } else {
-                    a.kill();
-                }
-            }
-            else if(a.getStrength() < this.getStrength())
-            {
-                if(a.isWeak())
-                {
-                    a.kill();
-                }
-                else
-                {
-                    a.weaken();
-                }
-            }
-            else
-            {
-                if(isWeak())
-                {
-                    kill();
-                }
-                else
-                {
-                    weaken();
-                }
-            }
-        }
-    }
-
-    /**
-     * make the ant weak
-     */
-    public void weaken()
-    {
-        this.weak = true;
-    }
-
-    /**
-     * heals the ant, make it no longer weak
-     */
-    public void heal()
-    {
-        this.weak = false;
     }
 
     public long getAntHillId()
@@ -206,6 +115,16 @@ public abstract class Ant extends Living implements AntSignalReceiver {
             };
         }
         WorldView.drawRotatedImage(context, i, center, rotation, dotSize);
+        if(lifePoints < maxLifePoints)
+        {
+            Vector start = position.add(new Vector(WorldView.TILE_SIZE/8, WorldView.TILE_SIZE-WorldView.TILE_SIZE/6));
+            context.setFill(Color.LIGHTGRAY);
+            context.fillRect(start.getX(), start.getY(), WorldView.TILE_SIZE-WorldView.TILE_SIZE/4, WorldView.TILE_SIZE/10);
+
+            double lifeWidth = (WorldView.TILE_SIZE-WorldView.TILE_SIZE/4)*lifePoints/maxLifePoints;
+            context.setFill(Color.RED);
+            context.fillRect(start.getX(), start.getY(), lifeWidth, WorldView.TILE_SIZE/10);
+        }
     }
 
     public Color getColor() {
