@@ -63,7 +63,7 @@ public class AntSignal implements Runnable, Drawable {
     public void run() {
         try {
             while (size < maxSize) {
-                TickWaiter.waitTick(this);
+                TickWaiter.waitTick();
                 synchronized (lock) {
                     size += signalSpeed;
                 }

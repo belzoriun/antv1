@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChunkUpdater implements Runnable{
 
-    private Chunk chunk;
+    private List<Chunk> chunks;
 
     private static List<ChunkUpdateFeature> updateFeatures = new ArrayList<>();
 
@@ -18,23 +18,23 @@ public class ChunkUpdater implements Runnable{
         updateFeatures.add(feature);
     }
 
-    public ChunkUpdater(Chunk c)
+    public ChunkUpdater(List<Chunk> c)
     {
-        chunk = c;
+        chunks = c;
     }
 
     @Override
     public void run() {
         while(TickWaiter.isLocked())
         {
-            TickWaiter.waitTick(this);
-            for(int i = 0; i<3; i++)
-            {
-                Vector pos = new Vector(Application.random.nextInt(Chunk.CHUNK_SIZE), Application.random.nextInt(Chunk.CHUNK_SIZE));
-                Tile t = chunk.getTile(pos);
-                for(ChunkUpdateFeature feature : updateFeatures)
-                {
-                    feature.call(pos,t);
+            TickWaiter.waitTick();
+            for(Chunk chunk : chunks) {
+                for (int i = 0; i < 3; i++) {
+                    Vector pos = new Vector(Application.random.nextInt(Chunk.CHUNK_SIZE), Application.random.nextInt(Chunk.CHUNK_SIZE));
+                    Tile t = chunk.getTile(pos);
+                    for (ChunkUpdateFeature feature : updateFeatures) {
+                        feature.call(pos, t);
+                    }
                 }
             }
         }

@@ -41,6 +41,10 @@ public class ArrowDisplay {
     public void update(GraphicsContext context)
     {
         Vector tilePos = Map.getInstance().getTilePosition(hill);
+        if(tilePos == null)
+        {
+            return;
+        }
         Vector position = manager.toWorldPoint(tilePos).multi(WorldView.TILE_SIZE).add(WorldView.TILE_SIZE/2);
         if(position.getX() < 0 || position.getX() > canvas.widthProperty().get() - arrowSize / 2
                 || position.getY() < 0 || position.getY() > canvas.heightProperty().get() - arrowSize / 2) {

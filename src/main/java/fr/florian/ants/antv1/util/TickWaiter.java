@@ -1,7 +1,5 @@
 package fr.florian.ants.antv1.util;
 
-import fr.florian.ants.antv1.living.Living;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +10,6 @@ public class TickWaiter {
     private static TickWaiter instance = null;
 
     private boolean isFree = false;
-    private List<Object> except;
-
-    public TickWaiter()
-    {
-        except = new ArrayList<>();
-    }
 
     private static TickWaiter getInstance()
     {
@@ -28,17 +20,13 @@ public class TickWaiter {
         return instance;
     }
 
-    public static void waitTick(Object waiter) {
+    public static void waitTick() {
+        if(getInstance().isFree)
+        {
+            return;
+        }
         synchronized (getInstance())
         {
-            if(getInstance().isFree)
-            {
-                return;
-            }
-            if(getInstance().except.contains(waiter))
-            {
-                getInstance().except.remove(waiter);
-            }
             try {
                 getInstance().wait();
             } catch (InterruptedException ignored) {
@@ -66,9 +54,5 @@ public class TickWaiter {
 
     public static boolean isLocked() {
         return !getInstance().isFree;
-    }
-
-    public static void freeFor(Object o) {
-        getInstance().except.add(o);
     }
 }

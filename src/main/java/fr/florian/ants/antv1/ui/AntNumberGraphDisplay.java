@@ -59,7 +59,7 @@ public class AntNumberGraphDisplay extends Pane implements Runnable{
     public void run() {
         try {
             while (TickWaiter.isLocked()) {
-                TickWaiter.waitTick(this);
+                TickWaiter.waitTick();
                 Platform.runLater(()-> {
                     double time = (GameTimer.getInstance().getTotalTime() - GameTimer.getInstance().getRemainingTime())/1000;
                     if(Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))

@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class Chunk {
 
-    public static final int CHUNK_SIZE = 4;
+    public static final int CHUNK_SIZE = 16;
 
     private java.util.Map<Vector, Tile> tiles;
 
@@ -27,7 +27,6 @@ public class Chunk {
                 tiles.put(tilePos, placer.placeTile(tilePos.add(pos.multi(CHUNK_SIZE))));
             }
         }
-        new Thread(new ChunkUpdater(this)).start();
     }
 
     public Tile getTile(Vector pos)

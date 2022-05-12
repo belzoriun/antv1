@@ -1,8 +1,11 @@
 package fr.florian.ants.antv1.ui;
 
+import fr.florian.ants.antv1.map.ChunkUpdateFeature;
+import fr.florian.ants.antv1.map.ChunkUpdater;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
+import fr.florian.ants.antv1.util.mod.ModLoader;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.option.Options;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
@@ -21,11 +24,13 @@ import java.util.Random;
 public class Application extends javafx.application.Application {
 
     public static Stage stage;
-    private static MainPane main;
-    private static StartMenu menu;
+    public static MainPane main;
+    public static StartMenu menu;
     private static SimulationOptionsMenu optionMenu;
     public static Options options;
     public static long seed = 0L;
+
+    private static DisplayStartController controller;
 
     public static Random random;
 
@@ -33,9 +38,7 @@ public class Application extends javafx.application.Application {
      * Restarts the whole application
      */
     public static void restart() {
-        System.out.println("restarting ...");
-        main.exit();
-        switchToOptionScreen();
+        controller.emitAsync(DisplayStartController.StartEvent.RESTART);
     }
 
     /**
@@ -43,18 +46,14 @@ public class Application extends javafx.application.Application {
      */
     public static void initGame()
     {
-        random = new Random(seed);
-        TickWaiter.lock();
-        PheromoneManager.forceInit();
-        Map.getInstance().init(new NoiseResourcePlacer(seed, List.of(new BasicResource(null),
-                new RareResource(null),
-                new ExtremelyRareResource(null),
-                new FoodResource(null))));
-        System.out.println("initialized map");
-        GameTimer.init(options.getInt(OptionKey.SIMULATION_TIME)* 60000L);//2 minute
-        GameTimer.getInstance().start();
-        System.out.println("initialized timer");
-        main.init();
+        controller.emitAsync(DisplayStartController.StartEvent.INIT_GAME);
+    }
+
+    public static void showLoadingScreen(String text)
+    {
+        if(stage.getScene().getRoot() != LoadMenu.getInstance())
+            stage.getScene().setRoot(LoadMenu.getInstance());
+        LoadMenu.getInstance().show(text);
     }
 
     @Override
@@ -76,6 +75,7 @@ public class Application extends javafx.application.Application {
 
     public static void switchToGameScreen()
     {
+        LoadMenu.getInstance().hide();
         stage.getScene().setRoot(main);
     }
 
@@ -97,8 +97,7 @@ public class Application extends javafx.application.Application {
     {
         if(stage.getScene().getRoot() == main)
             main.exit();
-        Platform.exit();
-        System.exit(0);
+        controller.emit(DisplayStartController.StartEvent.END);
     }
 
     public static void showEndMenu()
@@ -107,7 +106,12 @@ public class Application extends javafx.application.Application {
     }
 
     public static void main(String[] args) {
+        controller = new DisplayStartController();
+        controller.start();
         launch();
         endGame();
+        controller.terminate();
+        Platform.exit();
+        System.exit(0);
     }
 }

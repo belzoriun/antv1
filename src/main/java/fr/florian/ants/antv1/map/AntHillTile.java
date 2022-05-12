@@ -100,7 +100,6 @@ public class AntHillTile extends Tile{
         synchronized (Map.getInstance()) {
             Map.getInstance().spawn(queen, false);
         }
-        System.out.println("spawned queen");
         for (int i = 0; i < Application.options.getInt(OptionKey.SOLDIER_PER_QUEEN); i++) {
             SoldierAnt s = new SoldierAnt(uniqueId, queen, color, pos);
             synchronized (Map.getInstance()) {
@@ -113,7 +112,6 @@ public class AntHillTile extends Tile{
                 }
             }
         }
-        System.out.println("spawned "+Application.options.getInt(OptionKey.WORKER_PER_SOLDIER)*Application.options.getInt(OptionKey.SOLDIER_PER_QUEEN)+" workers");
     }
 
     public final long getUniqueId()

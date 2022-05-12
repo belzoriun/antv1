@@ -11,6 +11,7 @@ import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 import fr.florian.ants.antv1.util.resource.Resource;
+import javafx.application.Platform;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
@@ -25,13 +26,13 @@ public class Map {
     private final java.util.Map<Vector, Chunk> chunks;
     private final List<AntHillTile> antHills;
     private final List<Living> livings;
-    private final java.util.Map<Living, Thread> cores;
+    private final List<Thread> cores;
     private static Map instance = null;
 
     private Map()
     {
         chunks = new HashMap<>();
-        cores = new HashMap<>();
+        cores = new ArrayList<>();
         livings = new ArrayList<>();
         antHills = new ArrayList<>();
     }
@@ -62,9 +63,11 @@ public class Map {
     {
         synchronized (livings) {
             if(!revive) {
-                Thread t = new Thread(living);
-                t.start();
-                cores.put(living, t);
+                synchronized (cores) {
+                    Thread t = new Thread(living);
+                    t.start();
+                    cores.add(t);
+                }
             }
             if (!livings.contains(living)) {
                 livings.add(living);
@@ -103,6 +106,9 @@ public class Map {
     {
         PheromoneManager.getInstance().start();
 
+        Platform.runLater(() -> {
+            Application.showLoadingScreen("Placing resources");
+        });
         System.out.println("placing resources");
         for(int x = 0; x< Application.options.getInt(OptionKey.MAP_WIDTH); x++)
         {
@@ -116,6 +122,9 @@ public class Map {
             }
         }
 
+        Platform.runLater(() -> {
+            Application.showLoadingScreen("Placing ant hills");
+        });
         System.out.println("placing ant hills");
         for(int i = 0; i< Application.options.getInt(OptionKey.ANT_HILL_COUNT); i++)
         {
@@ -127,6 +136,8 @@ public class Map {
             hill.makeInitialSpawns(pos);
             antHills.add(hill);
         }
+
+        new Thread(new ChunkUpdater(chunks.values().stream().toList())).start();
         System.out.println("map generation done");
     }
 
@@ -149,11 +160,19 @@ public class Map {
         if(pos.getX()<0|| pos.getX()>=Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE||pos.getY()<0||pos.getY()>=Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE)
             return null;
         Vector chunkPos = pos.multi(1.0/Chunk.CHUNK_SIZE);
+        if(chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())) == null)
+        {
+            return null;
+        }
         return chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())).getTile(Chunk.reduceToChunkPos(pos));
     }
 
     public void drawTile(Vector vector, Vector displayPos, GraphicsContext graphicsContext2D) {
         Vector chunkPos = vector.multi(1.0/Chunk.CHUNK_SIZE);
+        if(chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())) == null)
+        {
+            return;
+        }
         Tile t = chunks.get(new Vector((int)chunkPos.getX(), (int)chunkPos.getY())).getTile(Chunk.reduceToChunkPos(vector));
         if(t != null)
         {
@@ -171,11 +190,10 @@ public class Map {
      */
     public void killAll()
     {
-        synchronized (livings) {
-            for (Living l : livings) {
-                new Thread(()->{
-                    l.kill(Living.GOD);
-                }).start();
+        for (Thread t : new ArrayList<>(cores)) {
+            try {
+                t.join();
+            } catch (InterruptedException ignored) {
             }
         }
     }

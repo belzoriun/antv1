@@ -31,7 +31,7 @@ public abstract class Tile implements Drawable {
      */
     public void placePheromone(long antHillId, Pheromone p)
     {
-        if (!pheromones.containsKey(antHillId)) {
+        if (!pheromones.containsKey(antHillId) || pheromones.get(antHillId) == null) {
             pheromones.put(antHillId, new PheromoneSet());
         }
         pheromones.get(antHillId).add(p);
@@ -70,7 +70,7 @@ public abstract class Tile implements Drawable {
 
     public int getPheromoneLevel(long antHillId, Class<? extends Pheromone> pheromoneType)
     {
-        if(!pheromones.containsKey(antHillId))
+        if(!pheromones.containsKey(antHillId) || pheromones.get(antHillId) == null)
         {
             return 0;
         }

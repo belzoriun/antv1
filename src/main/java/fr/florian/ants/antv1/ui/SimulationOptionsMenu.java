@@ -39,7 +39,7 @@ public class SimulationOptionsMenu extends BorderPane {
         start.setOnAction(e->{
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.initOwner(Application.stage);
-            if(Application.options.getInt(OptionKey.ANT_HILL_COUNT) > (Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH))/2) {
+            if(Application.options.getInt(OptionKey.ANT_HILL_COUNT) > (Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH)*Chunk.CHUNK_SIZE*Chunk.CHUNK_SIZE)/2) {
                 alert.setContentText("Warning : the number of ant hills may be too high for a map of this size, generate simulation anyway ?");
                 Optional<ButtonType> button = alert.showAndWait();
                 if (button.get() == ButtonType.OK) {
@@ -47,8 +47,8 @@ public class SimulationOptionsMenu extends BorderPane {
                     Application.initGame();
                 }
             }
-            else if(Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH) > 1000000/Chunk.CHUNK_SIZE) {
-                alert.setContentText("Warning : the size of the map may be too high. This could cause generation issues, generate simulation anyway ?");
+            else if(Application.options.getInt(OptionKey.MAP_HEIGHT)*Chunk.CHUNK_SIZE*Application.options.getInt(OptionKey.MAP_WIDTH)*Chunk.CHUNK_SIZE > 160000) {
+                alert.setContentText("Warning : the size of the map may be too high. This could cause generation/update issues, generate simulation anyway ?");
                 Optional<ButtonType> button = alert.showAndWait();
                 if (button.get() == ButtonType.OK) {
                     Application.switchToGameScreen();
@@ -65,7 +65,7 @@ public class SimulationOptionsMenu extends BorderPane {
             }
             else
             {
-                Application.switchToGameScreen();
+                Application.showLoadingScreen("Initializing game");
                 Application.initGame();
             }
             Application.options.save();

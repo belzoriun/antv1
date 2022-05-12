@@ -49,12 +49,11 @@ public abstract class Living implements Runnable, Drawable {
     @Override
     public void run() {
         try {
-            while (this.alive) {
-                TickWaiter.waitTick(this);
+            while (this.alive && TickWaiter.isLocked()) {
+                TickWaiter.waitTick();
 
                 Tile t = Map.getInstance().getTile(position);
                 if (t == null) {
-                    kill(Living.GOD);
                     break;
                 }
                 String nextTransition = getNextAction();
@@ -71,6 +70,7 @@ public abstract class Living implements Runnable, Drawable {
             }
         }catch(Exception ignored)
         {
+            ignored.printStackTrace();
         }
     }
 
@@ -86,7 +86,6 @@ public abstract class Living implements Runnable, Drawable {
         this.alive = false;
         if(killer != GOD)
             onKilled(killer);
-        TickWaiter.freeFor(this);
     }
 
     /**

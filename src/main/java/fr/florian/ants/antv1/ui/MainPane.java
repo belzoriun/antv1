@@ -35,30 +35,8 @@ public class MainPane extends BorderPane {
      */
     public void exit()
     {
-        TickWaiter.free();
-        System.out.print("killing ants ...");
-        long time = System.currentTimeMillis();
-        Map.getInstance().killAll();
-        System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
-        System.out.print("Stopping screen refresh ...");
-        time = System.currentTimeMillis();
         refreshHandler.stop();
-        System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
         Application.stage.getScene().removeEventFilter(KeyEvent.KEY_RELEASED, keyHandler);
-        try {
-            System.out.print("Stopping pheromone manager ...");
-            time = System.currentTimeMillis();
-            PheromoneManager.getInstance().stopExecution();
-            PheromoneManager.getInstance().join();
-            System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.print("Stopping timer ...");
-        time = System.currentTimeMillis();
-        GameTimer.getInstance().stopTime();
-        System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
-        Map.annihilate();
     }
 
     private void update()
