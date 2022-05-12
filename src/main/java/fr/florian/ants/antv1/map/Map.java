@@ -2,6 +2,8 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.insects.Tarentula;
+import fr.florian.ants.antv1.map.tileplacer.TilePlacer;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.TickWaiter;
@@ -90,24 +92,20 @@ public class Map {
     }
 
     /**
-     * Destroy the entire map
-     */
-    public static void annihilate()
-    {
-        instance = null;
-    }
-
-    /**
      * Initialize the map
      * create all tiles ant spawning ants
      * @param placer The tile placement specifier
      */
-    public void init(IResourcePlacer placer)
+    public void init(TilePlacer tilePlacer, IResourcePlacer placer)
     {
+        chunks.clear();
+        antHills.clear();
+        livings.clear();
+        cores.clear();
         PheromoneManager.getInstance().start();
 
         Platform.runLater(() -> {
-            Application.showLoadingScreen("Placing resources");
+            Application.showLoadingScreen("Generating map (0%)");
         });
         System.out.println("placing resources");
         for(int x = 0; x< Application.options.getInt(OptionKey.MAP_WIDTH); x++)
@@ -117,7 +115,11 @@ public class Map {
                 Vector v = new Vector(x, y);
                 if(!chunks.containsKey(v))
                 {
-                    addChunk(v, new Chunk(v, placer));
+                    addChunk(v, new Chunk(v, tilePlacer, placer));
+                    Platform.runLater(() -> {
+                        Application.showLoadingScreen("Generating map ("+(double)chunks.size()/
+                                (Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH))*100.0+"%)");
+                    });
                 }
             }
         }
@@ -249,7 +251,7 @@ public class Map {
     public void displayResources(GraphicsContext context, Vector pos, Vector displayPos) {
         Tile t = getTile(pos);
         if(t != null) {
-            if (t instanceof ResourceTile rt) {
+            if (t instanceof ResourceHoldTile rt) {
                 for (Resource r : rt.getResources()) {
                     if(r != null)
                         r.draw(context, r.getPosition().multi(WorldView.TILE_SIZE).add(displayPos));
@@ -265,6 +267,17 @@ public class Map {
             if(tilePos != null)
             {
                 return tilePos.add(entry.getKey().multi(Chunk.CHUNK_SIZE));
+            }
+        }
+        return null;
+    }
+
+    public Vector getChunkPos(Chunk chunk) {
+        for(java.util.Map.Entry<Vector, Chunk> entry : chunks.entrySet())
+        {
+            if(entry.getValue() == chunk)
+            {
+                return entry.getKey();
             }
         }
         return null;

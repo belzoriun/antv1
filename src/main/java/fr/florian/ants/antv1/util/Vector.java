@@ -30,6 +30,9 @@ public record Vector(double x, double y) {
     public Vector multi(double v) {
         return new Vector(x * v, y * v);
     }
+    public Vector multi(Vector v) {
+        return new Vector(x * v.getX(), y * v.getY());
+    }
 
     public Vector up() {
         return new Vector(this.x, this.y - 1);

@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Class representing a resource spot (can be empty)
  */
-public class ResourceTile extends Tile {
+public class ResourceTile extends Tile implements ResourceHoldTile{
 
     private final List<Resource> resources;
 
@@ -33,9 +33,9 @@ public class ResourceTile extends Tile {
     private VBox detailNode;
     private Label totalResources;
 
-    public ResourceTile(List<Resource> resources)
+    public ResourceTile()
     {
-        this.resources = resources;
+        this.resources = new ArrayList<>();
         livings = new VBox();
         totalResources = new Label();
         resourceList = new VBox();
@@ -78,7 +78,7 @@ public class ResourceTile extends Tile {
 
     @Override
     public void onWalkOn(Living l) {
-        //does nothing
+        l.resetTicksPerExecution();
     }
 
     @Override

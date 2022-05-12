@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.util.resource;
 
+import fr.florian.ants.antv1.map.ResourceHoldTile;
 import fr.florian.ants.antv1.map.ResourceTile;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.Vector;
@@ -33,22 +34,20 @@ public class RandomResourcePlacer implements IResourcePlacer{
     }
 
     @Override
-    public ResourceTile placeTile(Vector v) {
+    public void placeResources(Vector v, ResourceHoldTile t) {
         double xMin = 0.3;
         double xMax = 0.7;
         double yMin = 0.3;
         double yMax = 0.7;
-        List<Resource> res = new ArrayList<>();
         if(rand.nextInt(0, 100) < 30) {
             if(!selection.isEmpty()) {
                 int amount = rand.nextInt(0, 20);
                 Resource selected = selection.get(rand.nextInt(0, selection.size()));
                 for (int i = 0; i < amount; i++) {
                     Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
-                    res.add(selected.clone(pos));
+                    t.placeResource(selected.clone(pos));
                 }
             }
         }
-        return new ResourceTile(res);
     }
 }

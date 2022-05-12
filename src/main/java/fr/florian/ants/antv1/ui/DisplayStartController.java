@@ -2,6 +2,7 @@ package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.map.ChunkUpdateFeature;
 import fr.florian.ants.antv1.map.ChunkUpdater;
+import fr.florian.ants.antv1.map.tileplacer.OpenSimplexNoiseTilePlacer;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.mod.ModLoader;
@@ -9,7 +10,6 @@ import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
 import fr.florian.ants.antv1.util.resource.NoiseResourcePlacer;
 import javafx.application.Platform;
-import javafx.scene.input.KeyEvent;
 
 import java.util.*;
 
@@ -38,7 +38,9 @@ public class DisplayStartController extends Thread {
                 Application.random = new Random(Application.seed);
                 TickWaiter.lock();
                 PheromoneManager.forceInit();
-                fr.florian.ants.antv1.map.Map.getInstance().init(new NoiseResourcePlacer(Application.seed, ModLoader.loadModsResource()));
+                fr.florian.ants.antv1.map.Map.getInstance().init(
+                        new OpenSimplexNoiseTilePlacer(Application.seed, ModLoader.loadModsTiles()),
+                        new NoiseResourcePlacer(Application.seed, ModLoader.loadModsResource()));
                 for (ChunkUpdateFeature feature : ModLoader.loadModsUpdateFeatures()) {
                     ChunkUpdater.useUpdateFeature(feature);
                 }
@@ -57,6 +59,7 @@ public class DisplayStartController extends Thread {
                 });
             }catch(Exception | OutOfMemoryError e)
             {
+                e.printStackTrace();
                 Platform.runLater(() -> {
                     Thread t = new Thread(()->{
                         int remainingTime = 10;
@@ -114,7 +117,6 @@ public class DisplayStartController extends Thread {
             time = System.currentTimeMillis();
             GameTimer.getInstance().stopTime();
             System.out.println(" "+(System.currentTimeMillis()-time)+"ms");
-            fr.florian.ants.antv1.map.Map.annihilate();
         });
         executors.put(StartEvent.RESTART, ()->{
             executors.get(StartEvent.END).run();

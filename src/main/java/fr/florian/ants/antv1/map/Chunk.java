@@ -1,5 +1,6 @@
 package fr.florian.ants.antv1.map;
 
+import fr.florian.ants.antv1.map.tileplacer.TilePlacer;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.resource.IResourcePlacer;
 
@@ -16,7 +17,7 @@ public class Chunk {
         return new Vector((int)(v.getX()%CHUNK_SIZE), (int)(v.getY()%CHUNK_SIZE));
     }
 
-    public Chunk(Vector pos, IResourcePlacer placer)
+    public Chunk(Vector pos, TilePlacer tilePlacer, IResourcePlacer placer)
     {
         tiles = new HashMap<>();
         for(int x = 0; x<CHUNK_SIZE; x++)
@@ -24,7 +25,14 @@ public class Chunk {
             for(int y = 0; y<CHUNK_SIZE; y++)
             {
                 Vector tilePos = new Vector(x, y);
-                tiles.put(tilePos, placer.placeTile(tilePos.add(pos.multi(CHUNK_SIZE))));
+                Vector worldTilePos = tilePos.add(pos.multi(CHUNK_SIZE));
+                Tile t = tilePlacer.placeTile(worldTilePos);
+                if(t != null) {
+                    tiles.put(tilePos, t);
+                    if (t instanceof ResourceHoldTile rt) {
+                        placer.placeResources(worldTilePos, rt);
+                    }
+                }
             }
         }
     }

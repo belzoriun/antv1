@@ -1,10 +1,7 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.map.AntHillTile;
-import fr.florian.ants.antv1.map.Map;
-import fr.florian.ants.antv1.map.ResourceTile;
-import fr.florian.ants.antv1.map.Tile;
+import fr.florian.ants.antv1.map.*;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
@@ -37,7 +34,7 @@ public class WorkerAnt extends Ant {
     private String nextStep;
 
     public WorkerAnt(long anthillId, SoldierAnt soldier, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 8, 5, 1);
+        super(anthillId, color, initialPosition, 8, 1, 5, 1);
         nextStep = "";
         heldResources = new HeldResourceList(5);
         path = new ArrayList<>();
@@ -51,7 +48,7 @@ public class WorkerAnt extends Ant {
                 pathCleared = false;
                 Tile t = Map.getInstance().getTile(position);
                 if (t != null) {
-                    if (t instanceof ResourceTile res) {
+                    if (t instanceof ResourceHoldTile res) {
                         if (res.resourceCount() > 0) {
                             takeResource(res);
                             return;
@@ -75,7 +72,7 @@ public class WorkerAnt extends Ant {
                             {
                                 continue;
                             }
-                            if(next instanceof ResourceTile rt && !rt.getResources().isEmpty())
+                            if(next instanceof ResourceHoldTile rt && !rt.getResources().isEmpty())
                             {
                                 selection.clear();
                                 selection.add(dir);
@@ -121,9 +118,9 @@ public class WorkerAnt extends Ant {
                         }
                     } else {
                         if (path.isEmpty()) {
-                            if (t instanceof ResourceTile rt) {
+                            if (t instanceof ResourceHoldTile rt) {
                                 while (!getResources().isEmpty()) {
-                                    rt.getResources().add(getResources().remove());
+                                    rt.placeResource(getResources().remove());
                                 }
                             }
                         } else {
@@ -159,7 +156,7 @@ public class WorkerAnt extends Ant {
                         }
                     } else {
                         if (path.isEmpty()) {
-                            if (t instanceof ResourceTile rt) {
+                            if (t instanceof ResourceHoldTile rt) {
                                 while (!getResources().isEmpty()) {
                                     rt.placeResource(getResources().remove());
                                 }
@@ -278,9 +275,12 @@ public class WorkerAnt extends Ant {
         }
     }
 
-    private void takeResource(ResourceTile tile) {
+    private void takeResource(ResourceHoldTile tile) {
         if (!heldResources.isFull()) {
-            tile.onInteract(this);
+            try {
+                heldResources.add(tile.take());
+            } catch (Exception ignored) {
+            }
         }
     }
 

@@ -33,17 +33,13 @@ public class QueenAnt extends Ant implements AntSignalSender {
     private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
     private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
-    private int timeOperationCounter;
     private String nextStep;
 
-    private static final int TICKS_PER_OPERATION = 50;
-
     public QueenAnt(long anthillId, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 10, 200, 10);
+        super(anthillId, color, initialPosition, 10, 50, 200, 10);
         signals = new ArrayList<>();
-        nextStep = "";
+        nextStep = "send";
         subs = new ArrayList<>();
-        timeOperationCounter = TICKS_PER_OPERATION;
         initCore(new StateMachine.StateMachineBuilder()
                 .addState("idle", ()->{})
                 .addState("sendsignal", ()->{
@@ -78,11 +74,6 @@ public class QueenAnt extends Ant implements AntSignalSender {
 
     @Override
     protected String executeAction() {
-        if(timeOperationCounter <= 0) {
-
-            nextStep = "send";
-            timeOperationCounter = TICKS_PER_OPERATION;
-        }
         List<AntSignal> trash = new ArrayList<>();
         for (AntSignal sig : signals) {
             if (sig.mayDissipate()) {
@@ -90,7 +81,6 @@ public class QueenAnt extends Ant implements AntSignalSender {
             }
         }
         signals.removeAll(trash);
-        timeOperationCounter--;
         return nextStep;
     }
 
@@ -159,7 +149,6 @@ public class QueenAnt extends Ant implements AntSignalSender {
     @Override
     public Node getDetailDisplay() {
         VBox box = new VBox();
-        box.getChildren().add(new Label("Sending signal in "+(timeOperationCounter)+" ticks"));
         box.getChildren().add(new ImageView(getStateMachineDisplay()));
         return box;
     }

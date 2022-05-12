@@ -12,4 +12,6 @@ module fr.florian.ants.antv {
     exports fr.florian.ants.antv1.util.exception;
     exports fr.florian.ants.antv1.util.signals;
     exports fr.florian.ants.antv1.util.pheromone;
+    exports fr.florian.ants.antv1.map.tileplacer;
+    exports fr.florian.ants.antv1.util.fight;
 }

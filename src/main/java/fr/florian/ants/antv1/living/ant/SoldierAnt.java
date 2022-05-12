@@ -9,6 +9,7 @@ import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -29,44 +30,40 @@ public class SoldierAnt extends Ant implements AntSignalSender{
     private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
     private final Vector initialPosition;
-    private int actionCounter;
 
     private static final double MAX_ANTHILL_DISTANCE = 20;
-    private static final int TICKS_PER_ACTION = 3;
 
     public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 9.2, 10, 3);
+        super(anthillId, color, initialPosition, 9.2, 10, 10, 3);
         signals = new ArrayList<>();
         subs = new ArrayList<>();
         q.subscribe(this);
         this.initialPosition = initialPosition;
-        actionCounter = TICKS_PER_ACTION;
+        initCore(new StateMachine.StateMachineBuilder()
+                .addState("move", ()->{
+                    headingDirection = Direction.random();
+                    while (position.add(headingDirection.getOffset()).delta(this.initialPosition) > MAX_ANTHILL_DISTANCE
+                            || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null
+                            || (Map.getInstance().getTile(position.add(headingDirection.getOffset())) instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)) {
+                        headingDirection = Direction.random();
+                    }
+                    position = position.add(headingDirection.getOffset());
+                    synchronized (signals) {
+                        List<AntSignal> trash = new ArrayList<>();
+                        for (AntSignal sig : signals) {
+                            if (sig.mayDissipate()) {
+                                trash.add(sig);
+                            }
+                        }
+                        signals.removeAll(trash);
+                    }
+                }).get("move"));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     protected String executeAction() {
-        if(actionCounter <= 0) {
-            headingDirection = Direction.random();
-            while (position.add(headingDirection.getOffset()).delta(initialPosition) > MAX_ANTHILL_DISTANCE
-                    || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null
-                    || (Map.getInstance().getTile(position.add(headingDirection.getOffset())) instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)) {
-                headingDirection = Direction.random();
-            }
-            position = position.add(headingDirection.getOffset());
-            synchronized (signals) {
-                List<AntSignal> trash = new ArrayList<>();
-                for (AntSignal sig : signals) {
-                    if (sig.mayDissipate()) {
-                        trash.add(sig);
-                    }
-                }
-                signals.removeAll(trash);
-            }
-            actionCounter = TICKS_PER_ACTION;
-        }
-        actionCounter --;
-        return "";
+        return null;
     }
 
     @Override

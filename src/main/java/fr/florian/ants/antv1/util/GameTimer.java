@@ -94,6 +94,10 @@ public class GameTimer {
 
     public static GameTimer getInstance()
     {
+        if(instance == null)
+        {
+            init(2*60000);
+        }
         return instance;
     }
 

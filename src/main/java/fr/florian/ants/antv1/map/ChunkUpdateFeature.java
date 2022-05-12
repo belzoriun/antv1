@@ -18,7 +18,7 @@ public interface ChunkUpdateFeature {
 
         @Override
         public void call(Vector v, Tile t) {
-            if(t instanceof ResourceTile rt) {
+            if(t instanceof ResourceHoldTile rt) {
                 double xMin = 0.3;
                 double xMax = 0.7;
                 double yMin = 0.3;

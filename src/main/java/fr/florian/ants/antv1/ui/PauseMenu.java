@@ -21,11 +21,12 @@ public class PauseMenu extends BorderPane {
 
     private final Button continueBtn;
     private Vector clickPoint;
+    private Label title;
     private Button step;
 
     public PauseMenu(double initialTranslateX, double initialTranslateY)
     {
-        Label title = new Label("Game paused");
+        title = new Label("Game paused");
         title.setFont(new Font(15));
         title.setStyle("-fx-font-weight: bold");
         title.setUnderline(true);
@@ -106,5 +107,6 @@ public class PauseMenu extends BorderPane {
     public void setEndMenu() {
         continueBtn.setVisible(false);
         step.setVisible(false);
+        title.setText("Game end");
     }
 }

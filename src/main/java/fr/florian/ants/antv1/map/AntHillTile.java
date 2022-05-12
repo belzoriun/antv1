@@ -137,6 +137,7 @@ public class AntHillTile extends Tile{
         if(a instanceof WorkerAnt want)
         {
             Resource r = want.getResources().remove();
+            if(r == null) return;
             this.score += r.getResourceScore();
             r.onDeposit(this);
         }

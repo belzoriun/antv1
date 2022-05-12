@@ -37,6 +37,9 @@ public class ResourceLoader {
     public static final String STRAWBERRY = "strawberry.png";
     public static final String SUSHI = "sushi.png";
     public static final String WATERMELON = "watermelon.png";
+    public static final String SPIDER = "spider.png";
+    public static final String WATER_1 = "water_1.jpg";
+    public static final String WATER_2 = "water_2.jpg";
 
     private final Map<String, Image> streams;
     private final ClassLoader loader;
@@ -76,6 +79,9 @@ public class ResourceLoader {
             instance.loadResource(STRAWBERRY);
             instance.loadResource(SUSHI);
             instance.loadResource(WATERMELON);
+            instance.loadResource(SPIDER);
+            instance.loadResource(WATER_1);
+            instance.loadResource(WATER_2);
         }
         return instance;
     }

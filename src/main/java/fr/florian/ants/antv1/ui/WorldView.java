@@ -47,7 +47,7 @@ public class WorldView extends Pane {
 
     public WorldView()
     {
-        this.canvas = new Canvas(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        this.canvas = new Canvas(Application.stage.getWidth(), Application.stage.getHeight());
         hillArrows = new HashMap<>();
     }
 
