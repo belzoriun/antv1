@@ -129,6 +129,7 @@ public class AntHillTile extends Tile{
         if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
         {
             a.heal(10);
+            a.clearEffects();
         }
     }
 
@@ -141,6 +142,11 @@ public class AntHillTile extends Tile{
             this.score += r.getResourceScore();
             r.onDeposit(this);
         }
+    }
+
+    public void addScore(int amount)
+    {
+        this.score+=amount;
     }
 
     @Override
@@ -207,6 +213,11 @@ public class AntHillTile extends Tile{
         }
 
         return detailNode;
+    }
+
+    @Override
+    public void tickUpdate() {
+
     }
 
     public int getScore()

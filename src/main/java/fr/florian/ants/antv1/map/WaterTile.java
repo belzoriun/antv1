@@ -2,9 +2,13 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.effect.Wet;
+import fr.florian.ants.antv1.util.pheromone.Pheromone;
+import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
@@ -16,21 +20,26 @@ import java.util.concurrent.TimeUnit;
 
 public class WaterTile extends Tile{
 
-    private String waterImage = ResourceLoader.WATER_1;
+    private String[] waterImages = new String[]{
+            ResourceLoader.WATER_1,
+            ResourceLoader.WATER_2
+    };
+    private int waterImage = 0;
 
     public WaterTile()
     {
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(()->{
-            if(waterImage == ResourceLoader.WATER_1)
-                waterImage = ResourceLoader.WATER_2;
-            else
-                waterImage = ResourceLoader.WATER_1;
-        }, 0, 500, TimeUnit.MILLISECONDS);
+
+    }
+
+    @Override
+    public void placePheromone(long antHillId, Pheromone p)
+    {
+        //prevents placing pheromones on this tile
     }
 
     @Override
     public void onWalkOn(Living l) {
-        l.setTicksPerExecution(l.getTicksPerExecution()+5);
+        l.applyEffect(new Wet());
     }
 
     @Override
@@ -49,8 +58,18 @@ public class WaterTile extends Tile{
     }
 
     @Override
+    public void tickUpdate() {
+        if(waterImage == waterImages.length-1)
+        {
+            waterImage = 0;
+        }
+        else
+            waterImage++;
+    }
+
+    @Override
     public void draw(GraphicsContext context, Vector position) {
-        context.drawImage(ResourceLoader.getInstance().loadResource(waterImage)
+        context.drawImage(ResourceLoader.getInstance().loadResource(waterImages[waterImage])
                 , position.getX()
                 , position.getY()
                 , WorldView.TILE_SIZE

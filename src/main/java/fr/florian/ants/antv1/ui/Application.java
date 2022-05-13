@@ -1,6 +1,5 @@
 package fr.florian.ants.antv1.ui;
 
-import fr.florian.ants.antv1.map.ChunkUpdateFeature;
 import fr.florian.ants.antv1.map.ChunkUpdater;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;

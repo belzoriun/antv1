@@ -60,7 +60,6 @@ public class SoldierAnt extends Ant implements AntSignalSender{
                 }).get("move"));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     protected String executeAction() {
         return null;
@@ -81,7 +80,7 @@ public class SoldierAnt extends Ant implements AntSignalSender{
 
     @Override
     public List<AntSignal> getSignalList() {
-        return signals;
+        return new ArrayList<>(signals);
     }
 
     @Override

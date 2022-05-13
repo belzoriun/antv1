@@ -2,12 +2,12 @@ package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
 import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.util.resource.DeadAnt;
+import fr.florian.ants.antv1.ui.Application;
+import fr.florian.ants.antv1.util.resource.*;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
-import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -27,11 +27,17 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
 
     private final List<Resource> resources;
 
-    private java.util.Map<Living, HBox> followBottons;
-    private VBox livings;
-    private VBox resourceList;
-    private VBox detailNode;
-    private Label totalResources;
+    private final String[] textures = new String[]{
+            ResourceLoader.GRASS_RES_1,
+            ResourceLoader.GRASS_RES_2
+    };
+    private int currentTexture;
+
+    private final java.util.Map<Living, HBox> followBottons;
+    private final VBox livings;
+    private final VBox resourceList;
+    private final VBox detailNode;
+    private final Label totalResources;
 
     public ResourceTile()
     {
@@ -78,7 +84,6 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
 
     @Override
     public void onWalkOn(Living l) {
-        l.resetTicksPerExecution();
     }
 
     @Override
@@ -176,8 +181,33 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
     }
 
     @Override
+    public void tickUpdate() {
+        double xMin = 0.3;
+        double xMax = 0.7;
+        double yMin = 0.3;
+        double yMax = 0.7;
+        for(Resource resource : new Resource[]{
+                new BasicResource(null),
+                new RareResource(null),
+                new ExtremelyRareResource(null),
+                new FoodResource(null)
+        }) {
+            if (Application.random.nextDouble() > resource.getRarity() && Application.random.nextDouble() < 0.05) {
+                Vector pos = new Vector(Application.random.nextDouble(xMin, xMax), Application.random.nextDouble(yMin, yMax));
+                placeResource(resource.clone(pos));
+            }
+        }
+        if(currentTexture == textures.length-1)
+        {
+            currentTexture = 0;
+        }
+        else
+            currentTexture++;
+    }
+
+    @Override
     public void draw(GraphicsContext context, Vector position) {
-        context.drawImage(ResourceLoader.getInstance().loadResource(ResourceLoader.GRASS_RES_1)
+        context.drawImage(ResourceLoader.getInstance().loadResource(textures[currentTexture])
                 , position.getX()
                 , position.getY()
                 , WorldView.TILE_SIZE

@@ -33,15 +33,14 @@ public class QueenAnt extends Ant implements AntSignalSender {
     private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
     private final List<AntSignal> signals;
     private final List<AntSubscription> subs;
-    private String nextStep;
 
     public QueenAnt(long anthillId, Color color, Vector initialPosition) {
         super(anthillId, color, initialPosition, 10, 50, 200, 10);
         signals = new ArrayList<>();
-        nextStep = "send";
         subs = new ArrayList<>();
         initCore(new StateMachine.StateMachineBuilder()
-                .addState("idle", ()->{})
+                .addState("idle", ()-> {
+                })
                 .addState("sendsignal", ()->{
                     AntOrder order = AntOrder.SEARCH_FOR_FOOD;
                     if(GameTimer.getInstance().getRemainingTime()<=30000 && !Application.options.getBoolean(OptionKey.INFINITE_SIMULATION))
@@ -54,14 +53,14 @@ public class QueenAnt extends Ant implements AntSignalSender {
                     }
                     signals.add(newSig);
                     new Thread(newSig).start();
-                    nextStep = "spawn";
+                    executeDirectly("spawn");
                 })
                 .addState("spawnants", ()->{
                     if(Application.random.nextDouble() < 0.25)
                     {
                         makeSpawnNewAnt(5, 15, true);
                     }
-                    nextStep = "idle";
+                    executeDirectly("idle");
                 })
                 .addTransition("send")
                 .addTransition("spawn")
@@ -81,7 +80,7 @@ public class QueenAnt extends Ant implements AntSignalSender {
             }
         }
         signals.removeAll(trash);
-        return nextStep;
+        return "send";
     }
 
     public void makeSpawnNewAnt(int min, int max, boolean foodRequired) {

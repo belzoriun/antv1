@@ -24,26 +24,22 @@ public class AntWarMod implements ModLoader{
     }
 
     @Override
-    public Set<ChunkUpdateFeature> loadUpdateFeatures() {
-        Set<ChunkUpdateFeature> features = new HashSet<>();
-        features.add(new ChunkUpdateFeature.ResourceUpdateFeature(new BasicResource(null)));
-        features.add(new ChunkUpdateFeature.ResourceUpdateFeature(new RareResource(null)));
-        features.add(new ChunkUpdateFeature.ResourceUpdateFeature(new ExtremelyRareResource(null)));
-        features.add(new ChunkUpdateFeature.ResourceUpdateFeature(new FoodResource(null)));
-        features.add((Vector v, Tile t)->{
-            if(!GameTimer.getInstance().isDay() && Application.random.nextDouble()<0.00001)
-            {
-                Map.getInstance().spawn(new Tarentula(v), false);
-            }
-        });
-        return features;
-    }
-
-    @Override
     public Set<TilePlaceProperty> loadTileFactories() {
         Set<TilePlaceProperty> res = new HashSet<>();
         res.add(new TilePlaceProperty(ResourceTile::new, 1, -0.5, 1));
         res.add(new TilePlaceProperty(WaterTile::new, 1, -1, -0.5));
         return res;
+    }
+
+    @Override
+    public Set<LivingSpawnFactory> loadLivingSpawns() {
+        Set<LivingSpawnFactory> factories = new HashSet<>();
+        factories.add((Vector v)->{
+            if(Application.random.nextDouble() < 0.00001 && !GameTimer.getInstance().isDay())
+            {
+                Map.getInstance().spawn(new Tarentula(v), false);
+            }
+        });
+        return factories;
     }
 }

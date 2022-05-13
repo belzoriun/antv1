@@ -4,6 +4,7 @@ import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.*;
+import fr.florian.ants.antv1.util.effect.Effect;
 import fr.florian.ants.antv1.util.fight.Attacker;
 import fr.florian.ants.antv1.util.fight.FightManager;
 import fr.florian.ants.antv1.util.statemachine.StateMachine;
@@ -11,6 +12,9 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The class representing a living entity
@@ -28,10 +32,12 @@ public abstract class Living implements Runnable, Attacker, Drawable {
     private int tickCounter;
     private int ticksPerExecution;
     private final int initialTicksPerOperation;
+    private List<Effect> effects;
 
     protected Living(Vector pos, int ticksPerExecution, double maxLifePoints, double strength)
     {
         headingDirection = Direction.UP;
+        effects = new ArrayList<>();
         this.ticksPerExecution = ticksPerExecution;
         tickCounter = ticksPerExecution;
         initialTicksPerOperation = ticksPerExecution;
@@ -43,6 +49,37 @@ public abstract class Living implements Runnable, Attacker, Drawable {
                 .addState("idle", ()->{})
                 .get("idle");
         lifePoints = maxLifePoints;
+    }
+
+    public void applyEffect(Effect e)
+    {
+        synchronized (Effect.lock) {
+            List<Effect> existing = effects.stream().filter(ef -> e.getClass() == ef.getClass()).toList();
+            if (existing.isEmpty()) {
+                e.setup(this);
+                effects.add(e);
+            } else {
+                existing.get(0).resetDuration();
+            }
+        }
+    }
+
+    public void removeEffect(Effect e)
+    {
+        synchronized (Effect.lock) {
+            e.clear(this);
+            effects.remove(e);
+        }
+    }
+
+    public void clearEffects()
+    {
+        synchronized (Effect.lock) {
+            for (Effect e : effects) {
+                e.clear(this);
+            }
+            effects.clear();
+        }
     }
 
     protected void initCore(StateMachine machine)
@@ -57,12 +94,30 @@ public abstract class Living implements Runnable, Attacker, Drawable {
 
     protected abstract String getNextAction();
 
+    protected void executeDirectly(String nextTransition)
+    {
+        if (nextTransition != null && !nextTransition.isEmpty())
+            stateMachine.setTransition(nextTransition);
+        stateMachine.step();
+    }
+
     @Override
     public void run() {
         try {
             while (this.alive && TickWaiter.isLocked()) {
                 TickWaiter.waitTick();
-
+                List<Effect> trash = new ArrayList<>();
+                synchronized (Effect.lock) {
+                    for (Effect e : effects) {
+                        e.apply(this);
+                        if (e.depleted()) {
+                            trash.add(e);
+                        }
+                    }
+                    for (Effect e : trash) {
+                        removeEffect(e);
+                    }
+                }
                 tickCounter --;
                 if(tickCounter <= 0) {
                     Tile t = Map.getInstance().getTile(position);
@@ -81,6 +136,7 @@ public abstract class Living implements Runnable, Attacker, Drawable {
                     cur.onWalkOn(this);
                     tickCounter = ticksPerExecution;
                 }
+                onUpdate();
             }
         }catch(Exception ignored)
         {
@@ -98,8 +154,10 @@ public abstract class Living implements Runnable, Attacker, Drawable {
      */
     public void kill(Attacker killer) {
         this.alive = false;
-        if(killer != GOD)
+        if(killer != GOD) {
+            killer.onVictory(this);
             onKilled(killer);
+        }
     }
 
     /**
@@ -107,7 +165,7 @@ public abstract class Living implements Runnable, Attacker, Drawable {
      */
     public abstract void onKilled(Attacker killer);
 
-    protected void hit(Attacker attacker, double damage)
+    public void hit(Attacker attacker, double damage)
     {
         this.lifePoints -= damage;
         if(this.lifePoints <= 0)
@@ -167,6 +225,7 @@ public abstract class Living implements Runnable, Attacker, Drawable {
     public void revive()
     {
         alive = true;
+        effects = new ArrayList<>();
     }
     public abstract Node getDetailDisplay();
 
@@ -183,6 +242,8 @@ public abstract class Living implements Runnable, Attacker, Drawable {
             context.fillRect(start.getX(), start.getY(), lifeWidth, WorldView.TILE_SIZE/10);
         }
     }
+
+    public void onUpdate(){ }
 
     public int getTicksPerExecution() {
         return ticksPerExecution;

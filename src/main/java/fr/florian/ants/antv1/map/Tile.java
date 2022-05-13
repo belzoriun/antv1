@@ -61,20 +61,22 @@ public abstract class Tile implements Drawable {
 
     public int getPheromoneLevel(long antHillId)
     {
-        if(!pheromones.containsKey(antHillId))
+        PheromoneSet p = pheromones.get(antHillId);
+        if(p==null)
         {
             return 0;
         }
-        return pheromones.get(antHillId).getTotalLevel();
+        return p.getTotalLevel();
     }
 
     public int getPheromoneLevel(long antHillId, Class<? extends Pheromone> pheromoneType)
     {
-        if(!pheromones.containsKey(antHillId) || pheromones.get(antHillId) == null)
+        PheromoneSet set = pheromones.get(antHillId);
+        if(set == null)
         {
             return 0;
         }
-        return pheromones.get(antHillId).getTotalLevel(pheromoneType);
+        return set.getTotalLevel(pheromoneType);
     }
 
     public List<Pheromone> getAllPheromones()
@@ -110,4 +112,6 @@ public abstract class Tile implements Drawable {
      * @return The node to display
      */
     public abstract Node getInfoDisplay();
+
+    public abstract void tickUpdate();
 }

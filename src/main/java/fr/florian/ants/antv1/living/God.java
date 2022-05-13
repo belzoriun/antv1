@@ -8,7 +8,6 @@ import javafx.scene.canvas.GraphicsContext;
 public class God extends Living{
 
     private static God instance = null;
-    private static final int DEFAULT_DAMAGE = Integer.MAX_VALUE;
 
     private God()
     {
@@ -22,19 +21,17 @@ public class God extends Living{
         return instance;
     }
 
-    public void setDamage(double damage)
+    public void attack(Living l, double damage)
     {
-        this.strength = damage;
-    }
-
-    public void resetDamage()
-    {
-        this.strength = DEFAULT_DAMAGE;
+        double base = strength;
+        strength = damage;
+        this.attack(l);
+        strength = base;
     }
 
     @Override
     protected String getNextAction() {
-        return "";
+        return null;
     }
 
     @Override

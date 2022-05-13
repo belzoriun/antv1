@@ -1,6 +1,5 @@
 package fr.florian.ants.antv1.ui;
 
-import fr.florian.ants.antv1.map.ChunkUpdateFeature;
 import fr.florian.ants.antv1.map.ChunkUpdater;
 import fr.florian.ants.antv1.map.tileplacer.OpenSimplexNoiseTilePlacer;
 import fr.florian.ants.antv1.util.GameTimer;
@@ -41,9 +40,6 @@ public class DisplayStartController extends Thread {
                 fr.florian.ants.antv1.map.Map.getInstance().init(
                         new OpenSimplexNoiseTilePlacer(Application.seed, ModLoader.loadModsTiles()),
                         new NoiseResourcePlacer(Application.seed, ModLoader.loadModsResource()));
-                for (ChunkUpdateFeature feature : ModLoader.loadModsUpdateFeatures()) {
-                    ChunkUpdater.useUpdateFeature(feature);
-                }
                 Platform.runLater(() -> {
                     Application.showLoadingScreen("Initializing timer");
                 });

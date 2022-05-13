@@ -1,6 +1,5 @@
 package fr.florian.ants.antv1.util.mod;
 
-import fr.florian.ants.antv1.map.ChunkUpdateFeature;
 import fr.florian.ants.antv1.map.Tile;
 import fr.florian.ants.antv1.map.tileplacer.TilePlaceProperty;
 import fr.florian.ants.antv1.util.resource.Resource;
@@ -26,14 +25,12 @@ public interface ModLoader {
         return tiles.stream().toList();
     }
 
-    static List<ChunkUpdateFeature> loadModsUpdateFeatures()
-    {
+    static List<LivingSpawnFactory> loadModsSpawns() {
         ModLoader mod = new AntWarMod();
-        Set<ChunkUpdateFeature> features = mod.loadUpdateFeatures();
-        return features.stream().toList();
+        return new HashSet<>(mod.loadLivingSpawns()).stream().toList();
     }
 
     Set<Resource> loadResources();
-    Set<ChunkUpdateFeature> loadUpdateFeatures();
     Set<TilePlaceProperty> loadTileFactories();
+    Set<LivingSpawnFactory> loadLivingSpawns();
 }
