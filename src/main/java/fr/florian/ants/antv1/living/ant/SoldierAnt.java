@@ -5,10 +5,12 @@ import fr.florian.ants.antv1.living.LivingEntity;
 import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
+import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.fight.Attacker;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
@@ -32,7 +34,7 @@ public class SoldierAnt extends Ant{
     private static final double MAX_ANTHILL_DISTANCE = 20;
 
     public SoldierAnt() {
-        super(9.2, 10, 10, 3);
+        super(java.util.Set.of(Ants.QUEEN), Application.options.getInt(OptionKey.WORKER_PER_SOLDIER), 3, 9.2, 10, 10, 3);
     }
 
 

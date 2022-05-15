@@ -236,8 +236,10 @@ public class WorldView extends Pane {
         }
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.clearRect(0, 0, getWidth(), getHeight());
-        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE; x++) {
-            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE; y++) {
+        double width = canvas.widthProperty().get()/TILE_SIZE+1+(int) (-(manager.getOriginX()-1));
+        double height = canvas.heightProperty().get()/TILE_SIZE+1+(int) (-(manager.getOriginY()-1));
+        for (int x = (int) (-(manager.getOriginX()+1)); x < width ; x++) {
+            for (int y = (int) (-(manager.getOriginY()+1)); y < height; y++) {
                 Vector pos = new Vector(x, y);
                 Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
                 if (displayPoint.getX()  + TILE_SIZE >= 0
@@ -245,23 +247,14 @@ public class WorldView extends Pane {
                         && displayPoint.getY()  + TILE_SIZE >= 0
                         && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
                     drawTile(pos, displayPoint, context);
-            }
-        }
-        for (int x = 0; x < Application.options.getInt(OptionKey.MAP_WIDTH)* Chunk.CHUNK_SIZE; x++) {
-            for (int y = 0; y < Application.options.getInt(OptionKey.MAP_HEIGHT)* Chunk.CHUNK_SIZE; y++) {
-                Vector pos = new Vector(x, y);
-                Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
-                if (displayPoint.getX()  + TILE_SIZE >= 0
-                        && displayPoint.getX()  - TILE_SIZE <= canvas.getWidth()
-                        && displayPoint.getY()  + TILE_SIZE >= 0
-                        && displayPoint.getY()  - TILE_SIZE <= canvas.getHeight())
                     Map.getInstance().displayResources(context, pos, displayPoint);
             }
         }
 
         for (LivingEntity l : Map.getInstance().getLivings()) {
             Vector pos = l.getPosition();
-            if(pos != null)
+            if(pos != null && pos.getX() >= (int) (-(manager.getOriginX()+1)) && pos.getX() <= width
+                && pos.getY() >= (int) (-(manager.getOriginY()+1)) && pos.getY() <= height)
             {
                 Vector displayPoint = manager.toWorldPoint(pos).multi(TILE_SIZE);
                 if (displayPoint.getX() + TILE_SIZE >= 0

@@ -1,5 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
+import fr.florian.ants.antv1.map.AntHillTile;
+import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
@@ -14,6 +16,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.List;
+
 /**
  * Class representing the pause menu
  */
@@ -23,9 +27,12 @@ public class PauseMenu extends BorderPane {
     private Vector clickPoint;
     private Label title;
     private Button step;
+    private Label winner;
 
     public PauseMenu(double initialTranslateX, double initialTranslateY)
     {
+        winner = new Label("The winner is : ");
+        winner.setVisible(false);
         title = new Label("Game paused");
         title.setFont(new Font(15));
         title.setStyle("-fx-font-weight: bold");
@@ -34,6 +41,7 @@ public class PauseMenu extends BorderPane {
         title.setAlignment(Pos.CENTER);
         title.setPadding(new Insets(10));
         VBox main = new VBox();
+        main.getChildren().add(winner);
         this.setCenter(main);
         Button restart = new Button("restart");
         step = new Button("step simulation");
@@ -56,6 +64,7 @@ public class PauseMenu extends BorderPane {
         step.setOnAction(e->{
             GameTimer.getInstance().step();
         });
+        step.setMinWidth(main.getPrefWidth());
         continueBtn.setMinWidth(main.getPrefWidth());
         restart.setMinWidth(main.getPrefWidth());
         exit.setMinWidth(main.getPrefWidth());
@@ -108,5 +117,15 @@ public class PauseMenu extends BorderPane {
         continueBtn.setVisible(false);
         step.setVisible(false);
         title.setText("Game end");
+        List<AntHillTile> hills = Map.getInstance().getAntHills();
+        hills.sort((a, b)->{
+            if(a.getScore() == b.getScore()) return 0;
+            if(a.getScore()<b.getScore()) return 1;
+            return -1;
+        });
+        AntHillTile w = hills.get(0);
+        winner.setText(winner.getText()+w.getUniqueId()+"\n with "+w.getScore()+" points");
+        winner.setTextFill(w.getColor());
+        winner.setVisible(true);
     }
 }

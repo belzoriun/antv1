@@ -11,12 +11,13 @@ import fr.florian.ants.antv1.util.GameTimer;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.fight.Attacker;
 import fr.florian.ants.antv1.util.option.OptionKey;
+import fr.florian.ants.antv1.util.registry.Registry;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
 import fr.florian.ants.antv1.util.statemachine.StateMachine;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Class representing a queen ant
@@ -24,7 +25,7 @@ import java.util.HashMap;
 public class QueenAnt extends Ant {
 
     public QueenAnt() {
-        super(10, 50, 200, 10);
+        super(new HashSet<>(), Integer.MAX_VALUE, Integer.MAX_VALUE, 10, 50, 200, 10);
     }
 
     public void execute(LivingEntity self)
@@ -39,7 +40,7 @@ public class QueenAnt extends Ant {
             a.sendSignal(newSig);
             new Thread(newSig).start();
             if (Application.random.nextDouble() < 0.25) {
-                makeSpawnNewAnt(a, a.getAntHillId(), a.getPosition(), a.getColor(), 5, 15, true);
+                ((AntHillTile)Map.getInstance().getTile(self.getPosition())).makeSpawnNewAnt(a.getPosition(), 5, 15, true);
             }
         }
     }
@@ -52,23 +53,6 @@ public class QueenAnt extends Ant {
     @Override
     public void onKilled(Attacker killer, LivingEntity self) {
         //TODO : make something when queen dies
-    }
-    public void makeSpawnNewAnt(AntEntity queen, long antHillId, Vector pos, Color color, int min, int max, boolean foodRequired) {
-        int amount = Application.random.nextInt(min, max+1);
-        java.util.Map<Ant, Integer> companies = new HashMap<>();
-        for (AntEntity a : Map.getInstance().getAntsOf(antHillId)) {
-            if (companies.containsKey((Ant)a.getLiving())) {
-                companies.put((Ant)a.getLiving(), 0);
-            }
-            else
-            {
-                companies.put((Ant)a.getLiving(), companies.get((Ant)a.getLiving()));
-            }
-        }
-
-        for(int i = 0; i<amount; i++) {
-            //TODO : make spawn
-        }
     }
 
     @Override

@@ -12,6 +12,7 @@ import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.fight.Attacker;
+import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.FoodSourcePheromone;
 import fr.florian.ants.antv1.util.resource.DeadAnt;
 import fr.florian.ants.antv1.util.statemachine.StateMachine;
@@ -28,7 +29,7 @@ import java.util.Objects;
 public class WorkerAnt extends Ant {
 
     public WorkerAnt() {
-        super(8, 1, 5, 1);
+        super(java.util.Set.of(Ants.SOLDIER), 0, 1,8, 1, 5, 1);
     }
 
     @Override

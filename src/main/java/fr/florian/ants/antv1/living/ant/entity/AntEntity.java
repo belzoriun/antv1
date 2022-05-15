@@ -16,7 +16,6 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -34,6 +33,7 @@ public class AntEntity extends LivingEntity implements AntSignalReceiver, AntSig
     protected final List<AntSubscription> subs;
     protected Color color;
     protected Ant ant;
+    private List<AntEntity> referrers;
 
     private final ExecutorService executor = ForkJoinPool.commonPool();
 
@@ -42,6 +42,21 @@ public class AntEntity extends LivingEntity implements AntSignalReceiver, AntSig
         this.ant = ant;
         signals = new ArrayList<>();
         subs = new ArrayList<>();
+        referrers = new ArrayList<>();
+    }
+
+    public void setReferrers(List<AntEntity> r)
+    {
+        for(AntEntity e : r)
+        {
+            e.subscribe(this);
+        }
+        referrers = r;
+    }
+
+    public List<AntEntity> getReferrers()
+    {
+        return referrers;
     }
 
     public void onUpdate()
@@ -158,7 +173,6 @@ public class AntEntity extends LivingEntity implements AntSignalReceiver, AntSig
         synchronized (signals) {
             for (AntSubscription sub : subs) {
                 sub.emitSignal(newSig);
-                signals.add(newSig);
             }
             signals.add(newSig);
             new Thread(newSig).start();
@@ -173,6 +187,7 @@ public class AntEntity extends LivingEntity implements AntSignalReceiver, AntSig
     @Override
     public void subscribe(Flow.Subscriber<? super AntSignal> subscriber) {
         AntSubscription subscription = new AntSubscription(subscriber, executor);
+        subscriber.onSubscribe(subscription);
         subs.add(subscription);
     }
 

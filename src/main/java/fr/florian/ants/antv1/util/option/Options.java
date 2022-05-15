@@ -42,11 +42,11 @@ public class Options {
 
     public void save()
     {
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(this.getClass().getClassLoader().getResource("options.txt").getFile())))
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(Objects.requireNonNull(this.getClass().getClassLoader().getResource("options.txt")).getFile(), true)))
         {
             for(Map.Entry<String, String> entry : options.entrySet())
             {
-                writer.write(entry.getKey()+" : "+entry.getValue()+"\n");
+                writer.append(entry.getKey()).append(" : ").append(entry.getValue()).append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();

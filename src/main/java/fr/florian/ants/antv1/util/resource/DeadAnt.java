@@ -54,15 +54,11 @@ public class DeadAnt extends Resource implements Drawable {
                 {
                     wa.resetPath();
                 }
-                tile.makeSpawn(dead, true);
+                tile.makeRespawn(dead);
             }
             else
             {
-                AntEntity ant = (AntEntity) Map.getInstance().getLivingsAt(pos).stream().filter(l->l.getLiving() instanceof QueenAnt).toList().get(0);
-                if(ant != null)
-                {
-                    ((QueenAnt)ant.getLiving()).makeSpawnNewAnt(ant, ant.getAntHillId(), pos, ant.getColor(), 1, 1, false);
-                }
+                tile.makeSpawnNewAnt(pos, 1, 1, false);
             }
         }
     }

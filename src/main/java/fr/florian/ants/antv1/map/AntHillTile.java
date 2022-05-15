@@ -11,6 +11,7 @@ import fr.florian.ants.antv1.util.ImageColorMaker;
 import fr.florian.ants.antv1.util.ResourceLoader;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
+import fr.florian.ants.antv1.util.registry.Registry;
 import fr.florian.ants.antv1.util.resource.Resource;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
@@ -78,6 +79,71 @@ public class AntHillTile extends Tile{
         detailNode.getChildren().add(scroll);
     }
 
+
+    public synchronized void makeSpawnNewAnt(Vector pos, int min, int max, boolean foodRequired) {
+        int amount = Application.random.nextInt(min, max+1);
+        java.util.Map<AntEntity, Integer> companies = new HashMap<>();
+        for (AntEntity a : Map.getInstance().getAntsOf(uniqueId)) {
+            if(!companies.containsKey(a))
+            {
+                companies.put(a, 0);
+            }
+            for(AntEntity r : a.getReferrers()) {
+                if (!companies.containsKey(r)) {
+                    companies.put(r, 0);
+                } else {
+                    companies.put(r, companies.get(r)+1);
+                }
+            }
+        }
+
+        for(int i = 0; i<amount; i++) {
+            Ant spawning = null;
+            List<AntEntity> referrers = null;
+            for(Ant ant : Registry.ANT) {
+                if(ant.equals(Ants.QUEEN) || (foodRequired && ant.getRequiredFood() > foodHeld)) continue;
+                boolean found = true;
+                referrers = new ArrayList<>();
+                for(Ant r : ant.getSpawnRequirements())
+                {
+                    AntEntity one = null;
+                    for(java.util.Map.Entry<AntEntity, Integer> entry : companies.entrySet())
+                    {
+                        if(entry.getKey().getLiving().equals(r) && entry.getValue() < r.getMaxAntsInCharge())
+                        {
+                            one = entry.getKey();
+                            break;
+                        }
+                    }
+                    if(one == null)
+                    {
+                        found = false;
+                        break;
+                    }
+                    else
+                    {
+                        referrers.add(one);
+                    }
+                }
+                if(found)
+                {
+                    spawning = ant;
+                    break;
+                }
+            }
+            if(spawning != null) {
+                AntEntity entity = (AntEntity) spawning.createEntity(pos);
+                entity.addToColony(uniqueId, color);
+                entity.setReferrers(referrers);
+                Map.getInstance().spawn(entity, false);
+                if(foodRequired)
+                {
+                    consumeFood(spawning.getRequiredFood());
+                }
+            }
+        }
+    }
+
     public void addFood()
     {
         foodHeld++;
@@ -106,14 +172,14 @@ public class AntHillTile extends Tile{
             AntEntity soldier = (AntEntity) Ants.SOLDIER.createEntity(pos);
             synchronized (Map.getInstance()) {
                 soldier.addToColony(uniqueId, color);
-                queenEntity.subscribe(soldier);
+                soldier.setReferrers(List.of(queenEntity));
                 Map.getInstance().spawn(soldier, false);
             }
             for (int j = 0; j < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER); j++) {
                 synchronized (Map.getInstance()) {
                     AntEntity entity = (AntEntity) Ants.WORKER.createEntity(pos);
                     entity.addToColony(uniqueId, color);
-                    soldier.subscribe(entity);
+                    entity.setReferrers(List.of(entity));
                     Map.getInstance().spawn(entity, false);
                 }
             }
@@ -246,17 +312,12 @@ public class AntHillTile extends Tile{
                 , WorldView.TILE_SIZE);
     }
 
-    public void makeSpawn(AntEntity ant, boolean revive) {
+    public void makeRespawn(AntEntity ant) {
         if(ant.getAntHillId() != uniqueId)
         {
             score += 10;
             return;
         }
-        if(revive || ant.getLiving() instanceof SoldierAnt)
-        {
-            Map.getInstance().spawn(ant, revive);
-            return;
-        }
-        //TODO : review spawn thing
+        Map.getInstance().spawn(ant, true);
     }
 }

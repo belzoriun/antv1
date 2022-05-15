@@ -79,6 +79,10 @@ public class MainPane extends BorderPane {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) { e.printStackTrace();}
+                if(GameTimer.getInstance().getRemainingTime() <= 0)
+                {
+                    refreshHandler.stop();
+                }
             }
         };
         keyHandler = evt -> {

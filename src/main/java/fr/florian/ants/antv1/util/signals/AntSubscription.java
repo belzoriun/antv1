@@ -16,7 +16,7 @@ public class AntSubscription implements Flow.Subscription {
     private Future<?> future; // to allow cancellation
     private final List<AntSignal> signals;
 
-    private static final Object lock = new Object();
+    private final Object lock = new Object();
 
     public AntSubscription(Flow.Subscriber<? super AntSignal> sub, ExecutorService executor)
     {
