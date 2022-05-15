@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.util.signals;
 
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Drawable;
@@ -18,11 +19,11 @@ public class AntSignal implements Runnable, Drawable {
     private final double maxSize;
     private final AntOrder order;
     private final double signalSpeed;
-    private final Ant sender;
+    private final AntEntity sender;
 
     private static final Object lock = new Object();
 
-    public AntSignal(Ant sender, Vector pos, AntOrder order, double maxSize, double signalSpeed)
+    public AntSignal(AntEntity sender, Vector pos, AntOrder order, double maxSize, double signalSpeed)
     {
         this.from = pos;
         this.sender=sender;

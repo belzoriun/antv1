@@ -1,7 +1,7 @@
 package fr.florian.ants.antv1.map;
 
-import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.util.Drawable;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
 import fr.florian.ants.antv1.util.pheromone.PheromoneManager;
@@ -93,19 +93,19 @@ public abstract class Tile implements Drawable {
      * Called when an entity walks over this tile
      * @param l The entity
      */
-    public abstract void onWalkOn(Living l);
+    public abstract void onWalkOn(LivingEntity l);
 
     /**
      * Called when an ant interacts with this tile
      * @param a The ant interacting
      */
-    public abstract void onInteract(Ant a);
+    public abstract void onInteract(AntEntity a);
 
     /**
      * Called when an ant dies on this tile
      * @param a The dying ant
      */
-    public abstract void onAntDieOn(Ant a);
+    public abstract void onAntDieOn(AntEntity a);
 
     /**
      * Gets the display specification of this tile

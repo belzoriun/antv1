@@ -1,6 +1,8 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
@@ -22,59 +24,17 @@ import java.util.concurrent.Flow;
  * Ant class
  * describing the general behavior of an ant
  */
-public abstract class Ant extends Living implements AntSignalReceiver {
+public abstract class Ant extends Living {
 
     public static final int MAX_SIZE = 10;
 
     private final double size;
-    protected final long uniqueAnthillId;
-    private AntSubscription sub;
 
-    private final Color color;
-
-    protected Ant(long anthillId, Color color, Vector initialPosition, double size, int ticksPerOperation, double lifePoints, int strength) {
-        super(initialPosition,ticksPerOperation, lifePoints, strength);
+    protected Ant(double size, int ticksPerOperation, double lifePoints, int strength) {
+        super(ticksPerOperation, lifePoints, strength);
         if(size <= 0) size = 1;
         if(size > MAX_SIZE) size = MAX_SIZE;
         this.size = size;
-        this.uniqueAnthillId = anthillId;
-        this.color = color;
-    }
-
-    /**
-     * Executes an ant action
-     */
-    protected abstract String executeAction();
-
-    /**
-     *  called on each thread loop
-     */
-    protected String getNextAction()
-    {
-        //request orders
-        if(sub != null)
-        {
-            sub.request(1L);
-        }
-        return executeAction();
-    }
-
-    /**
-     * Called when ant gets killed
-     */
-    public void onKilled(Attacker killer)
-    {
-        Tile t = Map.getInstance().getTile(position);
-        if(t != null) {
-            t.onAntDieOn(this);
-        }
-    }
-
-    public void onGettingKilledBy(Living killer){}
-
-    public void setPosition(Vector pos)
-    {
-        this.position = pos;
     }
 
     public double getSize()
@@ -82,72 +42,9 @@ public abstract class Ant extends Living implements AntSignalReceiver {
         return size;
     }
 
-    public long getAntHillId()
-    {
-        return uniqueAnthillId;
-    }
-
     /**
      * Called when an order is received
      * @param order the received order
      */
-    protected abstract void onOrderReceived(AntOrder order);
-
-    /**
-     * draws the ant
-     */
-    @Override
-    public void draw(GraphicsContext context, Vector position)
-    {
-        if(Map.getInstance().getTile(this.position) instanceof AntHillTile ah && ah.getUniqueId() == uniqueAnthillId)
-        {
-            return;
-        }
-        double dotSize = WorldView.TILE_SIZE / (MAX_SIZE + 1 - size);
-        Image i = ResourceLoader.getInstance().loadResource("ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue());
-        Vector center = position.add(WorldView.TILE_SIZE / 2);
-        double rotation = 0;
-        if(headingDirection != null) {
-            rotation = switch (headingDirection) {
-                case LEFT -> 90;
-                case RIGHT -> -90;
-                case DOWN -> 180;
-                default -> 0;
-            };
-        }
-        WorldView.drawRotatedImage(context, i, center, rotation, dotSize);
-        drawLifepoints(context, position, dotSize);
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        if(subscription instanceof AntSubscription antSubscription)
-        {
-            this.sub = antSubscription;
-        }
-    }
-
-    @Override
-    public void onNext(AntSignal item) {
-        AntOrder order = item.getOrder(position);
-        if(order != null)
-        {
-            sub.acknowledge(item);
-            onOrderReceived(order);
-        }
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-        throwable.printStackTrace();
-    }
-
-    @Override
-    public void onComplete() {
-        this.sub = null;
-    }
+    public abstract void onOrderReceived(AntEntity self, AntOrder order);
 }

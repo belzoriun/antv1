@@ -1,15 +1,17 @@
 package fr.florian.ants.antv1.util.effect;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Effect {
-
-    public static final Object lock = new Object();
 
     private int counter;
     private final int ticksPerTrigger;
     private int duration;
     private final int totalDuration;
+    private boolean firstApplyDone;
 
     protected Effect(int ticksPerTrigger, int duration)
     {
@@ -17,6 +19,7 @@ public abstract class Effect {
         this.totalDuration = duration;
         this.duration = totalDuration;
         counter = 0;
+        firstApplyDone = false;
     }
 
     public void resetDuration()
@@ -29,8 +32,13 @@ public abstract class Effect {
         return duration <= 0;
     }
 
-    public void apply(Living l)
+    public void apply(LivingEntity l)
     {
+        if(!firstApplyDone)
+        {
+            trigger(l);
+            firstApplyDone = true;
+        }
         if(duration <= 0)
         {
             clear(l);
@@ -45,9 +53,7 @@ public abstract class Effect {
         }
     }
 
-    protected abstract void trigger(Living l);
+    protected abstract void trigger(LivingEntity l);
 
-    public abstract void clear(Living l);
-
-    public abstract void setup(Living living);
+    public abstract void clear(LivingEntity l);
 }

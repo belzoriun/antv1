@@ -1,11 +1,14 @@
 package fr.florian.ants.antv1.living.ant;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.AntOrder;
 import fr.florian.ants.antv1.util.Direction;
 import fr.florian.ants.antv1.util.Vector;
+import fr.florian.ants.antv1.util.fight.Attacker;
 import fr.florian.ants.antv1.util.signals.AntSignal;
 import fr.florian.ants.antv1.util.signals.AntSignalSender;
 import fr.florian.ants.antv1.util.signals.AntSubscription;
@@ -24,82 +27,41 @@ import java.util.concurrent.ForkJoinPool;
 /**
  * Class representing a commander ant
  */
-public class SoldierAnt extends Ant implements AntSignalSender{
-    private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
-
-    private final List<AntSignal> signals;
-    private final List<AntSubscription> subs;
-    private final Vector initialPosition;
+public class SoldierAnt extends Ant{
 
     private static final double MAX_ANTHILL_DISTANCE = 20;
 
-    public SoldierAnt(long anthillId, QueenAnt q, Color color, Vector initialPosition) {
-        super(anthillId, color, initialPosition, 9.2, 10, 10, 3);
-        signals = new ArrayList<>();
-        subs = new ArrayList<>();
-        q.subscribe(this);
-        this.initialPosition = initialPosition;
-        initCore(new StateMachine.StateMachineBuilder()
-                .addState("move", ()->{
-                    headingDirection = Direction.random();
-                    while (position.add(headingDirection.getOffset()).delta(this.initialPosition) > MAX_ANTHILL_DISTANCE
-                            || Map.getInstance().getTile(position.add(headingDirection.getOffset())) == null
-                            || (Map.getInstance().getTile(position.add(headingDirection.getOffset())) instanceof AntHillTile a && a.getUniqueId() != uniqueAnthillId)) {
-                        headingDirection = Direction.random();
-                    }
-                    position = position.add(headingDirection.getOffset());
-                    synchronized (signals) {
-                        List<AntSignal> trash = new ArrayList<>();
-                        for (AntSignal sig : signals) {
-                            if (sig.mayDissipate()) {
-                                trash.add(sig);
-                            }
-                        }
-                        signals.removeAll(trash);
-                    }
-                }).get("move"));
+    public SoldierAnt() {
+        super(9.2, 10, 10, 3);
+    }
+
+
+    @Override
+    public LivingEntity createEntity(Vector initialPosition) {
+        return new AntEntity(null, initialPosition, this);
     }
 
     @Override
-    protected String executeAction() {
-        return null;
+    public void onOrderReceived(AntEntity self, AntOrder order) {
+        AntSignal newSig = new AntSignal(self, self.getPosition(), order, 15, 0.3);
+        self.sendSignal(newSig);
     }
 
     @Override
-    protected void onOrderReceived(AntOrder order) {
-        AntSignal newSig = new AntSignal(this, position, order, 15, 0.3);
-        for(AntSubscription sub : subs)
-        {
-            sub.emitSignal(newSig);
+    public void onKilled(Attacker killer, LivingEntity self) {
+
+    }
+
+    @Override
+    public void execute(LivingEntity livingEntity) {
+        if(livingEntity instanceof AntEntity a) {
+            a.setHeadingDirection(Direction.random());
+            while (a.getPosition().add(a.getHeadingDirection().getOffset()).delta(a.getPosition()) > MAX_ANTHILL_DISTANCE
+                    || Map.getInstance().getTile(a.getPosition().add(a.getHeadingDirection().getOffset())) == null
+                    || (Map.getInstance().getTile(a.getPosition().add(a.getHeadingDirection().getOffset())) instanceof AntHillTile ht && ht.getUniqueId() != a.getAntHillId())) {
+                a.setHeadingDirection(Direction.random());
+            }
+            a.setPosition(a.getPosition().add(a.getHeadingDirection().getOffset()));
         }
-        synchronized (signals) {
-            signals.add(newSig);
-            new Thread(newSig).start();
-        }
-    }
-
-    @Override
-    public List<AntSignal> getSignalList() {
-        return new ArrayList<>(signals);
-    }
-
-    @Override
-    public void subscribe(Flow.Subscriber<? super AntSignal> subscriber) {
-        AntSubscription sub = new AntSubscription(subscriber, executor);
-        subs.add(sub);
-        subscriber.onSubscribe(sub);
-    }
-
-    @Override
-    protected void onAttackedBy(Living l) {
-
-    }
-
-    @Override
-    public Node getDetailDisplay() {
-        VBox box = new VBox();
-        box.getChildren().add(new Label("Life : "+(lifePoints/maxLifePoints*100)+"%"));
-        box.getChildren().add(new Label("This ant is purely random (for now)"));
-        return box;
     }
 }

@@ -1,7 +1,9 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.map.Tile;
@@ -98,9 +100,9 @@ public class TileDetail extends VBox {
                     pheromones.getChildren().add(l);
                 }
                 int a = 0;
-                for(Living liv : Map.getInstance().getLivingsAt(tilePos))
+                for(LivingEntity liv : Map.getInstance().getLivingsAt(tilePos))
                 {
-                    if(liv instanceof Ant ant && ant.getAntHillId() == hill.getUniqueId())
+                    if(liv instanceof AntEntity ant && ant.getAntHillId() == hill.getUniqueId())
                     {
                         a++;
                     }

@@ -1,7 +1,10 @@
 package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
 import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
+import fr.florian.ants.antv1.living.ant.entity.ResourceHolderAntEntity;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.util.resource.*;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
@@ -33,7 +36,7 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
     };
     private int currentTexture;
 
-    private final java.util.Map<Living, HBox> followBottons;
+    private final java.util.Map<LivingEntity, HBox> followBottons;
     private final VBox livings;
     private final VBox resourceList;
     private final VBox detailNode;
@@ -83,16 +86,16 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
     }
 
     @Override
-    public void onWalkOn(Living l) {
+    public void onWalkOn(LivingEntity l) {
     }
 
     @Override
-    public void onInteract(Ant a) {
-        if(a instanceof WorkerAnt worker) {
+    public void onInteract(AntEntity a) {
+        if(a instanceof ResourceHolderAntEntity worker) {
             Resource r = take();
             if (r != null) {
                 try {
-                    worker.getResources().add(r);
+                    worker.getHeldResources().add(r);
                 } catch (Exception ignore) {
                 }
             }
@@ -100,10 +103,10 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
     }
 
     @Override
-    public void onAntDieOn(Ant a) {
+    public void onAntDieOn(AntEntity a) {
         synchronized (resources) {
-            if (a instanceof WorkerAnt w) {
-                this.resources.addAll(w.getResources().getAll());
+            if (a instanceof ResourceHolderAntEntity w) {
+                this.resources.addAll(w.getHeldResources().getAll());
             }
             this.resources.add(new DeadAnt(a));
         }
@@ -131,11 +134,11 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
                 resourceList.getChildren().add(new Label(entry.getKey().getSimpleName()+" : "+entry.getValue()));
             }
 
-            List<Living> livingList = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
+            List<LivingEntity> livingList = Map.getInstance().getLivingsAt(Map.getInstance().getTilePosition(this));
 
             List<Node> trash = new ArrayList<>();
-            List<Living> trashLiving = new ArrayList<>();
-            for(java.util.Map.Entry<Living, HBox> entry : followBottons.entrySet()) {
+            List<LivingEntity> trashLiving = new ArrayList<>();
+            for(java.util.Map.Entry<LivingEntity, HBox> entry : followBottons.entrySet()) {
                 if (!livingList.contains(entry.getKey())) {
                     trash.add(entry.getValue());
                     trashLiving.add(entry.getKey());
@@ -143,8 +146,8 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
                 }
             }
 
-            for (Living liv : livingList) {
-                for(java.util.Map.Entry<Living, HBox> entry : followBottons.entrySet()) {
+            for (LivingEntity liv : livingList) {
+                for(java.util.Map.Entry<LivingEntity, HBox> entry : followBottons.entrySet()) {
                     if (entry.getKey().equals(liv)) {
                         if (!liv.isAlive()) {
                             trash.add(entry.getValue());
@@ -172,7 +175,7 @@ public class ResourceTile extends Tile implements ResourceHoldTile{
             for(Node n:trash) {
                 livings.getChildren().remove(n);
             }
-            for(Living n:trashLiving) {
+            for(LivingEntity n:trashLiving) {
                 followBottons.remove(n);
             }
 

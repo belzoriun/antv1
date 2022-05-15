@@ -1,7 +1,9 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
+import fr.florian.ants.antv1.living.ant.entity.ResourceHolderAntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Chunk;
 import fr.florian.ants.antv1.map.Map;
@@ -33,7 +35,7 @@ public class WorldView extends Pane {
     public static double MIN_TILE_SIZE = 15;
     private static double MAX_TILE_SIZE = 70;
     private static final float ZOOM_FACTOR = 1.05f;
-    private static Living followed;
+    private static LivingEntity followed;
 
     private DisplayType displayType;
     private TileDetail detail;
@@ -257,7 +259,7 @@ public class WorldView extends Pane {
             }
         }
 
-        for (Living l : Map.getInstance().getLivings()) {
+        for (LivingEntity l : Map.getInstance().getLivings()) {
             Vector pos = l.getPosition();
             if(pos != null)
             {
@@ -273,7 +275,7 @@ public class WorldView extends Pane {
                         context.setStroke(Color.YELLOW);
                         context.setLineDashes(0);
                         context.strokeOval(displayPoint.getX()+TILE_SIZE/4, displayPoint.getY()+TILE_SIZE/4, TILE_SIZE/2, TILE_SIZE/2);
-                        if(l instanceof WorkerAnt w) {
+                        if(l instanceof ResourceHolderAntEntity w) {
                             drawPath(context, w.getPath());
                         }
                     }
@@ -281,7 +283,7 @@ public class WorldView extends Pane {
                 if (l instanceof AntSignalSender sender && (displayType == DisplayType.SIGNALS || displayType == DisplayType.SIGNALS_AND_PHEROMONES)) {
                     List<AntSignal> signals = sender.getSignalList();
                     for (AntSignal s : signals) {
-                        if (!s.mayDissipate())
+                        if (s != null && !s.mayDissipate())
                             s.draw(context, manager.toWorldPoint(s.getSourcePosition()));
                     }
                 }
@@ -335,7 +337,7 @@ public class WorldView extends Pane {
         manager.translateOrigin(anchor.add(pos.multi(-1)));
     }
 
-    public static void follow(Living l)
+    public static void follow(LivingEntity l)
     {
         followed = l;
     }

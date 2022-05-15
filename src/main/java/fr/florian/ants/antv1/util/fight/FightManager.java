@@ -1,11 +1,10 @@
 package fr.florian.ants.antv1.util.fight;
 
-import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.Ant;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.util.Vector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,11 +12,11 @@ import java.util.List;
  */
 public class FightManager {
 
-    final List<Living> fighters;
-    private final Living fighter;
+    final List<LivingEntity> fighters;
+    private final LivingEntity fighter;
     private final Vector position;
 
-    public FightManager(Living l, Vector position)
+    public FightManager(LivingEntity l, Vector position)
     {
         this.position = position;
         this.fighters = Map.getInstance().getLivingsAt(position);
@@ -34,9 +33,9 @@ public class FightManager {
             return;
         }
         synchronized (Map.getInstance().getTile(position)) {
-            for (Living opponent : fighters) {
+            for (LivingEntity opponent : fighters) {
                 if (opponent != fighter && opponent.isAlive()) {
-                    if (fighter instanceof Ant f && opponent instanceof Ant o) {
+                    if (fighter instanceof AntEntity f && opponent instanceof AntEntity o) {
                         if(f.getAntHillId() != o.getAntHillId()) {
                             fighter.attack(opponent);
                         }

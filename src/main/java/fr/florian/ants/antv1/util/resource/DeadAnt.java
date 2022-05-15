@@ -3,6 +3,8 @@ package fr.florian.ants.antv1.util.resource;
 import fr.florian.ants.antv1.living.ant.Ant;
 import fr.florian.ants.antv1.living.ant.QueenAnt;
 import fr.florian.ants.antv1.living.ant.WorkerAnt;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
+import fr.florian.ants.antv1.living.ant.entity.ResourceHolderAntEntity;
 import fr.florian.ants.antv1.map.AntHillTile;
 import fr.florian.ants.antv1.map.Map;
 import fr.florian.ants.antv1.ui.Application;
@@ -22,14 +24,14 @@ import javafx.scene.paint.Color;
 public class DeadAnt extends Resource implements Drawable {
     private final Color color;
     private final double size;
-    private final Ant dead;
+    private final AntEntity dead;
 
-    public DeadAnt(Ant ant)
+    public DeadAnt(AntEntity ant)
     {
         super(new Vector(Application.random.nextDouble(1), Application.random.nextDouble(1)), 0, 0);
 
         this.color=ant.getColor();
-        this.size = ant.getSize();
+        this.size = ((Ant)ant.getLiving()).getSize();
         dead=ant;
         ResourceLoader.getInstance().saveResource("dead_ant"+color.getRed()+":"+color.getGreen()+":"+color.getBlue(),
                 ImageColorMaker.fade(
@@ -48,7 +50,7 @@ public class DeadAnt extends Resource implements Drawable {
             if(dead.getAntHillId() == tile.getUniqueId()) {
                 dead.revive();
                 dead.setPosition(pos);
-                if(dead instanceof WorkerAnt wa)
+                if(dead instanceof ResourceHolderAntEntity wa)
                 {
                     wa.resetPath();
                 }
@@ -56,10 +58,10 @@ public class DeadAnt extends Resource implements Drawable {
             }
             else
             {
-                QueenAnt ant = (QueenAnt) Map.getInstance().getLivingsAt(pos).stream().filter(l->l instanceof QueenAnt).toList().get(0);
+                AntEntity ant = (AntEntity) Map.getInstance().getLivingsAt(pos).stream().filter(l->l.getLiving() instanceof QueenAnt).toList().get(0);
                 if(ant != null)
                 {
-                    ant.makeSpawnNewAnt(1, 1, false);
+                    ((QueenAnt)ant.getLiving()).makeSpawnNewAnt(ant, ant.getAntHillId(), pos, ant.getColor(), 1, 1, false);
                 }
             }
         }

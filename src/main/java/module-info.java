@@ -1,5 +1,7 @@
 module fr.florian.ants.antv {
     requires javafx.controls;
+    requires guava;
+    requires it.unimi.dsi.fastutil;
 
 
     exports fr.florian.ants.antv1.ui;
@@ -14,4 +16,5 @@ module fr.florian.ants.antv {
     exports fr.florian.ants.antv1.util.pheromone;
     exports fr.florian.ants.antv1.map.tileplacer;
     exports fr.florian.ants.antv1.util.fight;
+    exports fr.florian.ants.antv1.living.ant.entity;
 }

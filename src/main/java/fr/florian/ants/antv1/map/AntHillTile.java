@@ -1,10 +1,10 @@
 package fr.florian.ants.antv1.map;
 
 import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.living.ant.QueenAnt;
-import fr.florian.ants.antv1.living.ant.SoldierAnt;
-import fr.florian.ants.antv1.living.ant.WorkerAnt;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.*;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
+import fr.florian.ants.antv1.living.ant.entity.ResourceHolderAntEntity;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
 import fr.florian.ants.antv1.util.ImageColorMaker;
@@ -44,7 +44,7 @@ public class AntHillTile extends Tile{
     private final long uniqueId;
     private final Color color;
 
-    private java.util.Map<Ant, HBox> followBottons;
+    private java.util.Map<AntEntity, HBox> followBottons;
 
     private int score;
 
@@ -96,19 +96,25 @@ public class AntHillTile extends Tile{
      */
     public void makeInitialSpawns(Vector pos)
     {
-        QueenAnt queen = new QueenAnt(uniqueId, color, pos);
+        QueenAnt queen = new QueenAnt();
+        AntEntity queenEntity = (AntEntity) queen.createEntity(pos);
         synchronized (Map.getInstance()) {
-            Map.getInstance().spawn(queen, false);
+            queenEntity.addToColony(uniqueId, color);
+            Map.getInstance().spawn(queenEntity, false);
         }
         for (int i = 0; i < Application.options.getInt(OptionKey.SOLDIER_PER_QUEEN); i++) {
-            SoldierAnt s = new SoldierAnt(uniqueId, queen, color, pos);
+            AntEntity soldier = (AntEntity) Ants.SOLDIER.createEntity(pos);
             synchronized (Map.getInstance()) {
-                Map.getInstance().spawn(s, false);
+                soldier.addToColony(uniqueId, color);
+                queenEntity.subscribe(soldier);
+                Map.getInstance().spawn(soldier, false);
             }
             for (int j = 0; j < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER); j++) {
                 synchronized (Map.getInstance()) {
-                    WorkerAnt w = new WorkerAnt(uniqueId, s, color, pos);
-                    Map.getInstance().spawn(w, false);
+                    AntEntity entity = (AntEntity) Ants.WORKER.createEntity(pos);
+                    entity.addToColony(uniqueId, color);
+                    soldier.subscribe(entity);
+                    Map.getInstance().spawn(entity, false);
                 }
             }
         }
@@ -125,8 +131,8 @@ public class AntHillTile extends Tile{
     }
 
     @Override
-    public void onWalkOn(Living l) {
-        if(l instanceof Ant a && a.getAntHillId() == this.uniqueId)
+    public void onWalkOn(LivingEntity l) {
+        if(l instanceof AntEntity a && a.getAntHillId() == this.uniqueId)
         {
             a.heal(10);
             a.clearEffects();
@@ -134,10 +140,10 @@ public class AntHillTile extends Tile{
     }
 
     @Override
-    public void onInteract(Ant a) {
-        if(a instanceof WorkerAnt want)
+    public void onInteract(AntEntity a) {
+        if(a instanceof ResourceHolderAntEntity want)
         {
-            Resource r = want.getResources().remove();
+            Resource r = want.getHeldResources().remove();
             if(r == null) return;
             this.score += r.getResourceScore();
             r.onDeposit(this);
@@ -150,11 +156,11 @@ public class AntHillTile extends Tile{
     }
 
     @Override
-    public void onAntDieOn(Ant a) {
-        if(a instanceof WorkerAnt want)
+    public void onAntDieOn(AntEntity a) {
+        if(a instanceof ResourceHolderAntEntity want)
         {
-            while(!want.getResources().isEmpty()) {
-                this.score += want.getResources().remove().getResourceScore();
+            while(!want.getHeldResources().isEmpty()) {
+                this.score += want.getHeldResources().remove().getResourceScore();
             }
         }
     }
@@ -166,12 +172,12 @@ public class AntHillTile extends Tile{
         id.setText("Id : " + uniqueId);
         food.setText("Food : " + foodHeld);
 
-        List<Ant> antsList = Map.getInstance().getAntsOf(uniqueId);
+        List<AntEntity> antsList = Map.getInstance().getAntsOf(uniqueId);
 
 
         List<Node> trash = new ArrayList<>();
-        List<Ant> trashAnt = new ArrayList<>();
-        for(java.util.Map.Entry<Ant, HBox> entry : followBottons.entrySet()) {
+        List<AntEntity> trashAnt = new ArrayList<>();
+        for(java.util.Map.Entry<AntEntity, HBox> entry : followBottons.entrySet()) {
             if (!entry.getKey().isAlive() && !antsList.contains(entry.getKey())) {
                 trash.add(entry.getValue());
                 trashAnt.add(entry.getKey());
@@ -179,8 +185,8 @@ public class AntHillTile extends Tile{
             }
         }
 
-        for (Ant ant : antsList) {
-            for(java.util.Map.Entry<Ant, HBox> entry : followBottons.entrySet()) {
+        for (AntEntity ant : antsList) {
+            for(java.util.Map.Entry<AntEntity, HBox> entry : followBottons.entrySet()) {
                 if (entry.getKey().equals(ant)) {
                     if (!ant.isAlive()) {
                         trash.add(entry.getValue());
@@ -208,7 +214,7 @@ public class AntHillTile extends Tile{
         for(Node n:trash) {
             ants.getChildren().remove(n);
         }
-        for(Ant n:trashAnt) {
+        for(AntEntity n:trashAnt) {
             followBottons.remove(n);
         }
 
@@ -240,34 +246,17 @@ public class AntHillTile extends Tile{
                 , WorldView.TILE_SIZE);
     }
 
-    public void makeSpawn(Ant ant, boolean revive) {
+    public void makeSpawn(AntEntity ant, boolean revive) {
         if(ant.getAntHillId() != uniqueId)
         {
             score += 10;
             return;
         }
-        if(revive || ant instanceof SoldierAnt)
+        if(revive || ant.getLiving() instanceof SoldierAnt)
         {
             Map.getInstance().spawn(ant, revive);
             return;
         }
-        if(ant instanceof WorkerAnt) {
-            java.util.Map<SoldierAnt, Integer> antsPerSoldier = new HashMap<>();
-            for (Ant a : Map.getInstance().getAntsOf(uniqueId)) {
-                if (a instanceof WorkerAnt wa) {
-                    if (antsPerSoldier.containsKey(wa.getSoldier())) {
-                        antsPerSoldier.put(wa.getSoldier(), antsPerSoldier.get(wa.getSoldier()) + 1);
-                    } else {
-                        antsPerSoldier.put(wa.getSoldier(), 1);
-                    }
-                }
-            }
-            for (java.util.Map.Entry<SoldierAnt, Integer> entry : antsPerSoldier.entrySet()) {
-                if (entry.getValue() < Application.options.getInt(OptionKey.WORKER_PER_SOLDIER)) {
-                    entry.getKey().subscribe(ant);
-                }
-            }
-            Map.getInstance().spawn(ant, false);
-        }
+        //TODO : review spawn thing
     }
 }

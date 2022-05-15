@@ -153,4 +153,9 @@ public class GameTimer {
         setTickTime(DEFAULT_TICK_TIME);
     }
 
+    public void step() {
+        paused = false;
+        core.run();
+        paused = true;
+    }
 }

@@ -23,6 +23,7 @@ public class AntSubscription implements Flow.Subscription {
         this.subscriber = sub;
         this.executor = executor;
         this.signals = new ArrayList<>();
+        sub.onSubscribe(this);
     }
 
     public void emitSignal(AntSignal sig)

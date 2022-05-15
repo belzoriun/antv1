@@ -1,6 +1,8 @@
 package fr.florian.ants.antv1.util.mod;
 
-import fr.florian.ants.antv1.living.insects.Tarentula;
+import fr.florian.ants.antv1.living.insects.Insects;
+import fr.florian.ants.antv1.living.insects.Tarantula;
+import fr.florian.ants.antv1.living.insects.entity.InsectEntity;
 import fr.florian.ants.antv1.map.*;
 import fr.florian.ants.antv1.map.tileplacer.TilePlaceProperty;
 import fr.florian.ants.antv1.ui.Application;
@@ -37,7 +39,7 @@ public class AntWarMod implements ModLoader{
         factories.add((Vector v)->{
             if(Application.random.nextDouble() < 0.00001 && !GameTimer.getInstance().isDay())
             {
-                Map.getInstance().spawn(new Tarentula(v), false);
+                Map.getInstance().spawn(Insects.SPIDER.createEntity(v), false);
             }
         });
         return factories;

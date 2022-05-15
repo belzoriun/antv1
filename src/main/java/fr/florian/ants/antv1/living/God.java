@@ -5,13 +5,13 @@ import fr.florian.ants.antv1.util.fight.Attacker;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 
-public class God extends Living{
+public class God extends Living implements Attacker{
 
     private static God instance = null;
 
     private God()
     {
-        super(new Vector(0, 0), 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        super(0, Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     public static God getInstance()
@@ -21,36 +21,33 @@ public class God extends Living{
         return instance;
     }
 
-    public void attack(Living l, double damage)
+    public void attack(LivingEntity l, double damage)
     {
-        double base = strength;
-        strength = damage;
-        this.attack(l);
-        strength = base;
+        l.hit(this, damage);
     }
 
     @Override
-    protected String getNextAction() {
+    public LivingEntity createEntity(Vector initialPosition) {
         return null;
     }
 
     @Override
-    public void onKilled(Attacker killer) {
+    public void onKilled(Attacker killer, LivingEntity self) {
         //nothing can kill god
     }
 
     @Override
-    protected void onAttackedBy(Living l) {
-        l.kill(this);
+    public void execute(LivingEntity livingEntity) {
+
     }
 
     @Override
-    public Node getDetailDisplay() {
-        return null;
+    public void attack(LivingEntity l) {
+
     }
 
     @Override
-    public void draw(GraphicsContext context, Vector position) {
-        //god cannot be drawn
+    public void onVictory(LivingEntity l) {
+
     }
 }

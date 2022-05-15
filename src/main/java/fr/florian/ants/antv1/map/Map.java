@@ -1,12 +1,10 @@
 package fr.florian.ants.antv1.map;
 
-import fr.florian.ants.antv1.living.Living;
-import fr.florian.ants.antv1.living.ant.Ant;
-import fr.florian.ants.antv1.living.insects.Tarentula;
+import fr.florian.ants.antv1.living.LivingEntity;
+import fr.florian.ants.antv1.living.ant.entity.AntEntity;
 import fr.florian.ants.antv1.map.tileplacer.TilePlacer;
 import fr.florian.ants.antv1.ui.Application;
 import fr.florian.ants.antv1.ui.WorldView;
-import fr.florian.ants.antv1.util.TickWaiter;
 import fr.florian.ants.antv1.util.Vector;
 import fr.florian.ants.antv1.util.option.OptionKey;
 import fr.florian.ants.antv1.util.pheromone.Pheromone;
@@ -27,7 +25,7 @@ public class Map {
 
     private final java.util.Map<Vector, Chunk> chunks;
     private final List<AntHillTile> antHills;
-    private final List<Living> livings;
+    private final List<LivingEntity> livings;
     private final List<Thread> cores;
     private static Map instance = null;
 
@@ -44,11 +42,11 @@ public class Map {
      * @param uniqueId The ant hill id
      * @return The ants owned by the hill
      */
-    public List<Ant> getAntsOf(long uniqueId) {
-        List<Ant> res = new ArrayList<>();
+    public List<AntEntity> getAntsOf(long uniqueId) {
+        List<AntEntity> res = new ArrayList<>();
         synchronized (livings) {
-            for (Living l : livings) {
-                if (l instanceof Ant a && a.getAntHillId() == uniqueId) {
+            for (LivingEntity l : livings) {
+                if (l instanceof AntEntity a && a.getAntHillId() == uniqueId) {
                     res.add(a);
                 }
             }
@@ -61,7 +59,7 @@ public class Map {
      * @param living The entity to be spawned
      * @param <T> The entity type
      */
-    public <T extends Living> void spawn(T living, boolean revive)
+    public <T extends LivingEntity> void spawn(T living, boolean revive)
     {
         synchronized (livings) {
             if(!revive) {
@@ -77,7 +75,7 @@ public class Map {
         }
     }
 
-    public List<Living> getLivings()
+    public List<LivingEntity> getLivings()
     {
         return new ArrayList<>(livings);
     }
@@ -117,8 +115,8 @@ public class Map {
                 {
                     addChunk(v, new Chunk(v, tilePlacer, placer));
                     Platform.runLater(() -> {
-                        Application.showLoadingScreen("Generating map ("+(double)chunks.size()/
-                                (Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH))*100.0+"%)");
+                        Application.showLoadingScreen("Generating map ("+Math.round((double)chunks.size()/
+                                (Application.options.getInt(OptionKey.MAP_HEIGHT)*Application.options.getInt(OptionKey.MAP_WIDTH))*100.0)+"%)");
                     });
                 }
             }
@@ -206,14 +204,14 @@ public class Map {
      */
     public int updateLivings()
     {
-        List<Living> trash = new ArrayList<>();
+        List<LivingEntity> trash = new ArrayList<>();
         synchronized (livings) {
-            for (Living l : livings) {
+            for (LivingEntity l : livings) {
                 if (!l.isAlive()) {
                     trash.add(l);
                 }
             }
-            for (Living l : trash) {
+            for (LivingEntity l : trash) {
                 livings.remove(l);
             }
             return livings.size();
@@ -225,10 +223,10 @@ public class Map {
      * @param position The position where to look for living entities
      * @return A list of entities
      */
-    public List<Living> getLivingsAt(Vector position) {
-        List<Living> res = new ArrayList<>();
+    public List<LivingEntity> getLivingsAt(Vector position) {
+        List<LivingEntity> res = new ArrayList<>();
         synchronized (livings) {
-            for (Living l : livings) {
+            for (LivingEntity l : livings) {
                 if (l != null && l.getPosition() != null && l.getPosition().equals(position)) {
                     res.add(l);
                 }

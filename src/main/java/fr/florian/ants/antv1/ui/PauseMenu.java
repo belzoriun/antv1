@@ -54,7 +54,7 @@ public class PauseMenu extends BorderPane {
             continueBtn.setDisable(false);
         });
         step.setOnAction(e->{
-            TickWaiter.emitTick();
+            GameTimer.getInstance().step();
         });
         continueBtn.setMinWidth(main.getPrefWidth());
         restart.setMinWidth(main.getPrefWidth());

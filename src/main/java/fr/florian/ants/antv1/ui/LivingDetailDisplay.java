@@ -1,6 +1,7 @@
 package fr.florian.ants.antv1.ui;
 
 import fr.florian.ants.antv1.living.Living;
+import fr.florian.ants.antv1.living.LivingEntity;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -11,10 +12,10 @@ import javafx.scene.text.Font;
 
 public class LivingDetailDisplay extends VBox {
 
-    private Living displayFor;
+    private LivingEntity displayFor;
 
-    private Label position;
-    private TitledPane detail;
+    private final Label position;
+    private final TitledPane detail;
 
     public LivingDetailDisplay()
     {
@@ -33,7 +34,7 @@ public class LivingDetailDisplay extends VBox {
         getChildren().add(detail);
     }
 
-    public void displayFor(Living l)
+    public void displayFor(LivingEntity l)
     {
         this.displayFor = l;
     }
