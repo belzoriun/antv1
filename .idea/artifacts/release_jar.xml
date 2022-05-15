@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="release:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/release</output-path>
+    <root id="archive" name="release_jar.jar">
+      <element id="module-output" name="AntV1" />
+    </root>
+  </artifact>
+</component>
