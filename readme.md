@@ -4,7 +4,7 @@ Here is how this project works, so if you want to know everything about it, read
 
 ## Project start
 To start this app, you currently have to load the project in your prefered IDE (eclipse, intelliji, noteblock, ...).
-This is a maven project, so you should double-check if you updated the project correctly ant installed all dependencies before saying this is glished and posting 10 issues on github (but I don't judge you).
+This is a maven project, so you should double-check if you updated the project correctly ant installed all dependencies before saying this is gliched and posting 10 issues on github (but I don't judge you).
 Then start it as you start a normal project, the main class being the Application class.
 An exe / the-exe-verion-for-linux-i-forgot-the-name-of launcher is currently being developped, and will be out soon.
 
@@ -34,10 +34,10 @@ There are also 3 types of ants : the qeen, the soldiers and the workers, soldier
 you can see some litle arrows around the map, with a number (a distance) next to them, clicking on them will bring you on an ant hill.
 
 #### Controls
-You can do multiple things with the map. By dragging on it, you can move it in all directions. The mouse weel can be used to zoom in ant out on the map. When clicking on the mouse wheel, you can reset the map zoom. If you press control while mouse weeling, you can speed up/down the simulation. pressing control ant the mouse weel button will make the time scroll go back to normal. 
-Pressing escape will pause the simulation, so as you can view details more easely. On the pause menu you can continue the simulation, step into it, restart a new one or quit to simulation options.
-Right clicking on a tile will display its informations, like the ants that are on this tile, the resources on it if there are some, ant, when on an ant hill, all the alive ants of the selected colony. By clicking on the "follow" button when viewing the ants on a tile, you can center the said ant on screen ant follow its movements, the yellow line being its path back to home.
-Ants release pheromones when traveling back to colony with food, ant some ants also send signals to alert others, by pressing tab, you can cicle through different display types showing respectively the pheromones, the signals and the pheromones + the signals.
+You can do multiple things with the map. By dragging on it, you can move it in all directions. The mouse weel can be used to zoom in ant out on the map. When clicking on the mouse wheel, you can reset the map zoom. If you press control while mouse weeling, you can speed up/down the simulation. pressing control ant the mouse weel button will make the time speed go back to normal. 
+Pressing escape will pause the simulation, so you can look at details more easely. On the pause menu you can continue the simulation, step into it, restart a new one or quit to simulation options.
+Right clicking on a tile will display its informations, like the ants that are on this tile, the resources on it if there are some, and, when on an ant hill, all the alive ants of the selected colony. By clicking on the "follow" button when viewing the ants on a tile, you can center the said ant on screen ant follow its movements, the yellow line being its path back to home.
+Ants release pheromones when traveling back to colony with food, and some ants also send signals to alert others, by pressing tab, you can cicle through different display types showing respectively the pheromones, the signals and the pheromones + the signals.
 
 ## Modding
-The modding part of this game is being delelopped for now, ant will be released as soon as possible.
+The modding part of this game is being delelopped for now, and will be released as soon as possible.
